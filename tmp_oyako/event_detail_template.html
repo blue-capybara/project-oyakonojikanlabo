@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>絵本作家 山田太郎さん サイン会 | 親子の時間研究所</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#8CB9DD',secondary:'#E5F0F8'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Noto Sans JP', sans-serif;
+color: #333;
+}
+input:focus {
+outline: none;
+}
+.hero-gradient {
+background: linear-gradient(90deg, rgba(255, 126, 51, 0.1) 0%, rgba(255, 126, 51, 0.05) 100%);
+}
+.custom-checkbox {
+display: inline-block;
+position: relative;
+padding-left: 30px;
+cursor: pointer;
+}
+.custom-checkbox input {
+position: absolute;
+opacity: 0;
+cursor: pointer;
+height: 0;
+width: 0;
+}
+.checkmark {
+position: absolute;
+top: 0;
+left: 0;
+height: 20px;
+width: 20px;
+background-color: #fff;
+border: 2px solid #ddd;
+border-radius: 4px;
+}
+.custom-checkbox:hover input ~ .checkmark {
+border-color: #ccc;
+}
+.custom-checkbox input:checked ~ .checkmark {
+background-color: #ff7e33;
+border-color: #ff7e33;
+}
+.checkmark:after {
+content: "";
+position: absolute;
+display: none;
+}
+.custom-checkbox input:checked ~ .checkmark:after {
+display: block;
+}
+.custom-checkbox .checkmark:after {
+left: 6px;
+top: 2px;
+width: 5px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+.custom-radio {
+display: inline-block;
+position: relative;
+padding-left: 30px;
+cursor: pointer;
+}
+.custom-radio input {
+position: absolute;
+opacity: 0;
+cursor: pointer;
+height: 0;
+width: 0;
+}
+.radio-mark {
+position: absolute;
+top: 0;
+left: 0;
+height: 20px;
+width: 20px;
+background-color: #fff;
+border: 2px solid #ddd;
+border-radius: 50%;
+}
+.custom-radio:hover input ~ .radio-mark {
+border-color: #ccc;
+}
+.custom-radio input:checked ~ .radio-mark {
+background-color: #fff;
+border-color: #ff7e33;
+}
+.radio-mark:after {
+content: "";
+position: absolute;
+display: none;
+}
+.custom-radio input:checked ~ .radio-mark:after {
+display: block;
+}
+.custom-radio .radio-mark:after {
+top: 3px;
+left: 3px;
+width: 10px;
+height: 10px;
+border-radius: 50%;
+background: #ff7e33;
+}
+.book-card:hover .book-hover {
+opacity: 1;
+}
+</style>
+</head>
+<body class="bg-white">
+<!-- ヘッダー -->
+<header class="bg-primary text-white">
+<div class="container mx-auto px-4 py-3 flex justify-between items-center">
+<div class="flex items-center">
+<h1 class="mr-8"><img src="https://public.readdy.ai/ai/img_res/cba2d764-8295-4654-ae71-f9fbfd1bd157.png" alt="親子の時間研究所" class="h-8"></h1>
+<nav class="hidden md:flex space-x-6">
+<a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/a72cea04-19cf-408c-9717-ee31ecb57153" data-readdy="true" class="text-white hover:text-gray-200 font-medium">ホーム</a>
+<a href="#" class="text-white hover:text-gray-200 font-medium">よみもの</a>
+<a href="#" class="text-white hover:text-gray-200 font-medium">おかいもの</a>
+<a href="#" class="text-white hover:text-gray-200 font-medium">絵本の靴下</a>
+<a href="#" class="text-white hover:text-gray-200 font-medium">イベント</a>
+<a href="#" class="text-white hover:text-gray-200 font-medium">作家</a>
+<a href="#" class="text-white hover:text-gray-200 font-medium">豊中PICO</a>
+</nav>
+</div>
+<div class="flex items-center space-x-4">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-search-line ri-lg"></i>
+</div>
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-user-line ri-lg"></i>
+</div>
+<div class="w-8 h-8 flex items-center justify-center md:hidden">
+<i class="ri-menu-line ri-lg"></i>
+</div>
+</div>
+</div>
+</header>
+<!-- パンくずリスト -->
+<div class="bg-gray-100 py-2">
+<div class="container mx-auto px-4">
+<div class="flex items-center text-sm text-gray-600">
+<a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/a72cea04-19cf-408c-9717-ee31ecb57153" data-readdy="true" class="hover:text-primary">HOME</a>
+<div class="w-4 h-4 flex items-center justify-center mx-1">
+<i class="ri-arrow-right-s-line"></i>
+</div>
+<a href="#" class="hover:text-primary">イベント</a>
+<div class="w-4 h-4 flex items-center justify-center mx-1">
+<i class="ri-arrow-right-s-line"></i>
+</div>
+<a href="#" class="hover:text-primary">近畿</a>
+<div class="w-4 h-4 flex items-center justify-center mx-1">
+<i class="ri-arrow-right-s-line"></i>
+</div>
+<a href="#" class="hover:text-primary">大阪府</a>
+<div class="w-4 h-4 flex items-center justify-center mx-1">
+<i class="ri-arrow-right-s-line"></i>
+</div>
+<span class="font-medium text-gray-800">たなかしん作品展【守りたいもの】</span>
+</div>
+</div>
+</div>
+<!-- イベント詳細ヘッダー -->
+<section class="hero-gradient py-12">
+<div class="container mx-auto px-4">
+<div class="flex flex-col md:flex-row items-center gap-8">
+<div class="w-full md:w-1/2">
+<a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/a72cea04-19cf-408c-9717-ee31ecb57153" data-readdy="true" class="inline-flex items-center text-gray-600 hover:text-primary mb-4">
+<div class="w-5 h-5 flex items-center justify-center mr-1">
+<i class="ri-arrow-left-line"></i>
+</div>
+イベント一覧に戻る
+</a>
+<span class="inline-block bg-primary/10 text-primary text-sm px-3 py-1 rounded-full mb-3">2025年6月8日 14:00-16:00</span>
+<h1 class="text-3xl md:text-4xl font-bold mb-6">たなかしん作品展<br>【守りたいもの】</h1>
+<p class="text-lg text-gray-700 mb-8">人気絵本「もりのともだち」シリーズの作者、山田太郎さんによるサイン会を開催します。新刊「もりのともだち おおきなき」の読み聞かせも行います。子どもから大人まで楽しめるイベントです。</p>
+<div class="grid grid-cols-2 gap-4 mb-8">
+<div class="bg-white rounded-lg p-4 shadow-sm">
+<div class="flex items-center mb-2">
+<div class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded-full mr-2">
+<i class="ri-calendar-line"></i>
+</div>
+<h3 class="font-bold text-gray-800">開催日時・連絡先</h3>
+</div>
+<p class="text-gray-600 mb-2">2025年6月8日（日）<br>14:00～16:00</p>
+<a href="https://g.co/kgs/KG9nZbh" target="_blank" class="inline-flex items-center text-primary hover:text-primary/80 text-sm">
+<div class="w-4 h-4 flex items-center justify-center mr-1">
+<i class="ri-store-2-line"></i>
+</div>お問い合わせ
+</a>
+</div>
+<div class="bg-white rounded-lg p-4 shadow-sm">
+<div class="flex items-center mb-2">
+<div class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded-full mr-2">
+<i class="ri-map-pin-line"></i>
+</div>
+<h3 class="font-bold text-gray-800">開催場所</h3>
+</div>
+<p class="text-gray-600 mb-2">カルチャー＆ブックカフェPICO<br>イベントスペース</p>
+<a href="https://maps.app.goo.gl/TzUQQmCq7pUzkBRJ6" target="_blank" data-readdy="true" class="inline-flex items-center text-primary hover:text-primary/80 text-sm">
+<div class="w-4 h-4 flex items-center justify-center mr-1">
+<i class="ri-map-2-line"></i>
+</div>
+Googleマップで見る
+</a>
+</div>
+<div class="bg-white rounded-lg p-4 shadow-sm">
+<div class="flex items-center mb-2">
+<div class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded-full mr-2">
+<i class="ri-money-yen-circle-line"></i>
+</div>
+<h3 class="font-bold text-gray-800">参加費</h3>
+</div>
+<p class="text-gray-600">無料<br>※書籍購入者優先</p>
+</div>
+<div class="bg-white rounded-lg p-4 shadow-sm">
+<div class="flex items-center mb-2">
+<div class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded-full mr-2">
+<i class="ri-group-line"></i>
+</div>
+<h3 class="font-bold text-gray-800">席枠</h3>
+</div>
+<p class="text-gray-600">30名<br>（要事前予約）</p>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col sm:flex-row gap-4">
+<a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/54174aca-123f-4177-963f-4e8f3588d72a" data-readdy="true" class="bg-primary text-white px-8 py-3 font-medium !rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors flex-1 flex justify-center items-center">
+<div class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-calendar-check-line"></i>
+</div>
+予約する
+</a>
+<button id="favoriteBtn" class="border border-primary text-primary px-8 py-3 font-medium !rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors flex items-center justify-center">
+<div class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-heart-line favorite-icon"></i>
+</div>
+お気に入り
+</button>
+<button id="shareBtn" class="border border-primary text-primary px-8 py-3 font-medium !rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors flex items-center justify-center">
+<div class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-share-line"></i>
+</div>
+シェアする
+</button>
+<div id="shareModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+<div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-xl font-bold">シェアする</h3>
+<button id="closeShareModal" class="text-gray-400 hover:text-gray-600">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<button id="shareTwitter" class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+<i class="ri-twitter-x-fill ri-lg"></i>
+<span>Twitter</span>
+</button>
+<button id="shareFacebook" class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+<i class="ri-facebook-fill ri-lg text-[#1877F2]"></i>
+<span>Facebook</span>
+</button>
+<button id="shareLine" class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+<i class="ri-line-fill ri-lg text-[#06C755]"></i>
+<span>LINE</span>
+</button>
+<button id="shareEmail" class="flex items-center justify-center gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+<i class="ri-mail-fill ri-lg text-gray-600"></i>
+<span>メール</span>
+</button>
+</div>
+<div class="relative">
+<input id="shareUrl" type="text" value="" readonly class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm" />
+<button id="copyUrl" class="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:text-primary/80">
+<i class="ri-file-copy-line ri-lg"></i>
+</button>
+</div>
+<div id="copyMessage" class="hidden mt-2 text-center text-sm text-primary">URLをコピーしました</div>
+</div>
+</div>
+</div>
+<div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+<div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold">ログインが必要です</h3>
+<button id="closeLoginModal" class="text-gray-400 hover:text-gray-600">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<p class="text-gray-600 mb-6">お気に入りにチェックを付けると、マイページにアーカイブされ、いつでもチェックできます。機能を使用するには、ログインまたは会員登録が必要です。</p>
+<div class="flex flex-col gap-3">
+<a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/d04e35f7-8f5a-44de-a25c-0b86501d209d" data-readdy="true" class="bg-primary text-white px-6 py-3 font-medium !rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors text-center">ログイン</a>
+<a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/d04e35f7-8f5a-44de-a25c-0b86501d209d" data-readdy="true" class="border border-primary text-primary px-6 py-3 font-medium !rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors text-center">新規会員登録</a>
+</div>
+</div>
+</div>
+<a href="https://g.page/r/CanrbSH-mv1oEAE/review" target="_blank" class="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors flex items-start gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-yellow-100 text-yellow-500 rounded-full flex-shrink-0">
+<i class="ri-star-line ri-xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-800 mb-1">🌟 お客様の声をぜひお聞かせください！</h3>
+<p class="text-gray-600 text-sm leading-relaxed">サービスにご満足いただけましたら、ぜひGoogle口コミにご協力をお願いします。皆さまからの温かいご意見が、私たちの励みになります！</p>
+</div>
+<div class="w-6 h-6 flex items-center justify-center text-gray-400 flex-shrink-0">
+<i class="ri-arrow-right-line"></i>
+</div>
+</a>
+</div>
+</div>
+<div class="w-full md:w-1/2">
+<div class="relative group">
+<div class="overflow-hidden rounded-2xl shadow-lg">
+<div class="flex transition-transform duration-300" id="imageSlider">
+<img src="/images/readdy/30e5f268453d5644679393e8b3b473c7.jpeg" alt="山田太郎さんサイン会" class="w-full h-auto flex-shrink-0">
+<img src="/images/readdy/53d7c73aaedde880715ee50ca618eda1.jpeg" alt="山田太郎さんサイン会の様子" class="w-full h-auto flex-shrink-0">
+</div>
+</div>
+<button class="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity" id="prevSlide">
+<i class="ri-arrow-left-s-line ri-2x"></i>
+</button>
+<button class="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity" id="nextSlide">
+<i class="ri-arrow-right-s-line ri-2x"></i>
+</button>
+<div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+<button class="w-3 h-3 rounded-full bg-white opacity-60 hover:opacity-100 transition-opacity" data-index="0"></button>
+<button class="w-3 h-3 rounded-full bg-white opacity-60 hover:opacity-100 transition-opacity" data-index="1"></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- イベント詳細情報 -->
+<section class="py-12 bg-white">
+<div class="container mx-auto px-4">
+<div class="flex flex-col md:flex-row gap-8">
+<div class="w-full md:w-2/3">
+<div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+<div class="p-6 border-b border-gray-100">
+<h2 class="text-2xl font-bold mb-4">詳細</h2>
+<p class="text-gray-700 mb-6 leading-relaxed">
+人気絵本作家の山田太郎さんをお招きし、サイン会を開催します。新刊「もりのともだち おおきなき」の出版を記念して、絵本の読み聞かせや創作秘話のトークセッションも予定しています。山田さんの温かな世界観に触れる貴重な機会です。お子様から大人まで、絵本ファンの皆様のご参加をお待ちしています。
+</p>
+<h3 class="text-xl font-bold mb-3">タイムスケジュール</h3>
+<div class="bg-gray-50 rounded-lg p-4 mb-6">
+<ul class="space-y-3">
+<li class="flex">
+<span class="font-bold text-primary w-24 flex-shrink-0">14:00～14:15</span>
+<span class="text-gray-700">開場・ご挨拶</span>
+</li>
+<li class="flex">
+<span class="font-bold text-primary w-24 flex-shrink-0">14:15～14:45</span>
+<span class="text-gray-700">新刊「もりのともだち おおきなき」読み聞かせ</span>
+</li>
+<li class="flex">
+<span class="font-bold text-primary w-24 flex-shrink-0">14:45～15:15</span>
+<span class="text-gray-700">山田太郎さんトークセッション（創作秘話・質問タイム）</span>
+</li>
+<li class="flex">
+<span class="font-bold text-primary w-24 flex-shrink-0">15:15～16:00</span>
+<span class="text-gray-700">サイン会</span>
+</li>
+</ul>
+</div>
+<h3 class="text-xl font-bold mb-3">参加特典</h3>
+<div class="bg-gray-50 rounded-lg p-4 mb-6">
+<ul class="space-y-3">
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-checkbox-circle-line"></i>
+</div>
+<span class="text-gray-700">山田太郎さん直筆サイン入り新刊「もりのともだち おおきなき」をご購入いただけます</span>
+</li>
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-checkbox-circle-line"></i>
+</div>
+<span class="text-gray-700">オリジナルしおりプレゼント（先着30名様）</span>
+</li>
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-checkbox-circle-line"></i>
+</div>
+<span class="text-gray-700">山田太郎さんとの記念撮影（書籍購入者限定）</span>
+</li>
+</ul>
+</div>
+<h3 class="text-xl font-bold mb-3">持ち物</h3>
+<div class="bg-gray-50 rounded-lg p-4 mb-6">
+<ul class="space-y-3">
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-checkbox-circle-line"></i>
+</div>
+<span class="text-gray-700">予約確認メール（印刷したもの、またはスマートフォンでの表示）</span>
+</li>
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-checkbox-circle-line"></i>
+</div>
+<span class="text-gray-700">サインをご希望の方は、山田太郎さんの著書（既刊をお持ちの方）</span>
+</li>
+</ul>
+</div>
+<h3 class="text-xl font-bold mb-3">注意事項</h3>
+<div class="bg-gray-50 rounded-lg p-4">
+<ul class="space-y-3">
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-information-line"></i>
+</div>
+<span class="text-gray-700">サインは、お一人様2冊までとさせていただきます</span>
+</li>
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-information-line"></i>
+</div>
+<span class="text-gray-700">イベント中の写真撮影は、記念撮影の時間以外はご遠慮ください</span>
+</li>
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-information-line"></i>
+</div>
+<span class="text-gray-700">当日は13:45より受付を開始します。開始10分前までにお越しください</span>
+</li>
+<li class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center text-primary mr-2 flex-shrink-0 mt-1">
+<i class="ri-information-line"></i>
+</div>
+<span class="text-gray-700">予約状況により、当日参加も可能ですが、事前予約の方を優先させていただきます</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- 作家プロフィール -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+<div class="p-6">
+<h2 class="text-2xl font-bold mb-6">作家プロフィール</h2>
+<div class="flex flex-col sm:flex-row gap-6">
+<div class="w-full sm:w-1/3">
+<img src="/images/readdy/36b9247d134a59c32460dbbcffde6a1c.jpeg" alt="山田太郎" class="w-full h-auto rounded-lg shadow-sm mb-4" id="mainProfileImage">
+<div class="grid grid-cols-3 gap-2">
+<img src="/images/readdy/36b9247d134a59c32460dbbcffde6a1c.jpeg" alt="山田太郎 宣材写真" class="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity thumbnail-image">
+<img src="https://readdy.ai/api/search-image?query=A%2520heartwarming%2520children%2527s%2520book%2520illustration%2520showing%2520forest%2520animals%2520playing%2520together%252C%2520painted%2520in%2520soft%2520watercolors%2520with%2520delicate%2520details.%2520The%2520scene%2520depicts%2520rabbits%252C%2520foxes%252C%2520and%2520birds%2520in%2520a%2520lush%2520forest%2520setting.&width=150&height=150&seq=2001&orientation=squarish" alt="作品1" class="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity thumbnail-image">
+<img src="https://readdy.ai/api/search-image?query=A%2520whimsical%2520children%2527s%2520book%2520illustration%2520of%2520woodland%2520creatures%2520having%2520a%2520picnic%2520under%2520a%2520large%2520tree%252C%2520painted%2520in%2520gentle%2520pastels%2520with%2520fine%2520details.%2520Features%2520squirrels%252C%2520hedgehogs%252C%2520and%2520mice.&width=150&height=150&seq=2002&orientation=squarish" alt="作品2" class="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity thumbnail-image">
+<img src="https://readdy.ai/api/search-image?query=A%2520charming%2520children%2527s%2520book%2520illustration%2520showing%2520forest%2520animals%2520preparing%2520for%2520winter%252C%2520with%2520warm%2520autumn%2520colors%2520and%2520detailed%2520brushwork.%2520Shows%2520deer%252C%2520bears%252C%2520and%2520chipmunks%2520gathering%2520food.&width=150&height=150&seq=2003&orientation=squarish" alt="作品3" class="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity thumbnail-image">
+<img src="https://readdy.ai/api/search-image?query=A%2520magical%2520children%2527s%2520book%2520illustration%2520depicting%2520nighttime%2520in%2520the%2520forest%252C%2520with%2520glowing%2520fireflies%2520and%2520moonlit%2520scenes.%2520Features%2520owls%252C%2520raccoons%252C%2520and%2520other%2520nocturnal%2520animals.&width=150&height=150&seq=2004&orientation=squarish" alt="作品4" class="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity thumbnail-image">
+<img src="https://readdy.ai/api/search-image?query=A%2520sweet%2520children%2527s%2520book%2520illustration%2520showing%2520baby%2520animals%2520learning%2520to%2520play%2520music%2520in%2520the%2520forest%252C%2520painted%2520in%2520soft%2520watercolors.%2520Features%2520young%2520rabbits%252C%2520foxes%252C%2520and%2520birds%2520with%2520instruments.&width=150&height=150&seq=2005&orientation=squarish" alt="作品5" class="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity thumbnail-image">
+</div>
+</div>
+<div class="w-full sm:w-2/3">
+<h3 class="text-xl font-bold mb-3">たなかしん</h3>
+<p class="text-gray-700 mb-4 leading-relaxed">
+1980年大阪府生まれ。絵本作家、イラストレーター。大学で美術を学んだ後、出版社で編集者として勤務。2010年に独立し、絵本作家としてデビュー。代表作「もりのともだち」シリーズは累計50万部を超えるベストセラーとなり、「日本絵本賞」「講談社出版文化賞」など数々の賞を受賞。温かみのある絵と、子どもの心に寄り添うストーリーが特徴で、国内外で高い評価を得ている。近年は絵本創作ワークショップも積極的に開催し、次世代の育成にも力を入れている。
+</p>
+<h4 class="font-bold mb-2">代表作</h4>
+<ul class="space-y-1 mb-4">
+<li class="text-gray-700">「もりのともだち」シリーズ（全6巻）</li>
+<li class="text-gray-700">「おばけのトントン」</li>
+<li class="text-gray-700">「ぼくのいえ きみのいえ」</li>
+<li class="text-gray-700">「まちのおと」</li>
+</ul>
+<div class="flex space-x-4">
+<a href="#" class="text-primary hover:text-primary/80 flex items-center">
+<div class="w-5 h-5 flex items-center justify-center mr-1">
+<i class="ri-global-line"></i>
+</div>
+公式サイト
+</a>
+<a href="#" class="text-primary hover:text-primary/80 flex items-center">
+<div class="w-5 h-5 flex items-center justify-center mr-1">
+<i class="ri-twitter-x-line"></i>
+</div>
+Twitter
+</a>
+<a href="#" class="text-primary hover:text-primary/80 flex items-center">
+<div class="w-5 h-5 flex items-center justify-center mr-1">
+<i class="ri-instagram-line"></i>
+</div>
+Instagram
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 関連書籍情報 -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+<div class="p-6">
+<h2 class="text-2xl font-bold mb-6">関連書籍</h2>
+<h3 class="text-xl font-bold mb-4">新刊</h3>
+<div class="flex flex-col md:flex-row gap-6 mb-8">
+<div class="w-full md:w-1/3">
+<img src="https://readdy.ai/api/search-image?query=A%2520children%2527s%2520picture%2520book%2520cover%2520featuring%2520a%2520large%2520tree%2520with%2520friendly%2520forest%2520animals%2520gathered%2520around%2520it.%2520The%2520illustration%2520style%2520is%2520warm%2520and%2520inviting%2520with%2520soft%2520colors.%2520The%2520book%2520appears%2520to%2520be%2520titled%2520%2522Forest%2520Friends%253A%2520The%2520Big%2520Tree%2522%2520in%2520Japanese.%2520The%2520cover%2520design%2520is%2520professional%2520and%2520appealing%2520to%2520children.&width=300&height=400&seq=1003&orientation=portrait" alt="もりのともだち おおきなき" class="w-full h-auto rounded-lg shadow-sm">
+</div>
+<div class="w-full md:w-2/3">
+<h4 class="text-lg font-bold mb-2">もりのともだち おおきなき</h4>
+<p class="text-sm text-gray-500 mb-3">作・絵：山田太郎 / 出版社：はるかぜ出版 / 2025年5月発売</p>
+<p class="text-gray-700 mb-4 leading-relaxed">
+「もりのともだち」シリーズ最新作。森の中心にそびえる大きな木を舞台に、動物たちの友情と助け合いを描いた心温まる物語。季節の移り変わりとともに変化する大きな木と、そこに集まる動物たちの暮らしを通して、自然との共生や命のつながりを優しく伝えます。山田太郎さんの繊細なタッチで描かれた美しい森の風景と、個性豊かな動物たちの表情が魅力的な一冊です。
+</p>
+<div class="flex items-center mb-4">
+<div class="flex text-yellow-400">
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-half-fill"></i>
+</div>
+<span class="ml-2 text-gray-600">4.8/5.0（32件のレビュー）</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xl font-bold">1,650円（税込）</span>
+<button class="bg-primary text-white px-6 py-2 font-medium !rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors">
+購入する
+</button>
+</div>
+</div>
+</div>
+<h3 class="text-xl font-bold mb-4">その他の作品</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+<div class="book-card bg-white rounded-lg shadow-sm overflow-hidden group relative">
+<img src="https://readdy.ai/api/search-image?query=A%2520children%2527s%2520picture%2520book%2520cover%2520showing%2520various%2520forest%2520animals%2520playing%2520together%2520in%2520a%2520woodland%2520setting.%2520The%2520illustration%2520style%2520is%2520warm%2520and%2520inviting%2520with%2520soft%2520colors.%2520The%2520book%2520appears%2520to%2520be%2520titled%2520%2522Forest%2520Friends%2522%2520in%2520Japanese.%2520The%2520cover%2520design%2520is%2520professional%2520and%2520appealing%2520to%2520children.&width=300&height=400&seq=1004&orientation=portrait" alt="もりのともだち" class="w-full h-auto">
+<div class="p-4">
+<h4 class="font-bold mb-1">もりのともだち</h4>
+<p class="text-sm text-gray-600">1,430円（税込）</p>
+</div>
+<div class="book-hover absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 transition-opacity duration-300">
+<button class="bg-white text-primary px-4 py-2 rounded-button font-medium">
+詳細を見る
+</button>
+</div>
+</div>
+<div class="book-card bg-white rounded-lg shadow-sm overflow-hidden group relative">
+<img src="https://readdy.ai/api/search-image?query=A%2520children%2527s%2520picture%2520book%2520cover%2520showing%2520forest%2520animals%2520gathering%2520food%2520in%2520autumn.%2520The%2520illustration%2520style%2520is%2520warm%2520and%2520inviting%2520with%2520soft%2520fall%2520colors.%2520The%2520book%2520appears%2520to%2520be%2520titled%2520%2522Forest%2520Friends%253A%2520Autumn%2520Harvest%2522%2520in%2520Japanese.%2520The%2520cover%2520design%2520is%2520professional%2520and%2520appealing%2520to%2520children.&width=300&height=400&seq=1005&orientation=portrait" alt="もりのともだち あきのおくりもの" class="w-full h-auto">
+<div class="p-4">
+<h4 class="font-bold mb-1">もりのともだち あきのおくりもの</h4>
+<p class="text-sm text-gray-600">1,430円（税込）</p>
+</div>
+<div class="book-hover absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 transition-opacity duration-300">
+<button class="bg-white text-primary px-4 py-2 rounded-button font-medium">
+詳細を見る
+</button>
+</div>
+</div>
+<div class="book-card bg-white rounded-lg shadow-sm overflow-hidden group relative">
+<img src="https://readdy.ai/api/search-image?query=A%2520children%2527s%2520picture%2520book%2520cover%2520showing%2520forest%2520animals%2520playing%2520in%2520snow.%2520The%2520illustration%2520style%2520is%2520warm%2520and%2520inviting%2520with%2520soft%2520winter%2520colors.%2520The%2520book%2520appears%2520to%2520be%2520titled%2520%2522Forest%2520Friends%253A%2520Winter%2520Fun%2522%2520in%2520Japanese.%2520The%2520cover%2520design%2520is%2520professional%2520and%2520appealing%2520to%2520children.&width=300&height=400&seq=1006&orientation=portrait" alt="もりのともだち ふゆのあそび" class="w-full h-auto">
+<div class="p-4">
+<h4 class="font-bold mb-1">もりのともだち ふゆのあそび</h4>
+<p class="text-sm text-gray-600">1,430円（税込）</p>
+</div>
+<div class="book-hover absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 transition-opacity duration-300">
+<button class="bg-white text-primary px-4 py-2 rounded-button font-medium">
+詳細を見る
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- サイドバー -->
+<div class="w-full md:w-1/3">
+<div class="md:sticky md:top-4">
+<!-- 予約フォーム -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+<div class="bg-primary text-white p-4">
+<h2 class="text-xl font-bold">予約する</h2>
+</div>
+<div class="p-6">
+<div class="text-center">
+<p class="text-gray-700 mb-6">イベントの予約は専用フォームから受け付けております。<br>下記のボタンから予約ページへお進みください。</p>
+<a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/54174aca-123f-4177-963f-4e8f3588d72a" data-readdy="true" class="inline-flex items-center justify-center bg-primary text-white px-8 py-4 font-medium !rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors w-full md:w-auto">
+<div class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-calendar-check-line"></i>
+</div>
+予約ページへ進む
+</a>
+</div>
+</div>
+</div>
+<!-- お問い合わせ情報 -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+<div class="p-6">
+<h2 class="text-xl font-bold mb-4">主催へ問い合わせ</h2>
+<div class="space-y-4">
+<div class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-3 flex-shrink-0">
+<i class="ri-phone-line"></i>
+</div>
+<div>
+<h3 class="font-bold mb-1">電話</h3>
+<p class="text-gray-600"><a href="tel:06-7654-7069" class="hover:text-primary transition-colors">06-7654-7069</a></p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-3 flex-shrink-0">
+<i class="ri-mail-line"></i>
+</div>
+<div>
+<h3 class="font-bold mb-1">メール</h3>
+<p class="text-gray-600"><a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/54174aca-123f-4177-963f-4e8f3588d72a" data-readdy="true" class="text-primary hover:text-primary/80">こちらのフォームからお願いします</a></p>
+<p class="text-sm text-gray-500">（24時間受付・返信は営業時間内）</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 関連イベント -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+<div class="p-6">
+<h2 class="text-xl font-bold mb-4">関連イベント</h2>
+<div class="space-y-4">
+<div class="flex items-start p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+<div class="w-12 h-12 flex flex-col items-center justify-center bg-primary/90 text-white rounded-lg mr-4 flex-shrink-0">
+<span class="text-xs">6月</span>
+<span class="text-lg font-bold">15</span>
+</div>
+<div>
+<h4 class="font-bold">親子で楽しむ絵本ワークショップ</h4>
+<p class="text-sm text-gray-600">絵本の世界から広がる創作活動を親子で楽しみましょう。</p>
+</div>
+</div>
+<div class="flex items-start p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+<div class="w-12 h-12 flex flex-col items-center justify-center bg-primary/90 text-white rounded-lg mr-4 flex-shrink-0">
+<span class="text-xs">6月</span>
+<span class="text-lg font-bold">21</span>
+</div>
+<div>
+<h4 class="font-bold">大人のための絵本講座</h4>
+<p class="text-sm text-gray-600">絵本の奥深さを知り、大人の視点から絵本を楽しむ講座です。</p>
+</div>
+</div>
+<div class="flex items-start p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+<div class="w-12 h-12 flex flex-col items-center justify-center bg-primary/90 text-white rounded-lg mr-4 flex-shrink-0">
+<span class="text-xs">6月</span>
+<span class="text-lg font-bold">29</span>
+</div>
+<div>
+<h4 class="font-bold">季節の絵本フェア</h4>
+<p class="text-sm text-gray-600">夏をテーマにした絵本を集めた特別フェアを開催します。</p>
+</div>
+</div>
+</div>
+<div class="mt-4 text-center">
+<a href="https://readdy.ai/home/a53999be-6831-42a7-9fde-0447fdc57a4e/a72cea04-19cf-408c-9717-ee31ecb57153" data-readdy="true" class="inline-flex items-center text-primary font-medium hover:underline">
+すべてのイベントを見る
+<div class="w-5 h-5 flex items-center justify-center ml-1">
+<i class="ri-arrow-right-line"></i>
+</div>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- フッター -->
+<footer class="bg-gray-800 text-white py-12">
+<div class="container mx-auto px-4">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+<div>
+<h3 class="text-xl font-['Pacifico'] mb-4">logo</h3>
+<p class="text-gray-400 mb-4">創造性と感性を育むライフスタイルメディア</p>
+<div class="flex space-x-4">
+<a href="#" class="text-gray-400 hover:text-white">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-twitter-x-line ri-lg"></i>
+</div>
+</a>
+<a href="#" class="text-gray-400 hover:text-white">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-instagram-line ri-lg"></i>
+</div>
+</a>
+<a href="#" class="text-gray-400 hover:text-white">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-facebook-circle-line ri-lg"></i>
+</div>
+</a>
+<a href="#" class="text-gray-400 hover:text-white">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-youtube-line ri-lg"></i>
+</div>
+</a>
+</div>
+</div>
+<div>
+<h3 class="font-bold text-lg mb-4">コンテンツ</h3>
+<ul class="space-y-2">
+<li><a href="#" class="text-gray-400 hover:text-white">よみもの</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">おかいもの</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">絵本の靴下</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">イベント</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">作家</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-lg mb-4">豊中PICO</h3>
+<ul class="space-y-2">
+<li><a href="#" class="text-gray-400 hover:text-white">絵本サロン</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">キッズスクール</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">カルチャースクール</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">レンタルスペース</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">アクセス</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-lg mb-4">企業情報</h3>
+<ul class="space-y-2">
+<li><a href="#" class="text-gray-400 hover:text-white">会社概要</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">プライバシーポリシー</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">特定商取引法に基づく表記</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white">お問い合わせ</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-gray-700 pt-8 text-center text-gray-500">
+<p>&copy; 2025 親子の時間研究所 All Rights Reserved.</p>
+</div>
+</div>
+</footer>
+<script id="navToggle">
+document.addEventListener('DOMContentLoaded', function() {
+const menuButton = document.querySelector('.ri-menu-line');
+const nav = document.querySelector('nav');
+if (menuButton && nav) {
+menuButton.addEventListener('click', function() {
+nav.classList.toggle('hidden');
+});
+}
+});
+</script>
+<script id="imageSlider">
+document.addEventListener('DOMContentLoaded', function() {
+const slider = document.getElementById('imageSlider');
+const buttons = document.querySelectorAll('[data-index]');
+const prevButton = document.getElementById('prevSlide');
+const nextButton = document.getElementById('nextSlide');
+let currentIndex = 0;
+const totalSlides = buttons.length;
+function updateSlider(index) {
+if (index < 0) index = totalSlides - 1;
+if (index >= totalSlides) index = 0;
+slider.style.transform = `translateX(-${index * 100}%)`;
+buttons.forEach((btn, i) => {
+btn.style.opacity = i === index ? '1' : '0.6';
+});
+currentIndex = index;
+}
+buttons.forEach(button => {
+button.addEventListener('click', () => {
+const index = parseInt(button.dataset.index);
+updateSlider(index);
+});
+});
+prevButton.addEventListener('click', () => {
+updateSlider(currentIndex - 1);
+});
+nextButton.addEventListener('click', () => {
+updateSlider(currentIndex + 1);
+});
+updateSlider(0);
+});
+</script>
+<script id="favoriteButton">
+document.addEventListener('DOMContentLoaded', function() {
+const favoriteBtn = document.getElementById('favoriteBtn');
+const loginModal = document.getElementById('loginModal');
+const closeLoginModal = document.getElementById('closeLoginModal');
+const isLoggedIn = false; // This should be replaced with actual login check
+let isFavorited = false;
+favoriteBtn.addEventListener('click', function() {
+if (!isLoggedIn) {
+loginModal.classList.remove('hidden');
+return;
+}
+isFavorited = !isFavorited;
+const icon = favoriteBtn.querySelector('.favorite-icon');
+if (isFavorited) {
+icon.classList.remove('ri-heart-line');
+icon.classList.add('ri-heart-fill');
+icon.style.color = '#CC2222';
+} else {
+icon.classList.remove('ri-heart-fill');
+icon.classList.add('ri-heart-line');
+icon.style.color = '';
+}
+});
+closeLoginModal.addEventListener('click', function() {
+loginModal.classList.add('hidden');
+});
+loginModal.addEventListener('click', function(e) {
+if (e.target === loginModal) {
+loginModal.classList.add('hidden');
+}
+});
+});
+</script>
+<script id="thumbnailGallery">
+document.addEventListener('DOMContentLoaded', function() {
+const mainImage = document.getElementById('mainProfileImage');
+const thumbnails = document.querySelectorAll('.thumbnail-image');
+thumbnails.forEach(thumbnail => {
+thumbnail.addEventListener('click', function() {
+mainImage.src = this.src;
+mainImage.alt = this.alt;
+thumbnails.forEach(thumb => thumb.classList.remove('ring-2', 'ring-primary'));
+this.classList.add('ring-2', 'ring-primary');
+});
+});
+});
+</script>
+<script id="shareDialog">
+document.addEventListener('DOMContentLoaded', function() {
+const shareBtn = document.getElementById('shareBtn');
+const shareModal = document.getElementById('shareModal');
+const closeShareModal = document.getElementById('closeShareModal');
+const shareUrl = document.getElementById('shareUrl');
+const copyUrl = document.getElementById('copyUrl');
+const copyMessage = document.getElementById('copyMessage');
+const shareTwitter = document.getElementById('shareTwitter');
+const shareFacebook = document.getElementById('shareFacebook');
+const shareLine = document.getElementById('shareLine');
+const shareEmail = document.getElementById('shareEmail');
+const pageTitle = document.title;
+const pageUrl = window.location.href;
+shareUrl.value = pageUrl;
+shareBtn.addEventListener('click', () => {
+shareModal.classList.remove('hidden');
+});
+closeShareModal.addEventListener('click', () => {
+shareModal.classList.add('hidden');
+});
+shareModal.addEventListener('click', (e) => {
+if (e.target === shareModal) {
+shareModal.classList.add('hidden');
+}
+});
+copyUrl.addEventListener('click', async () => {
+try {
+await navigator.clipboard.writeText(pageUrl);
+copyMessage.classList.remove('hidden');
+setTimeout(() => {
+copyMessage.classList.add('hidden');
+}, 2000);
+} catch (err) {
+console.error('Failed to copy URL:', err);
+}
+});
+shareTwitter.addEventListener('click', () => {
+const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(pageTitle)}&url=${encodeURIComponent(pageUrl)}`;
+window.open(twitterUrl, '_blank');
+});
+shareFacebook.addEventListener('click', () => {
+const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+window.open(facebookUrl, '_blank');
+});
+shareLine.addEventListener('click', () => {
+const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(pageUrl)}`;
+window.open(lineUrl, '_blank');
+});
+shareEmail.addEventListener('click', () => {
+const subject = encodeURIComponent(pageTitle);
+const body = encodeURIComponent(`${pageTitle}\n${pageUrl}`);
+window.location.href = `mailto:?subject=${subject}&body=${body}`;
+});
+});
+</script>
+<script id="formValidation">
+document.addEventListener('DOMContentLoaded', function() {
+const form = document.querySelector('form');
+if (form) {
+form.addEventListener('submit', function(e) {
+e.preventDefault();
+// 簡易バリデーション
+const name = document.getElementById('name');
+const email = document.getElementById('email');
+const tel = document.getElementById('tel');
+let isValid = true;
+if (!name.value.trim()) {
+name.classList.add('border-red-500');
+isValid = false;
+} else {
+name.classList.remove('border-red-500');
+}
+if (!email.value.trim() || !email.value.includes('@')) {
+email.classList.add('border-red-500');
+isValid = false;
+} else {
+email.classList.remove('border-red-500');
+}
+if (!tel.value.trim()) {
+tel.classList.add('border-red-500');
+isValid = false;
+} else {
+tel.classList.remove('border-red-500');
+}
+if (isValid) {
+// 成功時の処理
+alert('予約が完了しました。確認メールをお送りしますので、ご確認ください。');
+form.reset();
+} else {
+// エラー時の処理
+alert('入力内容に不備があります。必須項目を正しく入力してください。');
+}
+});
+}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+/* ========================================
+   HERO scale 実験用（安全）
+======================================== */
+
+@media (max-width: 700px) {
+  .hero {
+    --hero-base-width: 700;
+    --hero-base-height: 1066;
+
+    --hero-scale: calc(100vw / var(--hero-base-width));
+    height: calc(var(--hero-base-height) * var(--hero-scale));
+  }
+
+  .hero-inner {
+    transform: scale(var(--hero-scale));
+    transform-origin: top center;
+  }
+}
