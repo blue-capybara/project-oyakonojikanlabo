@@ -9,6 +9,8 @@ import Seo from '../components/seo/Seo';
 const INITIAL_FETCH_COUNT = 12;
 const LOAD_MORE_FETCH_COUNT = 12;
 const TAG_PREVIEW_COUNT_DESKTOP = 14;
+const TAGS_FETCH_COUNT = 100;
+const ALL_TAG_SLUG = '__all__';
 
 interface Article {
   id: string;
@@ -22,6 +24,11 @@ interface Article {
   publishedAt: string;
   tags: string[];
   categories: string[];
+}
+
+interface TagOption {
+  name: string;
+  slug: string;
 }
 
 interface ArchiveArticlesResponse {
@@ -56,11 +63,28 @@ interface ArchiveArticlesResponse {
   };
 }
 
+interface ArchiveTagsResponse {
+  tags: {
+    nodes: Array<{
+      name: string;
+      slug: string;
+    }>;
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string | null;
+    };
+  };
+}
+
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 
 const GET_ARCHIVE_POSTS = gql`
-  query GetArchivePosts($first: Int!, $after: String, $search: String) {
-    posts(first: $first, after: $after, where: { search: $search, orderby: { field: DATE, order: DESC } }) {
+  query GetArchivePosts($first: Int!, $after: String, $search: String, $tag: String) {
+    posts(
+      first: $first
+      after: $after
+      where: { search: $search, tag: $tag, orderby: { field: DATE, order: DESC } }
+    ) {
       pageInfo {
         endCursor
         hasNextPage
@@ -96,12 +120,27 @@ const GET_ARCHIVE_POSTS = gql`
   }
 `;
 
+const GET_ARCHIVE_TAGS = gql`
+  query GetArchiveTags($first: Int!, $after: String) {
+    tags(first: $first, after: $after, where: { hideEmpty: false }) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      nodes {
+        name
+        slug
+      }
+    }
+  }
+`;
+
 const ArchivePage: React.FC = () => {
   const showMembershipFeatures = getFeatureFlag('showMembershipFeatures');
-  const [selectedTag, setSelectedTag] = useState('すべて');
+  const [selectedTagSlug, setSelectedTagSlug] = useState(ALL_TAG_SLUG);
   const [sortBy, setSortBy] = useState('新着順');
   const [articles, setArticles] = useState<Article[]>([]);
-  const [tagOptions, setTagOptions] = useState<string[]>(['すべて']);
+  const [tagOptions, setTagOptions] = useState<TagOption[]>([{ name: 'すべて', slug: ALL_TAG_SLUG }]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,18 +155,46 @@ const ArchivePage: React.FC = () => {
 
   const articlesRef = useRef<Article[]>([]);
   const searchRef = useRef<string>('');
+  const selectedTagRef = useRef<string>(ALL_TAG_SLUG);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const updateTagOptions = useCallback((updatedArticles: Article[]) => {
-    const tagSet = new Set<string>();
-    updatedArticles.forEach((article) => {
-      article.tags.forEach((tag) => tagSet.add(tag));
-    });
-    setTagOptions(['すべて', ...Array.from(tagSet)]);
+  const fetchAllTags = useCallback(async () => {
+    const collected = new Map<string, TagOption>();
+    let nextCursor: string | null = null;
+    let hasNextPage = true;
+
+    try {
+      while (hasNextPage) {
+        const data = await request<ArchiveTagsResponse>(endpoint, GET_ARCHIVE_TAGS, {
+          first: TAGS_FETCH_COUNT,
+          after: nextCursor,
+        });
+
+        data.tags.nodes.forEach((tag) => {
+          if (!tag.slug || !tag.name) {
+            return;
+          }
+          collected.set(tag.slug, { name: tag.name, slug: tag.slug });
+        });
+
+        hasNextPage = data.tags.pageInfo.hasNextPage;
+        nextCursor = data.tags.pageInfo.endCursor;
+      }
+
+      const sortedTags = Array.from(collected.values()).sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      setTagOptions([{ name: 'すべて', slug: ALL_TAG_SLUG }, ...sortedTags]);
+    } catch (err) {
+      console.error('タグ一覧の取得に失敗しました:', err);
+    }
   }, []);
 
   const fetchArticles = useCallback(
-    async ({ after, append, search }: { after?: string | null; append?: boolean; search?: string } = {}) => {
+    async ({
+      after,
+      append,
+      search,
+      tag,
+    }: { after?: string | null; append?: boolean; search?: string; tag?: string } = {}) => {
       const isAppend = append ?? false;
       if (isAppend) {
         setIsLoadingMore(true);
@@ -138,13 +205,17 @@ const ArchivePage: React.FC = () => {
 
       try {
         const providedSearch = search ?? undefined;
+        const providedTag = tag ?? undefined;
         const effectiveSearch = providedSearch !== undefined ? providedSearch : searchRef.current;
+        const effectiveTag = providedTag !== undefined ? providedTag : selectedTagRef.current;
         const normalizedSearch = effectiveSearch?.trim() ?? '';
+        const normalizedTag = effectiveTag === ALL_TAG_SLUG ? null : effectiveTag;
 
         const data = await request<ArchiveArticlesResponse>(endpoint, GET_ARCHIVE_POSTS, {
           first: isAppend ? LOAD_MORE_FETCH_COUNT : INITIAL_FETCH_COUNT,
           after: after ?? null,
           search: normalizedSearch === '' ? null : normalizedSearch,
+          tag: normalizedTag,
         });
 
         const formattedArticles = data.posts.nodes.map((post): Article => {
@@ -176,13 +247,17 @@ const ArchivePage: React.FC = () => {
 
         articlesRef.current = updatedArticles;
         setArticles(updatedArticles);
-        updateTagOptions(updatedArticles);
         setPageInfo({
           hasNextPage: data.posts.pageInfo.hasNextPage,
           endCursor: data.posts.pageInfo.endCursor,
         });
-        if (!isAppend && providedSearch !== undefined) {
-          searchRef.current = normalizedSearch;
+        if (!isAppend) {
+          if (providedSearch !== undefined) {
+            searchRef.current = normalizedSearch;
+          }
+          if (providedTag !== undefined) {
+            selectedTagRef.current = effectiveTag;
+          }
         }
       } catch (err) {
         console.error('記事一覧の取得に失敗しました:', err);
@@ -195,8 +270,12 @@ const ArchivePage: React.FC = () => {
         }
       }
     },
-    [updateTagOptions],
+    [],
   );
+
+  useEffect(() => {
+    fetchAllTags();
+  }, [fetchAllTags]);
 
   useEffect(() => {
     const rawQuery = searchParams.get('q') ?? '';
@@ -205,34 +284,31 @@ const ArchivePage: React.FC = () => {
     setSearchInput((prev) => (prev !== rawQuery ? rawQuery : prev));
     setSearchKeyword((prev) => (prev !== normalized ? normalized : prev));
     if (normalized !== searchRef.current) {
-      setSelectedTag((prev) => (prev === 'すべて' ? prev : 'すべて'));
+      setSelectedTagSlug((prev) => (prev === ALL_TAG_SLUG ? prev : ALL_TAG_SLUG));
     }
 
     if (normalized === searchRef.current && articlesRef.current.length > 0) {
       return;
     }
 
-    fetchArticles({ search: normalized });
+    fetchArticles({ search: normalized, tag: ALL_TAG_SLUG });
   }, [searchParams, fetchArticles]);
 
   const filteredArticles = useMemo(() => {
-    const articlesByTag =
-      selectedTag === 'すべて' ? articles : articles.filter((article) => article.tags.includes(selectedTag));
-
     if (sortBy === '新着順') {
-      return [...articlesByTag].sort(
+      return [...articles].sort(
         (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
       );
     }
 
     if (sortBy === '古い順') {
-      return [...articlesByTag].sort(
+      return [...articles].sort(
         (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime(),
       );
     }
 
-    return articlesByTag;
-  }, [articles, selectedTag, sortBy]);
+    return articles;
+  }, [articles, sortBy]);
 
   const hasMore = pageInfo.hasNextPage;
 
@@ -251,7 +327,7 @@ const ArchivePage: React.FC = () => {
       return;
     }
 
-    setSelectedTag('すべて');
+    setSelectedTagSlug(ALL_TAG_SLUG);
     setSearchInput(trimmed);
     const params = new URLSearchParams(searchParams);
     if (trimmed) {
@@ -266,7 +342,7 @@ const ArchivePage: React.FC = () => {
     if (!searchRef.current && searchInput === '' && !(searchParams.get('q') ?? '')) {
       return;
     }
-    setSelectedTag('すべて');
+    setSelectedTagSlug(ALL_TAG_SLUG);
     setSearchInput('');
     const params = new URLSearchParams(searchParams);
     params.delete('q');
@@ -282,24 +358,27 @@ const ArchivePage: React.FC = () => {
 
   const hiddenTagCount = Math.max(tagOptions.length - visibleDesktopTags.length, 0);
 
-  const handleSelectTag = (tag: string) => {
-    setSelectedTag(tag);
+  const handleSelectTag = (tagSlug: string) => {
+    setSelectedTagSlug(tagSlug);
     setIsAllTagsOpen(false);
+    void fetchArticles({ tag: tagSlug, search: searchRef.current });
   };
 
-  const renderTagChip = (tag: string, size: 'sm' | 'md' = 'md') => {
+  const renderTagChip = (tag: TagOption, size: 'sm' | 'md' = 'md') => {
     // 横方向の余白を広げて視認性を向上
     const base = size === 'sm' ? 'text-xs px-3.5 py-1.5' : 'text-sm px-5 py-2';
     return (
       <button
         type="button"
-        key={tag}
-        onClick={() => handleSelectTag(tag)}
+        key={tag.slug}
+        onClick={() => handleSelectTag(tag.slug)}
         className={`rounded-full transition-colors whitespace-nowrap font-medium ${base} ${
-          selectedTag === tag ? 'bg-primary text-white' : 'bg-gray-100 text-gray-800 hover:bg-primary hover:text-white'
+          selectedTagSlug === tag.slug
+            ? 'bg-primary text-white'
+            : 'bg-gray-100 text-gray-800 hover:bg-primary hover:text-white'
         }`}
       >
-        {tag}
+        {tag.name}
       </button>
     );
   };
@@ -340,13 +419,13 @@ const ArchivePage: React.FC = () => {
             <div className="flex flex-wrap gap-2 md:gap-4">
               <div className="relative">
                 <select
-                  value={selectedTag}
+                  value={selectedTagSlug}
                   onChange={(e) => handleSelectTag(e.target.value)}
                   className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary appearance-none pr-8"
                 >
                   {tagOptions.map((tag) => (
-                    <option key={tag} value={tag}>
-                      {tag}
+                    <option key={tag.slug} value={tag.slug}>
+                      {tag.name}
                     </option>
                   ))}
                 </select>

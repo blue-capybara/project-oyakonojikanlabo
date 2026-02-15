@@ -6,16 +6,20 @@ import Breadcrumb from '../components/Breadcrumb';
 import useFavorite from '../hooks/useFavorite';
 import WordPressContent from '../components/Post/WordPressContent';
 import { getFeatureFlag } from '../config/featureFlags';
-import { send404Event } from '../lib/ga';
+import { send404Event, sendRelatedPostClickEvent } from '../lib/ga';
 import Seo from '../components/seo/Seo';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
+const relatedEndpoint = `${new URL(endpoint).origin}/wp-json/okjl/v1`;
+const RELATED_POSTS_LIMIT = 6;
 
 interface PostTag {
   name: string;
+  slug?: string;
 }
 
 interface PostData {
+  databaseId: number;
   title: string;
   date: string;
   content: string;
@@ -36,9 +40,34 @@ interface PostResponse {
   post: PostData | null;
 }
 
+interface RelatedPostRawItem {
+  id?: number;
+  title?: string;
+  slug?: string;
+  link?: string;
+  thumbnail?: string;
+  date?: string;
+  source?: string;
+}
+
+interface RelatedPostsResponse {
+  items?: RelatedPostRawItem[];
+}
+
+interface RelatedPost {
+  id: number;
+  title: string;
+  slug: string;
+  link: string;
+  thumbnail: string;
+  date: string;
+  source: string;
+}
+
 const GET_POST_BY_SLUG = gql`
   query GetPostBySlug($slug: ID!) {
     post(id: $slug, idType: SLUG) {
+      databaseId
       title
       date
       content
@@ -53,11 +82,68 @@ const GET_POST_BY_SLUG = gql`
       tags {
         nodes {
           name
+          slug
         }
       }
     }
   }
 `;
+
+const isValidDate = (value: string) => {
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.getTime());
+};
+
+const formatDateJa = (value: string) => {
+  if (!isValidDate(value)) {
+    return '';
+  }
+  return new Date(value).toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+const normalizeRelatedPost = (item: RelatedPostRawItem): RelatedPost | null => {
+  if (!item.id || item.id <= 0) {
+    return null;
+  }
+
+  const title = (item.title ?? '').trim();
+  if (!title) {
+    return null;
+  }
+
+  return {
+    id: item.id,
+    title,
+    slug: (item.slug ?? '').trim(),
+    link: (item.link ?? '').trim(),
+    thumbnail: (item.thumbnail ?? '').trim(),
+    date: (item.date ?? '').trim(),
+    source: (item.source ?? '').trim(),
+  };
+};
+
+const buildRelatedPostPath = (relatedPost: RelatedPost) => {
+  if (relatedPost.slug) {
+    return `/${relatedPost.slug}`;
+  }
+
+  if (relatedPost.link) {
+    try {
+      const url = new URL(relatedPost.link);
+      return `${url.pathname}${url.search}${url.hash}`;
+    } catch {
+      if (relatedPost.link.startsWith('/')) {
+        return relatedPost.link;
+      }
+    }
+  }
+
+  return '/archive';
+};
 
 const PostDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -66,6 +152,8 @@ const PostDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [relatedPosts, setRelatedPosts] = useState<RelatedPost[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
   const showMembershipFeatures = getFeatureFlag('showMembershipFeatures');
 
   const {
@@ -114,6 +202,17 @@ const PostDetailPage: React.FC = () => {
     setShowShareModal(true);
   };
 
+  const handleRelatedPostClick = (relatedPost: RelatedPost, position: number) => {
+    sendRelatedPostClickEvent({
+      currentPostSlug: slug ?? '',
+      currentPostId: post?.databaseId,
+      relatedPostId: relatedPost.id,
+      relatedPostSlug: relatedPost.slug || undefined,
+      relatedPostSource: relatedPost.source || undefined,
+      position,
+    });
+  };
+
   const handleShareClick = (platform: 'x' | 'facebook' | 'line' | 'email') => {
     if (!shareUrl) return;
 
@@ -152,6 +251,8 @@ const PostDetailPage: React.FC = () => {
       setError('記事のスラッグが指定されていません');
       setNotFound(true);
       setLoading(false);
+      setRelatedPosts([]);
+      setRelatedLoading(false);
       return;
     }
 
@@ -161,10 +262,6 @@ const PostDetailPage: React.FC = () => {
         setError(null);
         setNotFound(false);
         const data = await request<PostResponse>(endpoint, GET_POST_BY_SLUG, { slug });
-            console.log(
-      'GraphQL featuredImage sourceUrl:',
-      data.post?.featuredImage?.node?.sourceUrl
-    );
         if (!data.post) {
           setError('指定された記事が見つかりません');
           setNotFound(true); // SEO: コンテンツ不存在が確定したときだけ 404 を GA に送る
@@ -184,6 +281,57 @@ const PostDetailPage: React.FC = () => {
 
     fetchPost();
   }, [slug]);
+
+  useEffect(() => {
+    if (!post?.databaseId) {
+      setRelatedPosts([]);
+      setRelatedLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchRelatedPosts = async () => {
+      try {
+        setRelatedLoading(true);
+
+        const response = await fetch(
+          `${relatedEndpoint}/related/${post.databaseId}?limit=${RELATED_POSTS_LIMIT}`,
+          { signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          throw new Error(`関連記事取得APIのレスポンスが不正です: ${response.status}`);
+        }
+
+        const data = (await response.json()) as RelatedPostsResponse;
+        const normalizedRelatedPosts = (data.items ?? [])
+          .map((item) => normalizeRelatedPost(item))
+          .filter((item): item is RelatedPost => item !== null)
+          .slice(0, RELATED_POSTS_LIMIT);
+
+        if (!controller.signal.aborted) {
+          setRelatedPosts(normalizedRelatedPosts);
+        }
+      } catch (err) {
+        if (controller.signal.aborted) {
+          return;
+        }
+        console.error('関連記事の取得に失敗しました:', err);
+        setRelatedPosts([]);
+      } finally {
+        if (!controller.signal.aborted) {
+          setRelatedLoading(false);
+        }
+      }
+    };
+
+    fetchRelatedPosts();
+
+    return () => {
+      controller.abort();
+    };
+  }, [post?.databaseId]);
 
   useEffect(() => {
     if (notFound) {
@@ -302,9 +450,19 @@ const PostDetailPage: React.FC = () => {
           {/* タグ */}
           <div className="flex flex-wrap gap-2 mb-4">
             {tags.map((tag, index) => (
-              <span key={`${tag.name}-${index}`} className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full">
-                {tag.name}
-              </span>
+              tag.slug ? (
+                <Link
+                  key={`${tag.slug}-${index}`}
+                  to={`/tag/${encodeURIComponent(tag.slug)}`}
+                  className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full hover:bg-blue-200 transition-colors"
+                >
+                  {tag.name}
+                </Link>
+              ) : (
+                <span key={`${tag.name}-${index}`} className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full">
+                  {tag.name}
+                </span>
+              )
             ))}
           </div>
 
@@ -383,6 +541,48 @@ const PostDetailPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {(relatedLoading || relatedPosts.length > 0) && (
+        <section className="pb-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-2xl font-bold mb-6">次に読みたい記事</h2>
+
+              {relatedLoading ? (
+                <div className="py-10 flex items-center justify-center text-gray-500">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3" />
+                  <span>関連記事を読み込み中...</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {relatedPosts.map((relatedPost, index) => (
+                    <Link
+                      key={relatedPost.id}
+                      to={buildRelatedPostPath(relatedPost)}
+                      onClick={() => handleRelatedPostClick(relatedPost, index + 1)}
+                      className="group block h-full"
+                    >
+                      <div className="flex h-full flex-col bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:-translate-y-1">
+                        <img
+                          src={relatedPost.thumbnail || '/default.jpg'}
+                          alt={relatedPost.title}
+                          className="w-full h-40 object-cover object-top"
+                        />
+                        <div className="p-5 flex flex-col flex-1">
+                          <h3 className="text-lg font-bold line-clamp-2 mb-3">{relatedPost.title}</h3>
+                          {relatedPost.date && (
+                            <p className="mt-auto text-sm text-gray-500">{formatDateJa(relatedPost.date)}</p>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* シェアモーダル */}
       {showShareModal && (

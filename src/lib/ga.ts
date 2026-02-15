@@ -53,4 +53,35 @@ export const send404Event = () => {
   });
 };
 
+type RelatedPostClickEventParams = {
+  currentPostSlug: string;
+  currentPostId?: number;
+  relatedPostId: number;
+  relatedPostSlug?: string;
+  relatedPostSource?: string;
+  position: number;
+};
+
+export const sendRelatedPostClickEvent = ({
+  currentPostSlug,
+  currentPostId,
+  relatedPostId,
+  relatedPostSlug,
+  relatedPostSource,
+  position,
+}: RelatedPostClickEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+
+  gtagFn('event', 'related_post_click', {
+    current_post_slug: currentPostSlug,
+    ...(currentPostId ? { current_post_id: currentPostId } : {}),
+    related_post_id: relatedPostId,
+    ...(relatedPostSlug ? { related_post_slug: relatedPostSlug } : {}),
+    ...(relatedPostSource ? { related_post_source: relatedPostSource } : {}),
+    position,
+  });
+};
+
 export {}; // TypeScript module augment 確認用
