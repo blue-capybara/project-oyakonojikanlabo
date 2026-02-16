@@ -138,11 +138,11 @@ export const searchApi = {
   // 記事を検索
   async searchArticles(query: string, limit: number = 10): Promise<SearchResult[]> {
     try {
-      const data = await request<PostsResponse>(endpoint, SEARCH_POSTS, { 
-        search: query, 
-        first: limit 
+      const data = await request<PostsResponse>(endpoint, SEARCH_POSTS, {
+        search: query,
+        first: limit,
       });
-      
+
       return data.posts.nodes.map((post) => ({
         id: post.id,
         type: 'article' as const,
@@ -155,7 +155,7 @@ export const searchApi = {
           day: 'numeric',
         }),
         category: post.categories.nodes[0]?.name,
-        url: `/${post.slug}`
+        url: `/${post.slug}`,
       }));
     } catch (error) {
       console.error('記事検索エラー:', error);
@@ -190,9 +190,8 @@ export const searchApi = {
           'イベント',
         location:
           event.eventRegions?.nodes?.find((node) => node?.name)?.name ??
-          event.eventCpt?.venueRef?.nodes?.find((node) =>
-            node && 'title' in node && node.title
-          )?.title ??
+          event.eventCpt?.venueRef?.nodes?.find((node) => node && 'title' in node && node.title)
+            ?.title ??
           undefined,
         url: `/event/${event.slug}`,
       }));
@@ -221,9 +220,8 @@ export const searchApi = {
           category: event.eventCategories?.nodes?.find((cat) => cat?.name)?.name ?? 'スクール',
           location:
             event.eventRegions?.nodes?.find((node) => node?.name)?.name ??
-            event.eventCpt?.venueRef?.nodes?.find((node) =>
-              node && 'title' in node && node.title
-            )?.title ??
+            event.eventCpt?.venueRef?.nodes?.find((node) => node && 'title' in node && node.title)
+              ?.title ??
             undefined,
           url: `/event/${event.slug}`,
         }));
@@ -239,7 +237,7 @@ export const searchApi = {
       const [articles, events, schools] = await Promise.all([
         this.searchArticles(query, Math.ceil(limit / 3)),
         this.searchEvents(query, Math.ceil(limit / 3)),
-        this.searchSchools(query, Math.ceil(limit / 3))
+        this.searchSchools(query, Math.ceil(limit / 3)),
       ]);
 
       return [...articles, ...events, ...schools];
@@ -247,5 +245,5 @@ export const searchApi = {
       console.error('統合検索エラー:', error);
       return [];
     }
-  }
-}; 
+  },
+};

@@ -16,7 +16,9 @@ import useHeaderHeight from '../hooks/useHeaderHeight';
 
 const MyPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'profile' | 'reservations' | 'purchases' | 'favorites' | 'settings'>('reservations');
+  const [activeTab, setActiveTab] = useState<
+    'profile' | 'reservations' | 'purchases' | 'favorites' | 'settings'
+  >('reservations');
   const headerHeight = useHeaderHeight();
   const noindex = shouldNoIndex({ force: true });
 

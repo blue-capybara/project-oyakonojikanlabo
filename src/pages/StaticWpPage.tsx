@@ -180,9 +180,7 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
   if (!page || notFound) {
     return (
       <Layout>
-        <div className="container mx-auto py-32 text-center">
-          ページが見つかりませんでした。
-        </div>
+        <div className="container mx-auto py-32 text-center">ページが見つかりませんでした。</div>
       </Layout>
     );
   }
@@ -194,12 +192,7 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
         description={page.content ?? undefined}
         ogImage={page.featuredImage?.node?.sourceUrl ?? undefined}
       />
-      <Breadcrumb
-        items={[
-          { label: 'HOME', to: '/' },
-          { label: page.title ?? pageName },
-        ]}
-      />
+      <Breadcrumb items={[{ label: 'HOME', to: '/' }, { label: page.title ?? pageName }]} />
 
       <section className="pt-36 pb-12 bg-gray-50">
         <div className="container mx-auto px-4">

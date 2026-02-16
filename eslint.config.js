@@ -19,12 +19,9 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // React 17以降でJSXの新しい変換が導入されたため、React importを不要にする
       'react/react-in-jsx-scope': 'off',
     },
-  }
+  },
 );

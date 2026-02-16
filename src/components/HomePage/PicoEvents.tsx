@@ -123,7 +123,11 @@ const GET_PICO_EVENTS = gql`
 
 const stripHtml = (html?: string | null) => {
   if (!html) return '';
-  return html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 const selectPrimarySlot = (slots?: EventSlot[] | null) => {
@@ -188,7 +192,9 @@ const buildFallbackEvents = (): PicoEventCard[] => [
     summary: 'PICO企画による体験型展示。親子で楽しめるワークショップを同時開催。',
     image: withBase('images/readdy/bf36d3a66d2c4495d815daab6a95c131.png'),
     reservationOpen: false,
-    tags: [{ id: 'category', label: fallbackCategory.label, className: fallbackCategory.className }],
+    tags: [
+      { id: 'category', label: fallbackCategory.label, className: fallbackCategory.className },
+    ],
   },
 ];
 
@@ -207,7 +213,9 @@ const PicoEvents: React.FC = () => {
         const nodes = data.events?.nodes ?? [];
 
         const formatted: PicoEventCard[] = nodes
-          .filter((node): node is EventNode & { slug: string; title: string } => Boolean(node.slug && node.title))
+          .filter((node): node is EventNode & { slug: string; title: string } =>
+            Boolean(node.slug && node.title),
+          )
           .filter((node) =>
             node.eventCategories?.nodes?.some((term) => term?.slug === 'event-pico'),
           )
@@ -227,7 +235,13 @@ const PicoEvents: React.FC = () => {
               tags: [
                 { id: 'category', label: category.label, className: category.className },
                 ...(eventCpt.reservationOpen
-                  ? [{ id: 'reservation', label: '予約受付中', className: 'bg-emerald-100 text-emerald-700' }]
+                  ? [
+                      {
+                        id: 'reservation',
+                        label: '予約受付中',
+                        className: 'bg-emerald-100 text-emerald-700',
+                      },
+                    ]
                   : []),
               ],
             };

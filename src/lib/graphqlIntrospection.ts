@@ -85,5 +85,5 @@ export const graphqlIntrospection = {
       console.error('GraphQLタイプ取得エラー:', error);
       return [];
     }
-  }
-}; 
+  },
+};

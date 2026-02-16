@@ -96,7 +96,9 @@ const SettingsSection: React.FC = () => {
           <div className="space-y-4">
             {/* メール変更 */}
             <div>
-              <label htmlFor="email-change" className="block font-medium mb-2">メールアドレス変更</label>
+              <label htmlFor="email-change" className="block font-medium mb-2">
+                メールアドレス変更
+              </label>
               <div className="flex">
                 <input
                   type="email"
@@ -116,7 +118,9 @@ const SettingsSection: React.FC = () => {
 
             {/* ユーザー名変更 */}
             <div>
-              <label htmlFor="username-change" className="block font-medium mb-2">ユーザー名変更</label>
+              <label htmlFor="username-change" className="block font-medium mb-2">
+                ユーザー名変更
+              </label>
               <div className="flex">
                 <input
                   type="text"
@@ -136,7 +140,10 @@ const SettingsSection: React.FC = () => {
           </div>
 
           <div className="pt-4">
-            <button onClick={handleDeleteAccount} className="text-red-600 hover:text-red-700 flex items-center">
+            <button
+              onClick={handleDeleteAccount}
+              className="text-red-600 hover:text-red-700 flex items-center"
+            >
               <div className="w-5 h-5 flex items-center justify-center mr-2">
                 <i className="ri-delete-bin-line"></i>
               </div>
@@ -171,7 +178,10 @@ const SettingsSection: React.FC = () => {
               />
             </div>
             <div className="pt-2">
-              <button type="submit" className="bg-primary text-white px-6 py-2 font-medium !rounded-button hover:bg-primary/90 transition-colors">
+              <button
+                type="submit"
+                className="bg-primary text-white px-6 py-2 font-medium !rounded-button hover:bg-primary/90 transition-colors"
+              >
                 パスワードを変更
               </button>
             </div>
@@ -179,9 +189,7 @@ const SettingsSection: React.FC = () => {
         </div>
 
         {message && (
-          <div className="mt-6 p-3 bg-blue-50 text-sm text-blue-700 rounded">
-            {message}
-          </div>
+          <div className="mt-6 p-3 bg-blue-50 text-sm text-blue-700 rounded">{message}</div>
         )}
       </div>
     </section>

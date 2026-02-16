@@ -82,11 +82,7 @@ function App() {
             <Route path="/contact-us" element={<Navigate to="/contact" replace />} />
             <Route path="/company-profile" element={<Navigate to="/about" replace />} />
             {STATIC_WP_ROUTES.map(({ path, ...pageProps }) => (
-              <Route
-                key={path}
-                path={path}
-                element={<StaticWpPage {...pageProps} />}
-              />
+              <Route key={path} path={path} element={<StaticWpPage {...pageProps} />} />
             ))}
             <Route
               path="/mypage"

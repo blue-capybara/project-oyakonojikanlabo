@@ -43,25 +43,32 @@ const SearchPage: React.FC = () => {
     }
   };
 
-  const filteredResults = activeFilter === 'all'
-    ? results
-    : results.filter(result => result.type === activeFilter);
+  const filteredResults =
+    activeFilter === 'all' ? results : results.filter((result) => result.type === activeFilter);
 
   const getTypeLabel = (type: FilterType) => {
     switch (type) {
-      case 'article': return '記事';
-      case 'event': return 'イベント';
-      case 'school': return 'スクール';
-      default: return type;
+      case 'article':
+        return '記事';
+      case 'event':
+        return 'イベント';
+      case 'school':
+        return 'スクール';
+      default:
+        return type;
     }
   };
 
   const getTypeColor = (type: FilterType) => {
     switch (type) {
-      case 'article': return 'bg-blue-100 text-blue-800';
-      case 'event': return 'bg-red-100 text-red-800';
-      case 'school': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'article':
+        return 'bg-blue-100 text-blue-800';
+      case 'event':
+        return 'bg-red-100 text-red-800';
+      case 'school':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -72,16 +79,11 @@ const SearchPage: React.FC = () => {
         className="px-4 bg-gray-50 min-h-screen"
         style={{ paddingTop: headerHeight ? `${headerHeight}px` : undefined }}
       >
-        <Breadcrumb items={[
-          { label: 'HOME', to: '/' }, 
-          { label: '検索結果' }
-        ]} />
+        <Breadcrumb items={[{ label: 'HOME', to: '/' }, { label: '検索結果' }]} />
 
         <div className="container mx-auto max-w-[1536px] py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-4">
-              「{query}」の検索結果
-            </h1>
+            <h1 className="text-3xl font-bold mb-4">「{query}」の検索結果</h1>
             <p className="text-gray-600">
               {loading ? '検索中...' : `${filteredResults.length}件の結果が見つかりました`}
             </p>
@@ -90,12 +92,14 @@ const SearchPage: React.FC = () => {
           {/* フィルター */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <div className="flex flex-wrap gap-2">
-              {([
-                { id: 'all', label: 'すべて' },
-                { id: 'article', label: '記事' },
-                { id: 'event', label: 'イベント' },
-                { id: 'school', label: 'スクール' }
-              ] as Array<{ id: FilterType; label: string }>).map(filter => (
+              {(
+                [
+                  { id: 'all', label: 'すべて' },
+                  { id: 'article', label: '記事' },
+                  { id: 'event', label: 'イベント' },
+                  { id: 'school', label: 'スクール' },
+                ] as Array<{ id: FilterType; label: string }>
+              ).map((filter) => (
                 <button
                   key={filter.id}
                   onClick={() => setActiveFilter(filter.id)}
@@ -129,7 +133,7 @@ const SearchPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {filteredResults.map(result => (
+              {filteredResults.map((result) => (
                 <div key={result.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="flex flex-col md:flex-row">
                     <div className="md:w-64 flex-shrink-0">
@@ -143,7 +147,9 @@ const SearchPage: React.FC = () => {
                     </div>
                     <div className="flex-1 p-6">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className={`inline-block ${getTypeColor(result.type)} px-3 py-1 text-xs rounded-full`}>
+                        <span
+                          className={`inline-block ${getTypeColor(result.type)} px-3 py-1 text-xs rounded-full`}
+                        >
                           {getTypeLabel(result.type)}
                         </span>
                         {result.category && (
@@ -194,9 +200,7 @@ const SearchPage: React.FC = () => {
                 <i className="ri-search-line text-2xl text-gray-400"></i>
               </div>
               <h3 className="text-lg font-bold mb-2">検索結果が見つかりませんでした</h3>
-              <p className="text-gray-600">
-                別のキーワードで検索してみてください
-              </p>
+              <p className="text-gray-600">別のキーワードで検索してみてください</p>
             </div>
           )}
         </div>
@@ -205,4 +209,4 @@ const SearchPage: React.FC = () => {
   );
 };
 
-export default SearchPage; 
+export default SearchPage;

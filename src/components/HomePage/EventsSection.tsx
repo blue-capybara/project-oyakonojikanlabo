@@ -130,7 +130,11 @@ const fallbackCategory = { label: 'イベント', className: 'bg-gray-100 text-g
 
 const stripHtml = (html?: string | null) => {
   if (!html) return '';
-  return html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 const selectPrimarySlot = (slots?: EventSlot[] | null) => {
@@ -156,9 +160,7 @@ const formatSchedule = (slot?: EventSlot) => {
     }
   }
 
-  const timeLabel = startTime
-    ? `${startTime}${endTime ? `〜${endTime}` : ''}`
-    : endTime ?? '';
+  const timeLabel = startTime ? `${startTime}${endTime ? `〜${endTime}` : ''}` : (endTime ?? '');
 
   return [dateLabel, timeLabel].filter(Boolean).join(' ');
 };
@@ -209,7 +211,9 @@ const EventsSection: React.FC = () => {
         const nodes = data.events?.nodes ?? [];
 
         const formatted: EventCard[] = nodes
-          .filter((node): node is EventNode & { slug: string; title: string } => Boolean(node.slug && node.title))
+          .filter((node): node is EventNode & { slug: string; title: string } =>
+            Boolean(node.slug && node.title),
+          )
           .map((node) => {
             const eventCpt = node.eventCpt ?? {};
             const category = resolveCategory(eventCpt.eventType);
@@ -236,7 +240,13 @@ const EventsSection: React.FC = () => {
               tags: [
                 { id: 'category', label: category.label, className: category.className },
                 ...(eventCpt.reservationOpen
-                  ? [{ id: 'reservation', label: '予約受付中', className: 'bg-emerald-100 text-emerald-700' }]
+                  ? [
+                      {
+                        id: 'reservation',
+                        label: '予約受付中',
+                        className: 'bg-emerald-100 text-emerald-700',
+                      },
+                    ]
                   : []),
                 ...regionTags.map((label, index) => ({
                   id: `region-${index}`,

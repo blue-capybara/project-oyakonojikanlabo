@@ -117,7 +117,12 @@ const rewriteCmsAnchors = (root: ParentNode) => {
   });
 };
 
-const WordPressContent: React.FC<WordPressContentProps> = ({ html, className, customCss, customJs }) => {
+const WordPressContent: React.FC<WordPressContentProps> = ({
+  html,
+  className,
+  customCss,
+  customJs,
+}) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const scriptElementsRef = useRef<HTMLScriptElement[]>([]);
@@ -471,26 +476,24 @@ const WordPressContent: React.FC<WordPressContentProps> = ({ html, className, cu
         (script.textContent || '').includes('DOMContentLoaded'),
       );
 
-      scripts
-        .filter(isExecutableScript)
-        .forEach((original) => {
-          const runnable = document.createElement('script');
+      scripts.filter(isExecutableScript).forEach((original) => {
+        const runnable = document.createElement('script');
 
-          Array.from(original.attributes).forEach((attr) => {
-            runnable.setAttribute(attr.name, attr.value);
-          });
+        Array.from(original.attributes).forEach((attr) => {
+          runnable.setAttribute(attr.name, attr.value);
+        });
 
-          // Shadow DOM内の要素へアクセスできるよう、currentScript経由でshadowRootを渡す
-          (runnable as any).__shadowRoot = shadowRoot;
+        // Shadow DOM内の要素へアクセスできるよう、currentScript経由でshadowRootを渡す
+        (runnable as any).__shadowRoot = shadowRoot;
 
-          if (original.src) {
-            scriptElementsRef.current.push(runnable);
-            container.appendChild(runnable);
-            return;
-          }
+        if (original.src) {
+          scriptElementsRef.current.push(runnable);
+          container.appendChild(runnable);
+          return;
+        }
 
-          if (original.textContent) {
-            runnable.textContent = `
+        if (original.textContent) {
+          runnable.textContent = `
               (() => {
                 const shadowRoot = (window.document.currentScript && (window.document.currentScript).__shadowRoot) || null;
                 const realDocument = window.document;
@@ -526,11 +529,11 @@ const WordPressContent: React.FC<WordPressContentProps> = ({ html, className, cu
                 ${original.textContent}
               })();
             `;
-          }
+        }
 
-          scriptElementsRef.current.push(runnable);
-          container.appendChild(runnable);
-        });
+        scriptElementsRef.current.push(runnable);
+        container.appendChild(runnable);
+      });
 
       if (hasDOMContentLoadedListener) {
         // Shadow DOM内の疑似DOMContentLoadedを即時発火させ、記事内スクリプトの初期化を促す
@@ -549,12 +552,16 @@ const WordPressContent: React.FC<WordPressContentProps> = ({ html, className, cu
       detachCopyHandlers.forEach((fn) => fn());
       detachCopyHandlers.length = 0;
 
-      const buttons = container.querySelectorAll<HTMLButtonElement | HTMLAnchorElement>('.copy-hashtag-btn');
+      const buttons = container.querySelectorAll<HTMLButtonElement | HTMLAnchorElement>(
+        '.copy-hashtag-btn',
+      );
 
       buttons.forEach((btn) => {
         const showMessage = () => {
           const message =
-            btn.closest<HTMLElement>('[data-copy-wrapper]')?.querySelector<HTMLElement>('.copy-message') ||
+            btn
+              .closest<HTMLElement>('[data-copy-wrapper]')
+              ?.querySelector<HTMLElement>('.copy-message') ||
             container.querySelector<HTMLElement>('.copy-message');
 
           if (!message) {
@@ -726,7 +733,10 @@ const WordPressContent: React.FC<WordPressContentProps> = ({ html, className, cu
       }
 
       const url = href.startsWith('#')
-        ? new URL(`${window.location.pathname}${window.location.search}${href}`, window.location.origin)
+        ? new URL(
+            `${window.location.pathname}${window.location.search}${href}`,
+            window.location.origin,
+          )
         : new URL(href, window.location.href);
 
       if (url.origin !== window.location.origin || url.pathname !== window.location.pathname) {
@@ -778,13 +788,21 @@ const WordPressContent: React.FC<WordPressContentProps> = ({ html, className, cu
       if (href.startsWith('#')) {
         const scrolled = scrollToHash(href);
         if (scrolled) {
-          window.history.replaceState({}, '', `${window.location.pathname}${window.location.search}${href}`);
+          window.history.replaceState(
+            {},
+            '',
+            `${window.location.pathname}${window.location.search}${href}`,
+          );
         }
         return true;
       }
 
       const url = new URL(href, window.location.href);
-      if (url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash) {
+      if (
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname &&
+        url.hash
+      ) {
         const scrolled = scrollToHash(url.hash);
         if (scrolled) {
           window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
