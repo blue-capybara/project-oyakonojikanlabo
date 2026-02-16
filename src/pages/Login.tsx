@@ -4,6 +4,7 @@ import Layout from '../components/Layout/Layout';
 import Seo from '../components/seo/Seo';
 import { shouldNoIndex } from '../utils/seo';
 import { supabase } from '../lib/supabaseClient';
+import { sendLoginCompleteEvent } from '../lib/ga';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -31,6 +32,8 @@ const handleLogin = async (e: React.FormEvent) => {
     setMessage(`ログイン失敗: ${error?.message ?? '不明なエラー'}`);
     return;
   }
+
+  sendLoginCompleteEvent({ method: 'email' });
 
   // ✅ last_login を現在時刻で記録
   const now = new Date().toISOString();

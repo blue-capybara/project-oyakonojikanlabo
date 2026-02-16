@@ -6,7 +6,7 @@ import Breadcrumb from '../components/Breadcrumb';
 import useFavorite from '../hooks/useFavorite';
 import { getFeatureFlag } from '../config/featureFlags';
 import useSwipe from '../hooks/useSwipe';
-import { send404Event } from '../lib/ga';
+import { send404Event, sendShareClickEvent } from '../lib/ga';
 import Seo from '../components/seo/Seo';
 import { withBase } from '../utils/paths';
 
@@ -1492,6 +1492,8 @@ const EventDetailPage: React.FC = () => {
 
     const encodedUrl = encodeURIComponent(shareUrl);
     const encodedText = encodeURIComponent(shareText);
+
+    sendShareClickEvent({ platform, content_type: 'event', content_slug: slug ?? '' });
 
     switch (platform) {
       case 'x': {
