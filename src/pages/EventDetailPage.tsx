@@ -2144,23 +2144,11 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
   activeImageIndex,
   onThumbnailClick,
 }) => {
-  if (!artists || artists.length === 0) return null;
-
   const images = profile
     ? [profile.mainImage, ...(profile.gallery ?? [])].filter(
         (item): item is ArtistMedia => Boolean(item && item.url),
       )
     : [];
-  const mainImage = images[activeImageIndex] ?? images[0];
-  const biographyHtml =
-    profile?.biographyHtml && profile.biographyHtml.trim().length > 0
-      ? profile.biographyHtml
-      : undefined;
-  const biographyText =
-    !biographyHtml && profile?.biographyText && profile.biographyText.trim().length > 0
-      ? profile.biographyText
-      : undefined;
-  const hasNotes = Boolean(profile?.notes && profile?.notes.trim().length > 0);
   const imageCount = images.length;
 
   const handleArtistSwipeNext = useCallback(() => {
@@ -2179,6 +2167,19 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
     onSwipeLeft: handleArtistSwipeNext,
     onSwipeRight: handleArtistSwipePrev,
   });
+
+  if (!artists || artists.length === 0) return null;
+
+  const mainImage = images[activeImageIndex] ?? images[0];
+  const biographyHtml =
+    profile?.biographyHtml && profile.biographyHtml.trim().length > 0
+      ? profile.biographyHtml
+      : undefined;
+  const biographyText =
+    !biographyHtml && profile?.biographyText && profile.biographyText.trim().length > 0
+      ? profile.biographyText
+      : undefined;
+  const hasNotes = Boolean(profile?.notes && profile?.notes.trim().length > 0);
 
   return (
     <section
