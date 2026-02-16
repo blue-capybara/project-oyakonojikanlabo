@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { sendOutboundClickEvent } from '../../lib/ga';
 
 interface Product {
   id: string;
@@ -95,6 +96,7 @@ const ShoppingSection: React.FC = () => {
           <a
             href="https://shop.oyakonojikanlabo.jp/collections/all?sort_by=created-descending"
             className="text-primary font-medium flex items-center"
+            onClick={() => sendOutboundClickEvent({ url: 'https://shop.oyakonojikanlabo.jp/collections/all?sort_by=created-descending', link_text: '商品一覧へ' })}
           >
             商品一覧へ
             <div className="w-5 h-5 flex items-center justify-center ml-1">
@@ -122,6 +124,7 @@ const ShoppingSection: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full inline-block text-center bg-primary text-white py-2 font-medium rounded-button"
+                    onClick={() => sendOutboundClickEvent({ url: product.url, link_text: product.title })}
                   >
                     商品ページへ
                   </a>

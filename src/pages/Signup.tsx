@@ -5,6 +5,7 @@ import Seo from '../components/seo/Seo';
 import { shouldNoIndex } from '../utils/seo';
 import { supabase } from '../lib/supabaseClient';
 import { syncCustomerOnSignup } from '../lib/shopifySync';
+import { sendSignupCompleteEvent } from '../lib/ga';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -73,6 +74,7 @@ const Signup: React.FC = () => {
       }
 
       setMessage('登録成功！確認メールを送信しました。');
+      sendSignupCompleteEvent({ method: 'email', store_consent: storeConsent });
 
       const userId = data?.user?.id;
       if (userId) {
