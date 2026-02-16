@@ -19,7 +19,7 @@ const GA4_B_ID = import.meta.env.VITE_GA4_B_ID ?? '';
 const DEFAULT_LINKER_DOMAINS = [
   'oyakonojikanlabo.jp',
   'www.oyakonojikanlabo.jp',
-  'shop.oyakonojikanlabo.jp'
+  'shop.oyakonojikanlabo.jp',
 ];
 
 let initializedId: string | null = null;
@@ -35,8 +35,7 @@ const ensureGtag = () => {
 };
 
 const hasGa4bScript = () =>
-  typeof document !== 'undefined' &&
-  !!document.querySelector('script[data-ga4b="1"]');
+  typeof document !== 'undefined' && !!document.querySelector('script[data-ga4b="1"]');
 
 const hasAnyGtagScript = () =>
   typeof document !== 'undefined' &&
@@ -66,7 +65,7 @@ export const initGa4B = (domains?: string[]) => {
   window.gtag!('js', new Date());
   window.gtag!('config', GA4_B_ID, {
     send_page_view: false,
-    linker: { domains: resolvedDomains }
+    linker: { domains: resolvedDomains },
   });
 
   initializedId = GA4_B_ID;
@@ -79,12 +78,7 @@ type PageViewParams = {
   location?: string;
 };
 
-export const sendGa4BPageView = ({
-  path,
-  title,
-  referrer,
-  location
-}: PageViewParams) => {
+export const sendGa4BPageView = ({ path, title, referrer, location }: PageViewParams) => {
   if (!GA4_B_ID || typeof window === 'undefined') return;
 
   ensureGtag();
@@ -96,7 +90,7 @@ export const sendGa4BPageView = ({
     send_to: GA4_B_ID,
     page_path: path,
     page_location: pageLocation,
-    page_title: title || document.title
+    page_title: title || document.title,
   };
 
   if (referrer) {

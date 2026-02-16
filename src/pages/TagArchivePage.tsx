@@ -296,7 +296,9 @@ const TagArchivePage: React.FC = () => {
                 onClick={() => fetchTagPosts({ after: pageInfo.endCursor, append: true })}
                 disabled={isLoadingMore}
                 className={`px-8 py-3 rounded-button text-white transition-colors ${
-                  isLoadingMore ? 'bg-primary/60 cursor-not-allowed' : 'bg-primary hover:bg-primary/90'
+                  isLoadingMore
+                    ? 'bg-primary/60 cursor-not-allowed'
+                    : 'bg-primary hover:bg-primary/90'
                 }`}
               >
                 {isLoadingMore ? '読み込み中…' : 'もっと見る'}

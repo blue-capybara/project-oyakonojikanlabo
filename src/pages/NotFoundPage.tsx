@@ -14,7 +14,7 @@ const NotFoundPage: React.FC = () => {
               お探しのページは存在しないか、移動された可能性があります。
             </p>
           </div>
-          
+
           <div className="space-y-4">
             <Link
               to="/"
@@ -22,7 +22,7 @@ const NotFoundPage: React.FC = () => {
             >
               ホームに戻る
             </Link>
-            
+
             <div className="text-sm text-gray-500">
               <Link to="/archive" className="text-blue-600 hover:underline mr-4">
                 特集一覧

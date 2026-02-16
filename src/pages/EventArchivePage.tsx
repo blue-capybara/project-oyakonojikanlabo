@@ -229,9 +229,7 @@ const formatSchedule = (slot?: EventSlot) => {
   const startLabel = normalizeTime(startTime);
   const endLabel = normalizeTime(endTime);
 
-  const timeLabel = startLabel
-    ? `${startLabel}${endLabel ? `〜${endLabel}` : ''}`
-    : endLabel;
+  const timeLabel = startLabel ? `${startLabel}${endLabel ? `〜${endLabel}` : ''}` : endLabel;
 
   return [dateLabel, timeLabel].filter(Boolean).join(' ');
 };
@@ -264,10 +262,7 @@ const determineStatus = (slot?: EventSlot): Event['status'] => {
   return 'upcoming';
 };
 
-const buildLocationLabel = (
-  eventCpt?: EventCpt | null,
-  regions?: EventNode['eventRegions'],
-) => {
+const buildLocationLabel = (eventCpt?: EventCpt | null, regions?: EventNode['eventRegions']) => {
   const venueNames = eventCpt?.venueRef?.nodes
     ?.map((node) => node?.title)
     .filter((title): title is string => Boolean(title));
@@ -276,17 +271,15 @@ const buildLocationLabel = (
     return venueNames.join('・');
   }
 
-  const sortedRegions = regions?.nodes
-    ?.slice()
-    .sort((a, b) => {
-      const aSlug = a?.slug ?? '';
-      const bSlug = b?.slug ?? '';
-      const aIsPref = /\d{4}/.test(aSlug);
-      const bIsPref = /\d{4}/.test(bSlug);
-      if (aIsPref && !bIsPref) return -1;
-      if (!aIsPref && bIsPref) return 1;
-      return 0;
-    });
+  const sortedRegions = regions?.nodes?.slice().sort((a, b) => {
+    const aSlug = a?.slug ?? '';
+    const bSlug = b?.slug ?? '';
+    const aIsPref = /\d{4}/.test(aSlug);
+    const bIsPref = /\d{4}/.test(bSlug);
+    if (aIsPref && !bIsPref) return -1;
+    if (!aIsPref && bIsPref) return 1;
+    return 0;
+  });
 
   const regionNames = sortedRegions
     ?.map((node) => node?.name)
@@ -300,12 +293,20 @@ const buildLocationLabel = (
 };
 
 const deriveRegionInfo = (regions?: EventNode['eventRegions']) => {
-  const nodes = regions?.nodes?.filter((node): node is NonNullable<typeof node> => Boolean(node)) ?? [];
+  const nodes =
+    regions?.nodes?.filter((node): node is NonNullable<typeof node> => Boolean(node)) ?? [];
 
   const childNode = nodes.find((node) => node.parent?.node?.slug);
-  const topNode = childNode?.parent?.node ?? nodes.find((node) => !node.parent?.node?.slug) ?? childNode ?? nodes[0];
+  const topNode =
+    childNode?.parent?.node ??
+    nodes.find((node) => !node.parent?.node?.slug) ??
+    childNode ??
+    nodes[0];
 
-  const topSlug = normalizeRegionSlug(topNode?.slug) ?? (topNode?.name && REGION_SLUG_MAP[topNode.name]) ?? 'other';
+  const topSlug =
+    normalizeRegionSlug(topNode?.slug) ??
+    (topNode?.name && REGION_SLUG_MAP[topNode.name]) ??
+    'other';
   const topName = topNode?.name ?? REGION_SLUG_MAP[topNode?.slug ?? ''] ?? 'その他';
 
   const displayNode = childNode ?? nodes.find((node) => node.parent?.node?.slug) ?? nodes[0];
@@ -356,8 +357,7 @@ const FALLBACK_EVENTS: Event[] = [
     region: 'kinki',
     regionDisplay: '大阪府',
     regionName: '近畿',
-    image:
-      withBase('images/readdy/seq9-landscape-an-art-exhibition-featuring-childrens-book.jpg'),
+    image: withBase('images/readdy/seq9-landscape-an-art-exhibition-featuring-childrens-book.jpg'),
     status: 'upcoming',
   },
   {
@@ -389,79 +389,78 @@ const EventArchivePage: React.FC = () => {
     endCursor: null,
   });
 
-  const fetchEvents = useCallback(
-    async ({ append }: { append?: boolean } = {}) => {
-      const isAppend = append ?? false;
+  const fetchEvents = useCallback(async ({ append }: { append?: boolean } = {}) => {
+    const isAppend = append ?? false;
 
-      if (isAppend) {
-        if (!pageInfoRef.current.hasNextPage) return;
-        setIsLoadingMore(true);
-      } else {
-        setLoading(true);
-        setEvents([]);
-        pageInfoRef.current = { hasNextPage: true, endCursor: null };
-      }
+    if (isAppend) {
+      if (!pageInfoRef.current.hasNextPage) return;
+      setIsLoadingMore(true);
+    } else {
+      setLoading(true);
+      setEvents([]);
+      pageInfoRef.current = { hasNextPage: true, endCursor: null };
+    }
 
-      setError(null);
+    setError(null);
 
-      try {
-        const data = await request<EventsResponse>(endpoint, GET_EVENTS, {
-          first: isAppend ? 9 : 12,
-          after: isAppend ? pageInfoRef.current.endCursor : null,
+    try {
+      const data = await request<EventsResponse>(endpoint, GET_EVENTS, {
+        first: isAppend ? 9 : 12,
+        after: isAppend ? pageInfoRef.current.endCursor : null,
+      });
+
+      const nodes = data.events?.nodes ?? [];
+
+      const formatted: Event[] = nodes
+        .filter((node): node is EventNode & { slug: string; title: string } =>
+          Boolean(node.slug && node.title),
+        )
+        .map((node) => {
+          const eventCpt = node.eventCpt ?? {};
+          const primarySlot = selectPrimarySlot(eventCpt.singleSlots);
+          const categorySlug = resolveCategory(node.eventCategories);
+          const regionInfo = deriveRegionInfo(node.eventRegions);
+
+          return {
+            id: node.id,
+            slug: node.slug ?? node.id,
+            title: node.title ?? 'イベント情報',
+            category: categorySlug,
+            date: formatSchedule(primarySlot),
+            location: buildLocationLabel(eventCpt, node.eventRegions),
+            region: regionInfo.regionSlug,
+            regionDisplay: regionInfo.regionDisplay,
+            regionName: regionInfo.regionName,
+            image: eventCpt.mainImage?.node?.sourceUrl ?? '/default.jpg',
+            status: determineStatus(primarySlot),
+          };
         });
 
-        const nodes = data.events?.nodes ?? [];
+      setEvents((prev) => (isAppend ? [...prev, ...formatted] : formatted));
+      pageInfoRef.current = {
+        hasNextPage: Boolean(data.events?.pageInfo.hasNextPage),
+        endCursor: data.events?.pageInfo.endCursor ?? null,
+      };
 
-        const formatted: Event[] = nodes
-          .filter((node): node is EventNode & { slug: string; title: string } => Boolean(node.slug && node.title))
-          .map((node) => {
-            const eventCpt = node.eventCpt ?? {};
-            const primarySlot = selectPrimarySlot(eventCpt.singleSlots);
-            const categorySlug = resolveCategory(node.eventCategories);
-            const regionInfo = deriveRegionInfo(node.eventRegions);
-
-            return {
-              id: node.id,
-              slug: node.slug ?? node.id,
-              title: node.title ?? 'イベント情報',
-              category: categorySlug,
-              date: formatSchedule(primarySlot),
-              location: buildLocationLabel(eventCpt, node.eventRegions),
-              region: regionInfo.regionSlug,
-              regionDisplay: regionInfo.regionDisplay,
-              regionName: regionInfo.regionName,
-              image: eventCpt.mainImage?.node?.sourceUrl ?? '/default.jpg',
-              status: determineStatus(primarySlot),
-            };
-          });
-
-        setEvents((prev) => (isAppend ? [...prev, ...formatted] : formatted));
-        pageInfoRef.current = {
-          hasNextPage: Boolean(data.events?.pageInfo.hasNextPage),
-          endCursor: data.events?.pageInfo.endCursor ?? null,
-        };
-
-        if (!isAppend && formatted.length === 0) {
-          setEvents(FALLBACK_EVENTS);
-          pageInfoRef.current = { hasNextPage: false, endCursor: null };
-        }
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
-        setEvents((prev) => (prev.length > 0 ? prev : FALLBACK_EVENTS));
-        if (!isAppend) {
-          pageInfoRef.current = { hasNextPage: false, endCursor: null };
-        }
-      } finally {
-        if (isAppend) {
-          setIsLoadingMore(false);
-        } else {
-          setLoading(false);
-        }
+      if (!isAppend && formatted.length === 0) {
+        setEvents(FALLBACK_EVENTS);
+        pageInfoRef.current = { hasNextPage: false, endCursor: null };
       }
-    },
-    [],
-  );
+    } catch (err) {
+      console.error('Error fetching events:', err);
+      setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
+      setEvents((prev) => (prev.length > 0 ? prev : FALLBACK_EVENTS));
+      if (!isAppend) {
+        pageInfoRef.current = { hasNextPage: false, endCursor: null };
+      }
+    } finally {
+      if (isAppend) {
+        setIsLoadingMore(false);
+      } else {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     fetchEvents({ append: false });
@@ -469,7 +468,9 @@ const EventArchivePage: React.FC = () => {
 
   const categories = useMemo(() => {
     const unique = Array.from(
-      new Set(events.map((event) => event.category).filter((category) => category && category !== 'all')),
+      new Set(
+        events.map((event) => event.category).filter((category) => category && category !== 'all'),
+      ),
     );
 
     const options = unique.map((categoryId) => ({
@@ -502,31 +503,30 @@ const EventArchivePage: React.FC = () => {
     return [{ id: 'all', label: 'すべての地域' }, ...options];
   }, [events]);
 
-  const filteredEvents = events.filter(event => {
+  const filteredEvents = events.filter((event) => {
     const categoryMatch = selectedCategory === 'all' || event.category === selectedCategory;
     const regionMatch = selectedRegion === 'all' || event.region === selectedRegion;
     const periodMatch = selectedPeriod === 'all' || event.status === selectedPeriod;
     return categoryMatch && regionMatch && periodMatch;
   });
 
-  const getCategoryStyle = (category: string) => CATEGORY_META[category]?.className ?? CATEGORY_META.other.className;
+  const getCategoryStyle = (category: string) =>
+    CATEGORY_META[category]?.className ?? CATEGORY_META.other.className;
 
-  const getCategoryLabel = (category: string) => CATEGORY_META[category]?.label ?? CATEGORY_META.other.label;
+  const getCategoryLabel = (category: string) =>
+    CATEGORY_META[category]?.label ?? CATEGORY_META.other.label;
 
   return (
     <Layout>
-      <Breadcrumb
-        items={[
-          { label: 'ホーム', to: '/' },
-          { label: 'イベント一覧' },
-        ]}
-      />
+      <Breadcrumb items={[{ label: 'ホーム', to: '/' }, { label: 'イベント一覧' }]} />
       <div className="container mx-auto px-4">
-
         {/* ページヘッダー */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <h1 className="text-3xl font-bold">イベント一覧</h1>
-          <Link to="/" className="flex items-center text-primary hover:text-primary/80 mt-2 md:mt-0">
+          <Link
+            to="/"
+            className="flex items-center text-primary hover:text-primary/80 mt-2 md:mt-0"
+          >
             <i className="ri-arrow-left-line mr-1"></i>
             元のページに戻る
           </Link>
@@ -539,7 +539,7 @@ const EventArchivePage: React.FC = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">カテゴリー</label>
               <div className="flex flex-wrap gap-2">
-                {categories.map(category => (
+                {categories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
@@ -564,8 +564,10 @@ const EventArchivePage: React.FC = () => {
                   onChange={(e) => setSelectedRegion(e.target.value)}
                   className="w-full px-4 py-2 border rounded-lg appearance-none bg-white pr-10 focus:border-primary focus:ring-1 focus:ring-primary"
                 >
-                  {regions.map(region => (
-                    <option key={region.id} value={region.id}>{region.label}</option>
+                  {regions.map((region) => (
+                    <option key={region.id} value={region.id}>
+                      {region.label}
+                    </option>
                   ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -619,7 +621,8 @@ const EventArchivePage: React.FC = () => {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <p className="text-gray-600">
-                <span className="font-medium">{filteredEvents.length}</span>件のイベントが見つかりました
+                <span className="font-medium">{filteredEvents.length}</span>
+                件のイベントが見つかりました
               </p>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">並び替え:</span>
@@ -651,20 +654,16 @@ const EventArchivePage: React.FC = () => {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
             <div className="flex items-center">
               <i className="ri-error-warning-line text-red-500 mr-2"></i>
-              <p className="text-red-700">
-                データの取得中にエラーが発生しました: {error}
-              </p>
+              <p className="text-red-700">データの取得中にエラーが発生しました: {error}</p>
             </div>
-            <p className="text-red-600 text-sm mt-2">
-              サンプルデータを表示しています。
-            </p>
+            <p className="text-red-600 text-sm mt-2">サンプルデータを表示しています。</p>
           </div>
         )}
 
         {/* イベント一覧 */}
         {!loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEvents.map(event => (
+            {filteredEvents.map((event) => (
               <div
                 key={event.id}
                 className="relative group bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:-translate-y-1"
@@ -680,19 +679,21 @@ const EventArchivePage: React.FC = () => {
                   className="w-full h-48 object-cover object-top"
                 />
                 <div className="relative z-20 p-6">
-                <div className="flex justify-between items-center mb-3">
-                  <span className={`inline-block px-3 py-1 text-xs rounded-full ${getCategoryStyle(event.category)}`}>
-                    {getCategoryLabel(event.category)}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500 text-sm">{event.regionDisplay}</span>
-                    {showMembershipFeatures && (
-                      <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                        <i className="ri-heart-line"></i>
-                      </button>
-                    )}
+                  <div className="flex justify-between items-center mb-3">
+                    <span
+                      className={`inline-block px-3 py-1 text-xs rounded-full ${getCategoryStyle(event.category)}`}
+                    >
+                      {getCategoryLabel(event.category)}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 text-sm">{event.regionDisplay}</span>
+                      {showMembershipFeatures && (
+                        <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
+                          <i className="ri-heart-line"></i>
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
                   <h3 className="text-xl font-bold mb-2">{event.title}</h3>
                   <div className="flex items-center text-gray-600 mb-2">
                     <div className="w-5 h-5 flex items-center justify-center mr-2">
@@ -745,15 +746,20 @@ const EventArchivePage: React.FC = () => {
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="bg-white rounded-xl shadow-sm p-8 md:p-12 mb-12">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold mb-4">絵本イベントの情報を、メールでお届けします。</h2>
+              <h2 className="text-2xl font-bold mb-4">
+                絵本イベントの情報を、メールでお届けします。
+              </h2>
               <div className="text-gray-600 leading-relaxed text-base max-w-2xl mx-auto space-y-4">
                 <p>
-                  ご登録いただいた地域にあわせて、近くで開催されるイベントや、<br />
-                  ちょっといいなと思うカルチャーの話などを、<br />
+                  ご登録いただいた地域にあわせて、近くで開催されるイベントや、
+                  <br />
+                  ちょっといいなと思うカルチャーの話などを、
+                  <br />
                   ニュースレターでお届けしようと思っています。もちろん無料です。
                 </p>
                 <p>
-                  「行ってみたい」「気になる」<br />
+                  「行ってみたい」「気になる」
+                  <br />
                   そんなきっかけになればと思っています。
                 </p>
                 <p>ご関心のある方は、ぜひご登録ください。</p>

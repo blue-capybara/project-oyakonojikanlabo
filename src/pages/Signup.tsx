@@ -44,7 +44,8 @@ const Signup: React.FC = () => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const { lastName, firstName, email, password, confirmPassword, agreement, storeConsent } = formData;
+    const { lastName, firstName, email, password, confirmPassword, agreement, storeConsent } =
+      formData;
 
     if (!agreement) return setMessage('利用規約に同意してください。');
     if (password !== confirmPassword) return setMessage('パスワードが一致していません。');
@@ -94,11 +95,15 @@ const Signup: React.FC = () => {
             await syncCustomerOnSignup({ email, userId, consent: true });
             setSyncNotice('親子の時間研究所STOREとの連携が完了しました。');
           } else {
-            setSyncNotice('親子の時間研究所STOREとの連携は、ご希望の場合にマイページから設定できます。');
+            setSyncNotice(
+              '親子の時間研究所STOREとの連携は、ご希望の場合にマイページから設定できます。',
+            );
           }
         } catch (syncErr) {
           console.error('Store sync failed', syncErr);
-          setSyncNotice('親子の時間研究所STOREとの連携に失敗しました。時間をおいて再試行されるか、サポートへお問い合わせください。');
+          setSyncNotice(
+            '親子の時間研究所STOREとの連携に失敗しました。時間をおいて再試行されるか、サポートへお問い合わせください。',
+          );
         }
       } else {
         setSyncNotice('親子の時間研究所STOREとの連携はメール確認後に実行されます。');
@@ -121,69 +126,108 @@ const Signup: React.FC = () => {
     }
   };
 
-	return (
-		<Layout showNewsletter={false}>
+  return (
+    <Layout showNewsletter={false}>
       <Seo title="新規登録" description="会員登録ページ" noindex={noindex} />
-    <div className="container mx-auto px-4 py-12 max-w-xl">
-      <h1 className="text-2xl font-bold mb-6">新規登録</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <input name="lastName" placeholder="姓" onChange={handleChange} required className="border p-2 w-full rounded" />
-          <input name="firstName" placeholder="名" onChange={handleChange} required className="border p-2 w-full rounded" />
-        </div>
-        <input name="email" type="email" placeholder="メールアドレス" onChange={handleChange} required className="border p-2 w-full rounded" />
-        <input name="password" type="password" placeholder="パスワード" onChange={handleChange} required className="border p-2 w-full rounded" />
-        <input name="confirmPassword" type="password" placeholder="パスワード（確認）" onChange={handleChange} required className="border p-2 w-full rounded" />
-        <label className="block text-sm">
-          <input type="checkbox" name="agreement" onChange={handleChange} className="mr-2" />
-          <span>利用規約に同意します</span>
-        </label>
-        <label className="block text-sm">
-          <input type="checkbox" name="storeConsent" onChange={handleChange} className="mr-2" />
-          <span>
-            <a
-              href="https://shop.oyakonojikanlabo.jp/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline"
-            >
-              親子の時間研究所STORE
-            </a>
-            にも登録して最新情報を受け取る
-          </span>
-        </label>
-        {message && <p className="text-sm text-red-500">{message}</p>}
-        {syncNotice && <p className="text-sm text-gray-600">{syncNotice}</p>}
-        <button
-          type="submit"
-          className="bg-primary text-white px-4 py-2 rounded w-full disabled:opacity-60 disabled:cursor-not-allowed"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? '処理中...' : 'アカウント作成'}
-        </button>
-        <div className="text-center mt-4 text-sm">
-          <Link to="/login" className="text-primary hover:underline">すでにアカウントをお持ちの方はこちら</Link>
-        </div>
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+      <div className="container mx-auto px-4 py-12 max-w-xl">
+        <h1 className="text-2xl font-bold mb-6">新規登録</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              name="lastName"
+              placeholder="姓"
+              onChange={handleChange}
+              required
+              className="border p-2 w-full rounded"
+            />
+            <input
+              name="firstName"
+              placeholder="名"
+              onChange={handleChange}
+              required
+              className="border p-2 w-full rounded"
+            />
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-2 text-gray-500">または</span>
+          <input
+            name="email"
+            type="email"
+            placeholder="メールアドレス"
+            onChange={handleChange}
+            required
+            className="border p-2 w-full rounded"
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="パスワード"
+            onChange={handleChange}
+            required
+            className="border p-2 w-full rounded"
+          />
+          <input
+            name="confirmPassword"
+            type="password"
+            placeholder="パスワード（確認）"
+            onChange={handleChange}
+            required
+            className="border p-2 w-full rounded"
+          />
+          <label className="block text-sm">
+            <input type="checkbox" name="agreement" onChange={handleChange} className="mr-2" />
+            <span>利用規約に同意します</span>
+          </label>
+          <label className="block text-sm">
+            <input type="checkbox" name="storeConsent" onChange={handleChange} className="mr-2" />
+            <span>
+              <a
+                href="https://shop.oyakonojikanlabo.jp/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                親子の時間研究所STORE
+              </a>
+              にも登録して最新情報を受け取る
+            </span>
+          </label>
+          {message && <p className="text-sm text-red-500">{message}</p>}
+          {syncNotice && <p className="text-sm text-gray-600">{syncNotice}</p>}
+          <button
+            type="submit"
+            className="bg-primary text-white px-4 py-2 rounded w-full disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? '処理中...' : 'アカウント作成'}
+          </button>
+          <div className="text-center mt-4 text-sm">
+            <Link to="/login" className="text-primary hover:underline">
+              すでにアカウントをお持ちの方はこちら
+            </Link>
           </div>
-        </div>
-        <button
-          type="button"
-          onClick={handleGoogleSignup}
-          className="flex items-center justify-center gap-2 w-full border border-gray-300 rounded px-4 py-2 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
-          disabled={isSubmitting}
-        >
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-          <span>Googleアカウントで登録</span>
-        </button>
-      </form>
-			</div>
-			</Layout>
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">または</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleGoogleSignup}
+            className="flex items-center justify-center gap-2 w-full border border-gray-300 rounded px-4 py-2 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+          >
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="Google"
+              className="w-5 h-5"
+            />
+            <span>Googleアカウントで登録</span>
+          </button>
+        </form>
+      </div>
+    </Layout>
   );
 };
 

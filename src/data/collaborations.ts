@@ -1,5 +1,5 @@
-import csvRaw from "./collaborations.csv?raw";
-import { withBase } from "../utils/paths";
+import csvRaw from './collaborations.csv?raw';
+import { withBase } from '../utils/paths';
 
 export interface CollaborationItem {
   id: number;
@@ -8,11 +8,11 @@ export interface CollaborationItem {
   url?: string;
 }
 
-const IMAGE_BASE_PATH = "images/collaborations/";
+const IMAGE_BASE_PATH = 'images/collaborations/';
 
 const splitCsvLine = (line: string): string[] => {
   const cells: string[] = [];
-  let current = "";
+  let current = '';
   let inQuotes = false;
 
   for (let i = 0; i < line.length; i += 1) {
@@ -28,9 +28,9 @@ const splitCsvLine = (line: string): string[] => {
       continue;
     }
 
-    if (char === "," && !inQuotes) {
+    if (char === ',' && !inQuotes) {
       cells.push(current.trim());
-      current = "";
+      current = '';
       continue;
     }
 
@@ -44,16 +44,14 @@ const splitCsvLine = (line: string): string[] => {
 
 const toCollaborationItem = (
   [idRaw, title, imageRaw, url]: string[],
-  index: number
+  index: number,
 ): CollaborationItem => {
   // CSVではファイル名のみ指定された場合に画像ディレクトリを自動補完する
   const buildImagePath = (raw?: string | null) => {
-    if (!raw) return "";
+    if (!raw) return '';
     if (/^https?:\/\//.test(raw)) return raw;
 
-    const normalized = raw.includes("/")
-      ? raw.replace(/^\//, "")
-      : `${IMAGE_BASE_PATH}${raw}`;
+    const normalized = raw.includes('/') ? raw.replace(/^\//, '') : `${IMAGE_BASE_PATH}${raw}`;
 
     return withBase(normalized);
   };
@@ -62,9 +60,9 @@ const toCollaborationItem = (
 
   return {
     id: Number(idRaw) || index + 1,
-    title: title ?? "",
-    image: image ?? "",
-    ...(url ? { url } : {})
+    title: title ?? '',
+    image: image ?? '',
+    ...(url ? { url } : {}),
   };
 };
 

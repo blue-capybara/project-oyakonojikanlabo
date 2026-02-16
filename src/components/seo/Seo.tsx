@@ -15,7 +15,10 @@ export interface SeoProps {
 
 const stripHtml = (value?: string) => {
   if (!value) return undefined;
-  return value.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  return value
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 /**

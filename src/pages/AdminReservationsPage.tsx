@@ -25,9 +25,7 @@ type ReservationRecord = {
   created_at?: string | null;
 };
 
-type ApiResponse =
-  | { ok: true; reservations: ReservationRecord[] }
-  | { ok: false; error: string };
+type ApiResponse = { ok: true; reservations: ReservationRecord[] } | { ok: false; error: string };
 
 const formatDateTime = (iso?: string | null) => {
   if (!iso) return '';
@@ -104,9 +102,10 @@ const AdminReservationsPage = () => {
       );
 
       if (invokeError) {
-        const status = typeof (invokeError as Record<string, unknown>)?.['status'] === 'number'
-          ? Number((invokeError as Record<string, unknown>)['status'])
-          : null;
+        const status =
+          typeof (invokeError as Record<string, unknown>)?.['status'] === 'number'
+            ? Number((invokeError as Record<string, unknown>)['status'])
+            : null;
         const message = invokeError.message ?? '';
 
         if (status === 403 || message.includes('forbidden')) {
@@ -147,71 +146,68 @@ const AdminReservationsPage = () => {
     fetchReservations();
   }, [session, fetchReservations]);
 
-  const handleDownloadCsv = useCallback(
-    (items: ReservationRecord[]) => {
-      if (!items.length) return;
+  const handleDownloadCsv = useCallback((items: ReservationRecord[]) => {
+    if (!items.length) return;
 
-      const headers = [
-        '予約ID',
-        '予約コード',
-        'ユーザーID',
-        '氏名',
-        'メールアドレス',
-        'イベントスラッグ',
-        'イベントタイトル',
-        '開催日時',
-        '時間帯',
-        '人数',
-        'ステータス',
-        '電話番号',
-        '特記事項',
-        '会場',
-        '地域',
-        '作成日時',
-      ];
+    const headers = [
+      '予約ID',
+      '予約コード',
+      'ユーザーID',
+      '氏名',
+      'メールアドレス',
+      'イベントスラッグ',
+      'イベントタイトル',
+      '開催日時',
+      '時間帯',
+      '人数',
+      'ステータス',
+      '電話番号',
+      '特記事項',
+      '会場',
+      '地域',
+      '作成日時',
+    ];
 
-      const escape = (value: unknown) => {
-        if (value === null || value === undefined) return '';
-        const text = String(value).replace(/\r?\n/g, ' ');
-        if (text.includes('"') || text.includes(',') || text.includes('\n')) {
-          return `"${text.replace(/"/g, '""')}"`;
-        }
-        return text;
-      };
+    const escape = (value: unknown) => {
+      if (value === null || value === undefined) return '';
+      const text = String(value).replace(/\r?\n/g, ' ');
+      if (text.includes('"') || text.includes(',') || text.includes('\n')) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    };
 
-      const rows = items.map((item) => [
-        item.id,
-        item.reservation_code,
-        item.user_id ?? '',
-        item.customer_name ?? '',
-        item.customer_email ?? '',
-        item.event_slug ?? '',
-        item.event_title ?? '',
-        formatDateTime(item.event_date),
-        item.time_slot ?? '',
-        item.quantity ?? '',
-        item.status ?? '',
-        item.phone ?? '',
-        item.special_requests ?? '',
-        item.event_location ?? '',
-        item.event_region ?? '',
-        formatDateTime(item.created_at),
-      ]);
+    const rows = items.map((item) => [
+      item.id,
+      item.reservation_code,
+      item.user_id ?? '',
+      item.customer_name ?? '',
+      item.customer_email ?? '',
+      item.event_slug ?? '',
+      item.event_title ?? '',
+      formatDateTime(item.event_date),
+      item.time_slot ?? '',
+      item.quantity ?? '',
+      item.status ?? '',
+      item.phone ?? '',
+      item.special_requests ?? '',
+      item.event_location ?? '',
+      item.event_region ?? '',
+      formatDateTime(item.created_at),
+    ]);
 
-      const csv = [headers, ...rows].map((row) => row.map(escape).join(',')).join('\r\n');
-      const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+    const csv = [headers, ...rows].map((row) => row.map(escape).join(',')).join('\r\n');
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
 
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `reservations_${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    },
-    [],
-  );
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `reservations_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, []);
 
   const handleRefetch = () => {
     fetchReservations(eventSlugFilter ? { eventSlug: eventSlugFilter } : undefined);
@@ -220,12 +216,12 @@ const AdminReservationsPage = () => {
   const filteredReservations = useMemo(() => {
     if (!searchTerm) return reservations;
     const query = normalize(searchTerm);
-      return reservations.filter((item) => {
-        return [
-          item.reservation_code,
-          item.customer_name,
-          item.customer_email,
-          item.event_slug,
+    return reservations.filter((item) => {
+      return [
+        item.reservation_code,
+        item.customer_name,
+        item.customer_email,
+        item.event_slug,
         item.event_title,
         item.event_location,
         item.event_region,
@@ -294,7 +290,10 @@ const AdminReservationsPage = () => {
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="sm:col-span-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="eventSlugFilter">
+            <label
+              className="mb-1 block text-sm font-medium text-gray-700"
+              htmlFor="eventSlugFilter"
+            >
               イベントスラッグで絞り込み
             </label>
             <div className="flex gap-2">
@@ -310,9 +309,7 @@ const AdminReservationsPage = () => {
                 type="button"
                 onClick={() =>
                   fetchReservations(
-                    eventSlugFilter.trim()
-                      ? { eventSlug: eventSlugFilter.trim() }
-                      : undefined,
+                    eventSlugFilter.trim() ? { eventSlug: eventSlugFilter.trim() } : undefined,
                   )
                 }
                 className="shrink-0 rounded bg-gray-800 px-3 py-2 text-white hover:bg-gray-900"
@@ -388,7 +385,9 @@ const AdminReservationsPage = () => {
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700">
                     <div>{formatDateTime(item.event_date)}</div>
-                    {item.time_slot && <div className="text-xs text-gray-500">{item.time_slot}</div>}
+                    {item.time_slot && (
+                      <div className="text-xs text-gray-500">{item.time_slot}</div>
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700">
                     {item.quantity ?? '-'}
@@ -409,10 +408,7 @@ const AdminReservationsPage = () => {
               ))}
               {!filteredReservations.length && (
                 <tr>
-                  <td
-                    colSpan={8}
-                    className="px-4 py-8 text-center text-sm text-gray-500"
-                  >
+                  <td colSpan={8} className="px-4 py-8 text-center text-sm text-gray-500">
                     {fetching ? '読み込み中…' : '表示できる予約がありません。'}
                   </td>
                 </tr>

@@ -14,14 +14,17 @@
      add column if not exists customer_email text;
    ```
 2. Edge Function 用シークレットの設定。
+
    ```bash
    supabase secrets set \
      SUPABASE_SERVICE_ROLE_KEY="<service_roleキー>" \
      ADMIN_RESERVATIONS_ALLOWED_EMAILS="admin@example.com,manager@example.com"
    ```
+
    - 既存値を確認するときは `supabase secrets list`。
    - メールアドレスの削除・追加はいずれも「最新のカンマ区切りリストで再度 `set`」すれば OK。完全にクリアする場合は `supabase secrets unset ADMIN_RESERVATIONS_ALLOWED_EMAILS` を実行してから必要な値で `set`。
    - 任意で `ADMIN_RESERVATIONS_ALLOWED_ROLE` や `ADMIN_RESERVATIONS_ALLOWED_ORIGINS` も設定可能。
+
 3. Edge Function をデプロイ。
    ```bash
    supabase functions deploy admin_reservations
