@@ -201,7 +201,7 @@ const Header: React.FC = () => {
           <h1 className="flex-1 flex flex-col items-center">
             <Link to="/" className="flex flex-col items-center">
               <span className="text-[10px] mb-0.5 tracking-wider font-medium">
-                親子をもっともっとおもしろく
+                絵本のような暮らし、しよう。
               </span>
               <img
                 src={headerLogoSrc}
@@ -253,7 +253,7 @@ const Header: React.FC = () => {
             <div className="flex flex-col items-center py-8 space-y-6 transition-all duration-300">
               <div className="relative flex flex-col items-center space-y-3 w-full">
                 <span className="text-xs tracking-wider font-medium">
-                  親子をもっともっとおもしろく
+                  絵本のような暮らし、しよう。
                 </span>
                 <Link to="/" className="flex flex-col items-center">
                   <img
