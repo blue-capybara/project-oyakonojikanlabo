@@ -59,8 +59,10 @@ const Footer: React.FC = () => {
             <h3 className="font-bold text-lg mb-4">コンテンツ</h3>
             <ul className="space-y-2">
               <li>
-                <Link
-                  to="https://shop.oyakonojikanlabo.jp/"
+                <a
+                  href="https://shop.oyakonojikanlabo.jp/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white"
                   onClick={() =>
                     sendOutboundClickEvent({
@@ -70,7 +72,7 @@ const Footer: React.FC = () => {
                   }
                 >
                   おかいもの
-                </Link>
+                </a>
               </li>
               <li>
                 <a
