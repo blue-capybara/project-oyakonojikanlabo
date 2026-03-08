@@ -33,34 +33,40 @@ const DEFAULT_INQUIRY_TYPES: InquiryType[] = [
   { value: 'wholesale', label: '卸売りについて' },
   { value: 'pico', label: 'PICO豊中について' },
   { value: 'media', label: '取材、メディア関係のご相談' },
-  { value: 'other', label: 'その他ご相談' }
+  { value: 'other', label: 'その他ご相談' },
 ];
 
 const DEFAULT_FAQS: FaqItem[] = [
   {
     question: '絵本アート系イベントの掲載について教えてください',
-    answer: '現在、このサービスはまだ開始しておりません。ですが、「うちのイベントを紹介してもいいよ」「気になっている」というお声が集まれば、本格的にスタートする予定です。絵本専門店の方や絵本カフェの運営者の方などにも、無理のない形でご参加いただければうれしく思います。掲載は無料の予定です。イベントの規模やジャンルも問いません。今後、よりスムーズに情報掲載ができるよう、双方にとってやりやすい仕組みを模索してまいります。ご興味をお持ちの方は、ぜひご連絡ください。こちらから折り返しご連絡のうえ、ご相談させていただきます。'
+    answer:
+      '現在、このサービスはまだ開始しておりません。ですが、「うちのイベントを紹介してもいいよ」「気になっている」というお声が集まれば、本格的にスタートする予定です。絵本専門店の方や絵本カフェの運営者の方などにも、無理のない形でご参加いただければうれしく思います。掲載は無料の予定です。イベントの規模やジャンルも問いません。今後、よりスムーズに情報掲載ができるよう、双方にとってやりやすい仕組みを模索してまいります。ご興味をお持ちの方は、ぜひご連絡ください。こちらから折り返しご連絡のうえ、ご相談させていただきます。',
   },
   {
     question: '絵本の靴下はどこで購入できますか？',
-    answer: '「絵本のくつした」は、オンラインショップ「親子の時間研究所」、直営店「PICO豊中」、そして全国のお取り扱い書店でご購入いただけます。ときどき、期間限定のポップアップショップにも登場します。最新の販売情報は、SNSでもおしらせしていますので、よかったら、そちらもチェックしてみてくださいね。'
+    answer:
+      '「絵本のくつした」は、オンラインショップ「親子の時間研究所」、直営店「PICO豊中」、そして全国のお取り扱い書店でご購入いただけます。ときどき、期間限定のポップアップショップにも登場します。最新の販売情報は、SNSでもおしらせしていますので、よかったら、そちらもチェックしてみてくださいね。',
   },
   {
     question: '商品に不具合があった場合',
-    answer: 'ご迷惑をおかけして申し訳ございません。お問い合わせフォームにて、種別「商品の不良について」を選択し、以下の情報をご記入ください。・商品名・ご購入日・不具合の内容　不具合の状況がわかる写真も添付していただけますと、より迅速な対応が可能です。'
+    answer:
+      'ご迷惑をおかけして申し訳ございません。お問い合わせフォームにて、種別「商品の不良について」を選択し、以下の情報をご記入ください。・商品名・ご購入日・不具合の内容　不具合の状況がわかる写真も添付していただけますと、より迅速な対応が可能です。',
   },
   {
     question: '取材や撮影の依頼はどのように行えばよいですか？',
-    answer: '取材や撮影をご希望の際は、お問い合わせフォームで「取材、メディア関係のご相談」を選び、以下の情報をご記入ください。・媒体名・取材・撮影の内容・ご希望の日時・ご連絡先　企画書や参考資料などがございましたら、画像添付機能にてあわせてご提出ください。'
+    answer:
+      '取材や撮影をご希望の際は、お問い合わせフォームで「取材、メディア関係のご相談」を選び、以下の情報をご記入ください。・媒体名・取材・撮影の内容・ご希望の日時・ご連絡先　企画書や参考資料などがございましたら、画像添付機能にてあわせてご提出ください。',
   },
   {
     question: '画像添付機能の使い方を教えてください',
-    answer: '画像を添付する場合は、該当のエリアにファイルをドラッグ＆ドロップするか、クリックしてファイルを選択してください。対応形式：JPG、PNG、GIF　アップロード可能数：最大5枚　合計ファイルサイズ：最大5MBまで　アップロード後にはプレビューが表示されます。不要な画像はその場で削除することも可能です。'
+    answer:
+      '画像を添付する場合は、該当のエリアにファイルをドラッグ＆ドロップするか、クリックしてファイルを選択してください。対応形式：JPG、PNG、GIF　アップロード可能数：最大5枚　合計ファイルサイズ：最大5MBまで　アップロード後にはプレビューが表示されます。不要な画像はその場で削除することも可能です。',
   },
   {
     question: '絵本作家や出版社とのコラボレーションは可能ですか？',
-    answer: 'ご相談ください。親子の時間研究所では、絵本作家さんや出版社さんと、イベントや商品づくり、コンテンツ制作など、いろいろな形でご一緒しています。「こんなことできるかな？」というご相談も、大歓迎です。お問い合わせフォームから、またはメールにてお気軽にご連絡くださいね。'
-  }
+    answer:
+      'ご相談ください。親子の時間研究所では、絵本作家さんや出版社さんと、イベントや商品づくり、コンテンツ制作など、いろいろな形でご一緒しています。「こんなことできるかな？」というご相談も、大歓迎です。お問い合わせフォームから、またはメールにてお気軽にご連絡くださいね。',
+  },
 ];
 
 const ContactForm: React.FC<ContactFormProps> = ({
@@ -71,9 +77,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
 }) => {
   const resolvedDefaultInquiryType = useMemo(() => {
     if (!defaultInquiryType) return '';
-    return inquiryTypes.some((type) => type.value === defaultInquiryType)
-      ? defaultInquiryType
-      : '';
+    return inquiryTypes.some((type) => type.value === defaultInquiryType) ? defaultInquiryType : '';
   }, [defaultInquiryType, inquiryTypes]);
 
   const [selectedInquiryType, setSelectedInquiryType] = useState(resolvedDefaultInquiryType);
@@ -97,7 +101,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
   const handleFileUpload = (files: FileList | null) => {
     if (!files) return;
 
-    const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    const newFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
 
     if (uploadedFiles.length + newFiles.length > maxFiles) {
       showNotification(`最大${maxFiles}枚までアップロードできます`, 'error');
@@ -112,20 +116,23 @@ const ContactForm: React.FC<ContactFormProps> = ({
       return;
     }
 
-    newFiles.forEach(file => {
+    newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setUploadedFiles(prev => [...prev, {
-          file,
-          preview: e.target?.result as string
-        }]);
+        setUploadedFiles((prev) => [
+          ...prev,
+          {
+            file,
+            preview: e.target?.result as string,
+          },
+        ]);
       };
       reader.readAsDataURL(file);
     });
   };
 
   const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const getTotalSize = () => {
@@ -159,8 +166,14 @@ const ContactForm: React.FC<ContactFormProps> = ({
 
     const formData = new FormData(form);
 
-    if (!formData.get('name') || !formData.get('email') || !formData.get('phone') ||
-        !selectedInquiryType || !formData.get('message') || !formData.get('privacy_policy')) {
+    if (
+      !formData.get('name') ||
+      !formData.get('email') ||
+      !formData.get('phone') ||
+      !selectedInquiryType ||
+      !formData.get('message') ||
+      !formData.get('privacy_policy')
+    ) {
       showNotification('必須項目をすべて入力してください。', 'error');
       return;
     }
@@ -219,7 +232,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseAnonKey}`
+          Authorization: `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify({
           requestId,
@@ -231,14 +244,17 @@ const ContactForm: React.FC<ContactFormProps> = ({
           inquiry_type: selectedInquiryType,
           message,
           image_urls: imageUrls,
-        })
+        }),
       });
 
       if (!sendResponse.ok) {
         throw new Error('failed to send mail');
       }
 
-      showNotification('お問い合わせを受け付けました。担当者からの返信をお待ちください。', 'success');
+      showNotification(
+        'お問い合わせを受け付けました。担当者からの返信をお待ちください。',
+        'success',
+      );
       form.reset();
       setSelectedInquiryType(resolvedDefaultInquiryType);
       setUploadedFiles([]);
@@ -318,7 +334,9 @@ const ContactForm: React.FC<ContactFormProps> = ({
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 text-sm text-left bg-white flex justify-between items-center"
                   >
                     <span className={selectedInquiryType ? 'text-gray-900' : 'text-gray-500'}>
-                      {selectedInquiryType ? inquiryTypes.find(type => type.value === selectedInquiryType)?.label : '選択してください'}
+                      {selectedInquiryType
+                        ? inquiryTypes.find((type) => type.value === selectedInquiryType)?.label
+                        : '選択してください'}
                     </span>
                     <div className="w-4 h-4 flex items-center justify-center text-gray-500">
                       <i className="ri-arrow-down-s-line"></i>
@@ -361,7 +379,9 @@ const ContactForm: React.FC<ContactFormProps> = ({
 
             {/* File Upload Section */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-4">画像添付（任意）</label>
+              <label className="block text-sm font-medium text-gray-700 mb-4">
+                画像添付（任意）
+              </label>
               <div className="space-y-4">
                 <div
                   className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-blue-50 transition-colors"
@@ -382,8 +402,12 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <div className="w-12 h-12 flex items-center justify-center mx-auto mb-4 text-gray-400">
                     <i className="ri-upload-cloud-2-line ri-2x"></i>
                   </div>
-                  <p className="text-gray-600 mb-2">ファイルをドラッグ&ドロップまたはクリックして選択</p>
-                  <p className="text-sm text-gray-500">最大5枚まで、合計5MBまで（JPG、PNG、GIF対応）</p>
+                  <p className="text-gray-600 mb-2">
+                    ファイルをドラッグ&ドロップまたはクリックして選択
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    最大5枚まで、合計5MBまで（JPG、PNG、GIF対応）
+                  </p>
                   <input
                     type="file"
                     id="fileInput"
@@ -408,8 +432,15 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 {uploadedFiles.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
                     {uploadedFiles.map((item, index) => (
-                      <div key={index} className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
-                        <img src={item.preview} alt="プレビュー" className="w-full h-full object-cover" />
+                      <div
+                        key={index}
+                        className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square"
+                      >
+                        <img
+                          src={item.preview}
+                          alt="プレビュー"
+                          className="w-full h-full object-cover"
+                        />
                         <button
                           type="button"
                           onClick={() => removeFile(index)}
@@ -428,7 +459,10 @@ const ContactForm: React.FC<ContactFormProps> = ({
               <label className="flex items-start cursor-pointer">
                 <input type="checkbox" name="privacy_policy" required className="mt-1 mr-3" />
                 <span className="text-sm text-gray-600">
-                  <Link to="/privacy" className="text-primary hover:underline">プライバシーポリシー</Link>に同意します<span className="text-red-500 ml-1">*</span>
+                  <Link to="/privacy" className="text-primary hover:underline">
+                    プライバシーポリシー
+                  </Link>
+                  に同意します<span className="text-red-500 ml-1">*</span>
                 </span>
               </label>
             </div>

@@ -242,7 +242,9 @@ const ReservationSection: React.FC = () => {
       }
     } catch (err) {
       setActionError(
-        err instanceof Error ? `予約の更新に失敗しました: ${err.message}` : '予約の更新に失敗しました。',
+        err instanceof Error
+          ? `予約の更新に失敗しました: ${err.message}`
+          : '予約の更新に失敗しました。',
       );
     } finally {
       setActionLoading(false);
@@ -281,7 +283,9 @@ const ReservationSection: React.FC = () => {
       }
     } catch (err) {
       setActionError(
-        err instanceof Error ? `キャンセルに失敗しました: ${err.message}` : 'キャンセルに失敗しました。',
+        err instanceof Error
+          ? `キャンセルに失敗しました: ${err.message}`
+          : 'キャンセルに失敗しました。',
       );
     } finally {
       setActionLoading(false);
@@ -346,7 +350,9 @@ const ReservationSection: React.FC = () => {
                   <div>
                     <p className="text-sm text-gray-500 mb-1">場所</p>
                     <p className="font-medium">
-                      {latestReservation.event_location || latestReservation.event_region || '会場情報未定'}
+                      {latestReservation.event_location ||
+                        latestReservation.event_region ||
+                        '会場情報未定'}
                     </p>
                   </div>
                   <div>
@@ -437,11 +443,21 @@ const ReservationSection: React.FC = () => {
                 <table className="w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">イベント名</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日時</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">予約番号</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ステータス</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        イベント名
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        日時
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        予約番号
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ステータス
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        操作
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -475,7 +491,10 @@ const ReservationSection: React.FC = () => {
                           ) : (
                             <div className="flex items-center gap-3">
                               {reservation.event_slug ? (
-                                <Link to={`/event/${reservation.event_slug}`} className="text-primary hover:text-primary/80">
+                                <Link
+                                  to={`/event/${reservation.event_slug}`}
+                                  className="text-primary hover:text-primary/80"
+                                >
                                   詳細
                                 </Link>
                               ) : (
@@ -536,7 +555,10 @@ const ReservationSection: React.FC = () => {
                 </p>
               </div>
               <div>
-                <label htmlFor="reservation-edit-datetime" className="mb-2 block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="reservation-edit-datetime"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
                   開催日時
                 </label>
                 <input
@@ -546,12 +568,13 @@ const ReservationSection: React.FC = () => {
                   onChange={(event) => setEditDateTime(event.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-700"
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  未定の場合は空欄のままにしてください。
-                </p>
+                <p className="mt-1 text-xs text-gray-500">未定の場合は空欄のままにしてください。</p>
               </div>
               <div>
-                <label htmlFor="reservation-edit-timeslot" className="mb-2 block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="reservation-edit-timeslot"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
                   時間帯ラベル
                 </label>
                 <input
@@ -564,7 +587,10 @@ const ReservationSection: React.FC = () => {
                 />
               </div>
               <div>
-                <label htmlFor="reservation-edit-quantity" className="mb-2 block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="reservation-edit-quantity"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
                   参加人数
                 </label>
                 <input
@@ -615,11 +641,16 @@ const ReservationSection: React.FC = () => {
               </p>
               <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
                 <p className="font-semibold">{cancelTarget.event_title || 'イベント名未設定'}</p>
-                <p className="mt-1 text-gray-600">予約番号：{cancelTarget.reservation_code || '未発行'}</p>
+                <p className="mt-1 text-gray-600">
+                  予約番号：{cancelTarget.reservation_code || '未発行'}
+                </p>
                 <p className="mt-1 text-gray-600">日時：{formatDateTimeWithSlot(cancelTarget)}</p>
               </div>
               <div>
-                <label htmlFor="reservation-cancel-reason" className="mb-2 block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="reservation-cancel-reason"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
                   キャンセル理由（任意）
                 </label>
                 <textarea

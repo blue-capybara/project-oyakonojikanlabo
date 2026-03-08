@@ -26,7 +26,7 @@ export const useGa4BPageView = (options: UseGa4BPageViewOptions = {}) => {
 
     sendGa4BPageView({
       path,
-      referrer
+      referrer,
     });
 
     prevPathRef.current = path;

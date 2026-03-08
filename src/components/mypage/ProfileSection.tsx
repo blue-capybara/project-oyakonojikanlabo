@@ -14,7 +14,9 @@ const ProfileSection: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
 
   const fetchUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
       setUserName(user.user_metadata?.name || 'ゲストユーザー');
       setEmail(user.email || 'メールアドレス不明');
@@ -127,34 +129,71 @@ const ProfileSection: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block font-medium mb-2">氏名</label>
-                  <input type="text" value={userName} onChange={e => setUserName(e.target.value)} className="w-full border rounded-button py-2 px-4" />
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="w-full border rounded-button py-2 px-4"
+                  />
                 </div>
                 <div>
                   <label className="block font-medium mb-2">メールアドレス</label>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full border rounded-button py-2 px-4" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full border rounded-button py-2 px-4"
+                  />
                 </div>
                 <div>
                   <label className="block font-medium mb-2">電話番号</label>
-                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="w-full border rounded-button py-2 px-4" />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full border rounded-button py-2 px-4"
+                  />
                 </div>
                 <div>
                   <label className="block font-medium mb-2">生年月日</label>
-                  <input type="date" value={birthday} onChange={e => setBirthday(e.target.value)} className="w-full border rounded-button py-2 px-4" />
+                  <input
+                    type="date"
+                    value={birthday}
+                    onChange={(e) => setBirthday(e.target.value)}
+                    className="w-full border rounded-button py-2 px-4"
+                  />
                 </div>
               </div>
               <div>
                 <label className="block font-medium mb-2">住所</label>
-                <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full border rounded-button py-2 px-4" />
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full border rounded-button py-2 px-4"
+                />
               </div>
               <div>
                 <label className="flex items-center space-x-2">
-                  <input type="checkbox" checked={newsletter} onChange={e => setNewsletter(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={newsletter}
+                    onChange={(e) => setNewsletter(e.target.checked)}
+                  />
                   <span>お知らせやイベント情報を受け取る</span>
                 </label>
               </div>
               <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={closeModal} className="border px-6 py-2 rounded-button">キャンセル</button>
-                <button type="submit" className="bg-primary text-white px-6 py-2 rounded-button">保存する</button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="border px-6 py-2 rounded-button"
+                >
+                  キャンセル
+                </button>
+                <button type="submit" className="bg-primary text-white px-6 py-2 rounded-button">
+                  保存する
+                </button>
               </div>
             </form>
           </div>

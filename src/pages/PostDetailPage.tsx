@@ -357,7 +357,7 @@ const PostDetailPage: React.FC = () => {
               <h2 className="text-2xl font-semibold text-gray-700 mb-4">記事が見つかりません</h2>
               <p className="text-gray-600 mb-8">{error}</p>
             </div>
-            
+
             <div className="space-y-4">
               <Link
                 to="/archive"
@@ -365,7 +365,7 @@ const PostDetailPage: React.FC = () => {
               >
                 記事一覧に戻る
               </Link>
-              
+
               <div className="text-sm text-gray-500">
                 <Link to="/" className="text-blue-600 hover:underline">
                   ホームに戻る
@@ -381,9 +381,7 @@ const PostDetailPage: React.FC = () => {
   if (!post) {
     return (
       <Layout>
-        <div className="container mx-auto py-32 text-center">
-          記事が見つかりませんでした。
-        </div>
+        <div className="container mx-auto py-32 text-center">記事が見つかりませんでした。</div>
       </Layout>
     );
   }
@@ -439,7 +437,9 @@ const PostDetailPage: React.FC = () => {
                   }`}
                 >
                   <div className="w-5 h-5 flex items-center justify-center">
-                    <i className={`${isFavorited ? 'ri-heart-fill text-red-500' : 'ri-heart-line'}`}></i>
+                    <i
+                      className={`${isFavorited ? 'ri-heart-fill text-red-500' : 'ri-heart-line'}`}
+                    ></i>
                   </div>
                   <span>お気に入り</span>
                 </button>
@@ -449,7 +449,7 @@ const PostDetailPage: React.FC = () => {
 
           {/* タグ */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {tags.map((tag, index) => (
+            {tags.map((tag, index) =>
               tag.slug ? (
                 <Link
                   key={`${tag.slug}-${index}`}
@@ -459,11 +459,14 @@ const PostDetailPage: React.FC = () => {
                   {tag.name}
                 </Link>
               ) : (
-                <span key={`${tag.name}-${index}`} className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full">
+                <span
+                  key={`${tag.name}-${index}`}
+                  className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full"
+                >
                   {tag.name}
                 </span>
-              )
-            ))}
+              ),
+            )}
           </div>
 
           {/* タイトルと日付 */}
@@ -569,9 +572,13 @@ const PostDetailPage: React.FC = () => {
                           className="w-full h-40 object-cover object-top"
                         />
                         <div className="p-5 flex flex-col flex-1">
-                          <h3 className="text-lg font-bold line-clamp-2 mb-3">{relatedPost.title}</h3>
+                          <h3 className="text-lg font-bold line-clamp-2 mb-3">
+                            {relatedPost.title}
+                          </h3>
                           {relatedPost.date && (
-                            <p className="mt-auto text-sm text-gray-500">{formatDateJa(relatedPost.date)}</p>
+                            <p className="mt-auto text-sm text-gray-500">
+                              {formatDateJa(relatedPost.date)}
+                            </p>
                           )}
                         </div>
                       </div>

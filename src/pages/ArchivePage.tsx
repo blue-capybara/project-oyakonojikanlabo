@@ -140,7 +140,9 @@ const ArchivePage: React.FC = () => {
   const [selectedTagSlug, setSelectedTagSlug] = useState(ALL_TAG_SLUG);
   const [sortBy, setSortBy] = useState('新着順');
   const [articles, setArticles] = useState<Article[]>([]);
-  const [tagOptions, setTagOptions] = useState<TagOption[]>([{ name: 'すべて', slug: ALL_TAG_SLUG }]);
+  const [tagOptions, setTagOptions] = useState<TagOption[]>([
+    { name: 'すべて', slug: ALL_TAG_SLUG },
+  ]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -181,7 +183,9 @@ const ArchivePage: React.FC = () => {
         nextCursor = data.tags.pageInfo.endCursor;
       }
 
-      const sortedTags = Array.from(collected.values()).sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      const sortedTags = Array.from(collected.values()).sort((a, b) =>
+        a.name.localeCompare(b.name, 'ja'),
+      );
       setTagOptions([{ name: 'すべて', slug: ALL_TAG_SLUG }, ...sortedTags]);
     } catch (err) {
       console.error('タグ一覧の取得に失敗しました:', err);
@@ -243,7 +247,9 @@ const ArchivePage: React.FC = () => {
           };
         });
 
-        const updatedArticles = isAppend ? [...articlesRef.current, ...formattedArticles] : formattedArticles;
+        const updatedArticles = isAppend
+          ? [...articlesRef.current, ...formattedArticles]
+          : formattedArticles;
 
         articlesRef.current = updatedArticles;
         setArticles(updatedArticles);
@@ -399,12 +405,7 @@ const ArchivePage: React.FC = () => {
         title="記事一覧"
         description="親子の時間研究所の記事一覧ページです。最新記事から子育て・イベント情報までまとめてチェックできます。"
       />
-      <Breadcrumb
-        items={[
-          { label: 'HOME', to: '/' },
-          { label: '記事一覧' },
-        ]}
-      />
+      <Breadcrumb items={[{ label: 'HOME', to: '/' }, { label: '記事一覧' }]} />
 
       <div className="container mx-auto px-4 pb-16">
         <div className="mb-10">
@@ -606,7 +607,9 @@ const ArchivePage: React.FC = () => {
               onClick={handleLoadMore}
               disabled={isLoadingMore}
               className={`px-8 py-3 rounded-button text-white transition-colors ${
-                isLoadingMore ? 'bg-primary/60 cursor-not-allowed' : 'bg-primary hover:bg-primary/90'
+                isLoadingMore
+                  ? 'bg-primary/60 cursor-not-allowed'
+                  : 'bg-primary hover:bg-primary/90'
               }`}
             >
               {isLoadingMore ? '読み込み中…' : 'もっと見る'}
@@ -626,7 +629,9 @@ const ArchivePage: React.FC = () => {
           />
           <div
             className={`relative w-full md:max-w-4xl bg-white rounded-t-3xl md:rounded-2xl shadow-2xl max-h-[75vh] md:max-h-[70vh] overflow-y-auto p-6 md:p-8 transform-gpu transition-all duration-200 ease-out ${
-              isModalVisible ? 'opacity-100 translate-y-0 md:scale-100' : 'opacity-0 translate-y-3 md:translate-y-0 md:scale-95'
+              isModalVisible
+                ? 'opacity-100 translate-y-0 md:scale-100'
+                : 'opacity-0 translate-y-3 md:translate-y-0 md:scale-95'
             }`}
           >
             <div className="flex items-center justify-between mb-4">

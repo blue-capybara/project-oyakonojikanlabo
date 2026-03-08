@@ -33,12 +33,7 @@ const PreviewPage: React.FC = () => {
         ogType="article"
         noindex={noindex}
       />
-      <Breadcrumb
-        items={[
-          { label: 'HOME', to: '/' },
-          { label: 'プレビュー' },
-        ]}
-      />
+      <Breadcrumb items={[{ label: 'HOME', to: '/' }, { label: 'プレビュー' }]} />
 
       {/* ヘッダー */}
       <div className="container mx-auto px-4 pt-16 pb-10">
@@ -78,7 +73,9 @@ const PreviewPage: React.FC = () => {
               <i className="ri-error-warning-line text-lg mt-0.5" aria-hidden />
               <div>
                 <p className="font-semibold">URLが不正です</p>
-                <p className="text-sm mt-1">`p` クエリ（投稿ID）が必要です。もう一度プレビューURLを確認してください。</p>
+                <p className="text-sm mt-1">
+                  `p` クエリ（投稿ID）が必要です。もう一度プレビューURLを確認してください。
+                </p>
               </div>
             </div>
           </div>
@@ -91,7 +88,10 @@ const PreviewPage: React.FC = () => {
           {loading && (
             <div className="container mx-auto px-4 pb-16">
               <div className="flex flex-col items-center py-16 text-gray-500">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" aria-label="loading" />
+                <div
+                  className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"
+                  aria-label="loading"
+                />
                 <p className="mt-4">プレビューを読み込んでいます...</p>
               </div>
             </div>

@@ -210,8 +210,7 @@ const formatSchedule = (slot?: EventSlot) => {
   const start = normalize(startTime);
   const end = normalize(endTime);
 
-  const timeLabel =
-    start && end ? `${start}〜${end}` : start ? start : end ? end : '';
+  const timeLabel = start && end ? `${start}〜${end}` : start ? start : end ? end : '';
 
   return [dateLabel, timeLabel].filter(Boolean).join(' ');
 };
@@ -230,8 +229,7 @@ const buildLocationLabel = (
   }
 
   const regionNames =
-    regions?.nodes?.map((node) => node?.name).filter((name): name is string => Boolean(name)) ??
-    [];
+    regions?.nodes?.map((node) => node?.name).filter((name): name is string => Boolean(name)) ?? [];
 
   return regionNames[0] ?? '場所未設定';
 };
@@ -240,10 +238,12 @@ const getPostSummary = async (identifier: string) => {
   const attempts = looksLikeGlobalId(identifier)
     ? [
         () => request<PostSummaryResponse>(endpoint, GET_POST_SUMMARY_BY_ID, { id: identifier }),
-        () => request<PostSummaryResponse>(endpoint, GET_POST_SUMMARY_BY_SLUG, { slug: identifier }),
+        () =>
+          request<PostSummaryResponse>(endpoint, GET_POST_SUMMARY_BY_SLUG, { slug: identifier }),
       ]
     : [
-        () => request<PostSummaryResponse>(endpoint, GET_POST_SUMMARY_BY_SLUG, { slug: identifier }),
+        () =>
+          request<PostSummaryResponse>(endpoint, GET_POST_SUMMARY_BY_SLUG, { slug: identifier }),
         () => request<PostSummaryResponse>(endpoint, GET_POST_SUMMARY_BY_ID, { id: identifier }),
       ];
 
@@ -266,10 +266,12 @@ const getEventSummary = async (identifier: string) => {
   const attempts = looksLikeGlobalId(identifier)
     ? [
         () => request<EventSummaryResponse>(endpoint, GET_EVENT_SUMMARY_BY_ID, { id: identifier }),
-        () => request<EventSummaryResponse>(endpoint, GET_EVENT_SUMMARY_BY_SLUG, { slug: identifier }),
+        () =>
+          request<EventSummaryResponse>(endpoint, GET_EVENT_SUMMARY_BY_SLUG, { slug: identifier }),
       ]
     : [
-        () => request<EventSummaryResponse>(endpoint, GET_EVENT_SUMMARY_BY_SLUG, { slug: identifier }),
+        () =>
+          request<EventSummaryResponse>(endpoint, GET_EVENT_SUMMARY_BY_SLUG, { slug: identifier }),
         () => request<EventSummaryResponse>(endpoint, GET_EVENT_SUMMARY_BY_ID, { id: identifier }),
       ];
 
@@ -437,11 +439,7 @@ const FavoriteSection: React.FC = () => {
     }
 
     if (loading) {
-      return (
-        <div className="flex justify-center py-10 text-gray-500">
-          読み込み中です…
-        </div>
-      );
+      return <div className="flex justify-center py-10 text-gray-500">読み込み中です…</div>;
     }
 
     if (error) {
@@ -510,11 +508,7 @@ const FavoriteSection: React.FC = () => {
     }
 
     if (loading) {
-      return (
-        <div className="flex justify-center py-10 text-gray-500">
-          読み込み中です…
-        </div>
-      );
+      return <div className="flex justify-center py-10 text-gray-500">読み込み中です…</div>;
     }
 
     if (error) {

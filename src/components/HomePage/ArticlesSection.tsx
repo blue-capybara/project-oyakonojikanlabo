@@ -68,7 +68,6 @@ const GET_ARTICLES = gql`
   }
 `;
 
-
 const ArticlesSection: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
 
@@ -113,10 +112,7 @@ const ArticlesSection: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">記事一覧</h2>
-          <Link
-            to="/archive"
-            className="text-primary font-medium flex items-center"
-          >
+          <Link to="/archive" className="text-primary font-medium flex items-center">
             すべて見る
             <div className="w-5 h-5 flex items-center justify-center ml-1">
               <i className="ri-arrow-right-line"></i>
@@ -124,37 +120,41 @@ const ArticlesSection: React.FC = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 min-[600px]:grid-cols-2 lg:grid-cols-3 gap-8">
-  {articles.map((article) => (
-    <Link to={`/${article.slug}`} key={article.id} className="block hover:cursor-pointer group">
-      <div className="flex flex-col h-full bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:-translate-y-1">
-        <img
-          src={article.image}
-          alt={article.title}
-          className="w-full h-48 object-cover object-top"
-        />
-        <div className="flex flex-col justify-between flex-1 p-6">
-          <div>
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-nowrap -mx-1 px-1 py-1 mb-3 min-h-[32px]">
-              {article.tags.map((tag) => (
-                <span
-                  key={`${article.id}-${tag}`}
-                  className="shrink-0 inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 text-xs rounded-full whitespace-nowrap leading-none"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <h3 className="text-xl font-bold mb-2 line-clamp-2 lg:line-clamp-none">
-              {article.title}
-            </h3>
-            <p className="hidden lg:block text-gray-600 mb-4">{article.excerpt}</p>
-          </div>
-          <span className="text-gray-500 text-sm mt-auto">{article.date}</span>
+          {articles.map((article) => (
+            <Link
+              to={`/${article.slug}`}
+              key={article.id}
+              className="block hover:cursor-pointer group"
+            >
+              <div className="flex flex-col h-full bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:-translate-y-1">
+                <img
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-48 object-cover object-top"
+                />
+                <div className="flex flex-col justify-between flex-1 p-6">
+                  <div>
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-nowrap -mx-1 px-1 py-1 mb-3 min-h-[32px]">
+                      {article.tags.map((tag) => (
+                        <span
+                          key={`${article.id}-${tag}`}
+                          className="shrink-0 inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 text-xs rounded-full whitespace-nowrap leading-none"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <h3 className="text-xl font-bold mb-2 line-clamp-2 lg:line-clamp-none">
+                      {article.title}
+                    </h3>
+                    <p className="hidden lg:block text-gray-600 mb-4">{article.excerpt}</p>
+                  </div>
+                  <span className="text-gray-500 text-sm mt-auto">{article.date}</span>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
-      </div>
-    </Link>
-  ))}
-</div>
       </div>
     </section>
   );

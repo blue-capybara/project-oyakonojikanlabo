@@ -37,13 +37,15 @@ const ShoppingSection: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://ehonyasan-moe.oyakonojikanlabo.jp/socks/shopify-proxy.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            query: `{
+        const response = await fetch(
+          'https://ehonyasan-moe.oyakonojikanlabo.jp/socks/shopify-proxy.php',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: `{
               products(first: 4, sortKey: CREATED_AT, reverse: true) {
                 edges {
                   node {
@@ -61,9 +63,10 @@ const ShoppingSection: React.FC = () => {
                   }
                 }
               }
-            }`
-          })
-        });
+            }`,
+            }),
+          },
+        );
 
         const json: ShopifyProductResponse = await response.json();
         const edges = json.data?.products?.edges ?? [];
@@ -74,7 +77,7 @@ const ShoppingSection: React.FC = () => {
             id: node.id,
             title: node.title,
             image: image?.originalSrc ?? '',
-            url: `https://shop.oyakonojikanlabo.jp/products/${node.handle}`
+            url: `https://shop.oyakonojikanlabo.jp/products/${node.handle}`,
           };
         });
 
@@ -103,8 +106,11 @@ const ShoppingSection: React.FC = () => {
           </a>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map(product => (
-            <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
+            >
               <a href={product.url} target="_blank" rel="noopener noreferrer">
                 <img
                   src={product.image}

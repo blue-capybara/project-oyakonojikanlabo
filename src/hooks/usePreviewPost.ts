@@ -62,7 +62,7 @@ export const usePreviewPost = (postId: string | null) => {
     // 必須の環境変数がそろっているかを事前チェック
     if (!sanitizedBase || !previewAuthUser || !previewAuthPassword) {
       console.error(
-        'プレビューAPIの環境変数が不足しています。VITE_WP_PREVIEW_API_BASE / VITE_WP_PREVIEW_AUTH_USER / VITE_WP_PREVIEW_AUTH_PASSWORD を確認してください。'
+        'プレビューAPIの環境変数が不足しています。VITE_WP_PREVIEW_API_BASE / VITE_WP_PREVIEW_AUTH_USER / VITE_WP_PREVIEW_AUTH_PASSWORD を確認してください。',
       );
       setState({
         data: null,
@@ -127,9 +127,7 @@ export const usePreviewPost = (postId: string | null) => {
             if (mediaRes.ok) {
               const mediaJson = await mediaRes.json();
               normalizedFeaturedImageUrl =
-                mediaJson?.source_url ??
-                mediaJson?.media_details?.sizes?.full?.source_url ??
-                null;
+                mediaJson?.source_url ?? mediaJson?.media_details?.sizes?.full?.source_url ?? null;
             }
           } catch (mediaErr) {
             if (!controller.signal.aborted) {
