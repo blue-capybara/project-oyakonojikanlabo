@@ -43,7 +43,6 @@ interface ArtistRelatedBook {
   title?: string;
   publisher?: string;
   releaseDate?: string;
-  releaseDateText?: string;
   isbn?: string;
   coverImage?: ArtistMedia;
 }
@@ -225,7 +224,6 @@ interface ArtistNode {
       title?: string | null;
       publisher?: string | null;
       releaseDate?: string | null;
-      releaseDateText?: string | null;
       isbn?: string | null;
       coverImage?: {
         node?: {
@@ -395,7 +393,6 @@ const GET_ARTIST_DETAIL = gql`
           title
           publisher
           releaseDate
-          releaseDateText
           isbn
           coverImage {
             node {
@@ -446,7 +443,7 @@ const formatSchedule = (slot?: EventSlot) => {
 
   const timeLabel = normalizedStart
     ? `${normalizedStart}${normalizedEnd ? `〜${normalizedEnd}` : ''}`
-    : normalizedEnd ?? '';
+    : (normalizedEnd ?? '');
 
   return [dateLabel, timeLabel].filter(Boolean).join(' ');
 };
@@ -598,7 +595,7 @@ const buildTimeScheduleEntries = (
       const timeParts = [toHourMinute(startTime), toHourMinute(endTime)].filter(
         (value): value is string => Boolean(value),
       );
-      const timeLabel = timeParts.length > 0 ? timeParts.join('〜') : label ?? '時間未定';
+      const timeLabel = timeParts.length > 0 ? timeParts.join('〜') : (label ?? '時間未定');
 
       const activityParts = [label, note]
         .map((value) => (value ? value.trim() : ''))
@@ -728,39 +725,10 @@ const renderMultilineText = (text: string) =>
     </React.Fragment>
   ));
 
-const formatBookReleaseDate = (value?: string) => {
+const formatIsoDate = (value?: string) => {
   if (!value) return undefined;
-  const normalized = value.trim();
-  if (!normalized) return undefined;
-
-  const yearOnly = normalized.match(/^(\d{4})$/);
-  if (yearOnly) {
-    return `${yearOnly[1]}年`;
-  }
-
-  const yearMonth = normalized.match(/^(\d{4})-(\d{2})$/);
-  if (yearMonth) {
-    const year = yearMonth[1];
-    const month = Number.parseInt(yearMonth[2], 10);
-    if (month >= 1 && month <= 12) {
-      return `${year}年${month}月`;
-    }
-    return normalized;
-  }
-
-  const yearMonthDay = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (yearMonthDay) {
-    const year = yearMonthDay[1];
-    const month = Number.parseInt(yearMonthDay[2], 10);
-    const day = Number.parseInt(yearMonthDay[3], 10);
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      return `${year}年${month}月${day}日`;
-    }
-    return normalized;
-  }
-
-  const date = new Date(normalized);
-  if (Number.isNaN(date.getTime())) return normalized;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
   return date.toLocaleDateString('ja-JP', {
     year: 'numeric',
     month: 'long',
@@ -993,11 +961,7 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
   const infoMainImage = info?.profileImage?.node?.sourceUrl
     ? {
         url: info.profileImage.node.sourceUrl,
-        alt:
-          info.profileImage.node.altText ??
-          info?.name ??
-          node.title ??
-          undefined,
+        alt: info.profileImage.node.altText ?? info?.name ?? node.title ?? undefined,
       }
     : undefined;
 
@@ -1025,10 +989,9 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
     (infoGallery && infoGallery[0]) ??
     (parsed.gallery && parsed.gallery[0]);
 
-  const gallerySources = [
-    ...(infoGallery ?? []),
-    ...(parsed.gallery ?? []),
-  ].filter((item) => (mainImage ? item.url !== mainImage.url : true));
+  const gallerySources = [...(infoGallery ?? []), ...(parsed.gallery ?? [])].filter((item) =>
+    mainImage ? item.url !== mainImage.url : true,
+  );
 
   const expertise = info?.expertiseFields
     ?.map((field) => (field ? field.trim() : ''))
@@ -1070,7 +1033,6 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
       const title = book.title?.trim();
       const publisher = book.publisher?.trim();
       const releaseDate = book.releaseDate?.trim();
-      const releaseDateText = book.releaseDateText?.trim();
       const isbn = book.isbn?.trim();
       const coverImage = book.coverImage?.node?.sourceUrl
         ? {
@@ -1079,12 +1041,11 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
           }
         : undefined;
 
-      if (!title && !publisher && !releaseDate && !releaseDateText && !isbn && !coverImage) return null;
+      if (!title && !publisher && !releaseDate && !isbn && !coverImage) return null;
       return {
         title: title || undefined,
         publisher: publisher || undefined,
         releaseDate: releaseDate || undefined,
-        releaseDateText: releaseDateText || undefined,
         isbn: isbn || undefined,
         coverImage,
       } as ArtistRelatedBook;
@@ -1345,7 +1306,8 @@ const EventDetailPage: React.FC = () => {
     onSwipeRight: handleEventImagePrev,
   });
 
-  const seoDescription = event?.descriptionHtml ?? event?.description ?? event?.detailHtml ?? undefined;
+  const seoDescription =
+    event?.descriptionHtml ?? event?.description ?? event?.detailHtml ?? undefined;
   const seoOgImage = event?.image || event?.galleryImages?.[0]?.url || undefined;
 
   // WordPress GraphQL からイベントデータを取得
@@ -1461,7 +1423,9 @@ const EventDetailPage: React.FC = () => {
       try {
         setArtistLoading(true);
         setArtistError(null);
-        const data = await request<ArtistResponse>(endpoint, GET_ARTIST_DETAIL, { slug: activeArtistSlug });
+        const data = await request<ArtistResponse>(endpoint, GET_ARTIST_DETAIL, {
+          slug: activeArtistSlug,
+        });
         if (cancelled) return;
         if (!data.artist) {
           throw new Error('作家情報が見つかりませんでした');
@@ -1477,7 +1441,9 @@ const EventDetailPage: React.FC = () => {
         if (cancelled) return;
         setArtistDetail(null);
         setArtistError(
-          err instanceof Error ? err.message : '作家情報の取得に失敗しました。時間をおいて再度お試しください。',
+          err instanceof Error
+            ? err.message
+            : '作家情報の取得に失敗しました。時間をおいて再度お試しください。',
         );
       } finally {
         if (!cancelled) {
@@ -1663,7 +1629,10 @@ const EventDetailPage: React.FC = () => {
             <div className="w-full md:w-1/2">
               <div className="flex flex-col gap-6">
                 <div className="order-1 md:order-1">
-                  <Link to="/event" className="mb-4 inline-flex items-center text-gray-600 hover:text-primary">
+                  <Link
+                    to="/event"
+                    className="mb-4 inline-flex items-center text-gray-600 hover:text-primary"
+                  >
                     <div className="mr-1 flex h-5 w-5 items-center justify-center">
                       <i className="ri-arrow-left-line"></i>
                     </div>
@@ -1697,9 +1666,7 @@ const EventDetailPage: React.FC = () => {
 
                 <div className="order-2 md:order-1">
                   {event ? (
-                    <h1 className="text-3xl font-bold md:text-4xl">
-                      {event.title}
-                    </h1>
+                    <h1 className="text-3xl font-bold md:text-4xl">{event.title}</h1>
                   ) : (
                     !loading && (
                       <h1 className="text-3xl font-bold text-gray-500 md:text-4xl">
@@ -1748,7 +1715,9 @@ const EventDetailPage: React.FC = () => {
                                 scrollToArtistSection();
                               }}
                               className={`inline-flex items-center gap-1 rounded-full px-3 py-1 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white ${
-                                isActive ? 'bg-primary text-white' : 'bg-primary/10 text-primary hover:bg-primary/20'
+                                isActive
+                                  ? 'bg-primary text-white'
+                                  : 'bg-primary/10 text-primary hover:bg-primary/20'
                               } ${hasSlug ? '' : 'border border-dashed border-primary/40 text-primary/60'}`}
                               aria-pressed={isActive}
                             >
@@ -1833,11 +1802,13 @@ const EventDetailPage: React.FC = () => {
                             : '開催場所情報を取得できませんでした'}
                       </p>
                       <a
-                        href={hasMapUrl ? event?.mapUrl ?? undefined : undefined}
+                        href={hasMapUrl ? (event?.mapUrl ?? undefined) : undefined}
                         target={hasMapUrl ? '_blank' : undefined}
                         rel={hasMapUrl ? 'noopener noreferrer' : undefined}
                         className={`inline-flex items-center text-sm ${
-                          hasMapUrl ? 'text-primary hover:text-primary/80' : 'cursor-not-allowed text-gray-400'
+                          hasMapUrl
+                            ? 'text-primary hover:text-primary/80'
+                            : 'cursor-not-allowed text-gray-400'
                         }`}
                       >
                         <div className="mr-1 flex h-4 w-4 items-center justify-center">
@@ -2043,7 +2014,8 @@ const EventDetailPage: React.FC = () => {
                   <div className="p-6">
                     <div className="text-center">
                       <p className="text-gray-700 mb-6">
-                        イベントの予約は専用フォームから受け付けております。<br />
+                        イベントの予約は専用フォームから受け付けております。
+                        <br />
                         下記のボタンから予約ページへお進みください。
                       </p>
                       {loading ? (
@@ -2090,7 +2062,7 @@ const EventDetailPage: React.FC = () => {
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">シェアする</h3>
-              <button 
+              <button
                 onClick={() => setShowShareModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -2142,7 +2114,6 @@ const EventDetailPage: React.FC = () => {
   );
 };
 
-
 interface ArtistProfileSectionProps {
   artists: EventArtist[];
   profile: ArtistProfile | null;
@@ -2181,8 +2152,8 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
   if (!artists || artists.length === 0) return null;
 
   const images = profile
-    ? [profile.mainImage, ...(profile.gallery ?? [])].filter(
-        (item): item is ArtistMedia => Boolean(item && item.url),
+    ? [profile.mainImage, ...(profile.gallery ?? [])].filter((item): item is ArtistMedia =>
+        Boolean(item && item.url),
       )
     : [];
   const mainImage = images[activeImageIndex] ?? images[0];
@@ -2223,7 +2194,9 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-semibold text-primary/80">作家プロフィール</p>
-            <h2 className="mt-1 text-2xl font-bold text-gray-900">イベントに登場する作家をご紹介</h2>
+            <h2 className="mt-1 text-2xl font-bold text-gray-900">
+              イベントに登場する作家をご紹介
+            </h2>
           </div>
           <div className="flex flex-wrap gap-2">
             {artists.map((artist) => {
@@ -2244,7 +2217,9 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
                 >
                   <i className="ri-user-smile-line text-base"></i>
                   <span>{artist.name}</span>
-                  {!hasSlug && <span className="text-xs font-semibold text-primary/60">未連携</span>}
+                  {!hasSlug && (
+                    <span className="text-xs font-semibold text-primary/60">未連携</span>
+                  )}
                 </button>
               );
             })}
@@ -2346,10 +2321,13 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
                   dangerouslySetInnerHTML={{ __html: biographyHtml }}
                 />
               ) : biographyText ? (
-                <p className="mt-4 whitespace-pre-line text-gray-700 leading-relaxed">{biographyText}</p>
+                <p className="mt-4 whitespace-pre-line text-gray-700 leading-relaxed">
+                  {biographyText}
+                </p>
               ) : (
                 <p className="mt-4 rounded-xl border border-dashed border-gray-200 bg-white/60 p-4 text-gray-500">
-                  プロフィール本文がまだ登録されていません。ACFの「プロフィール」フィールドを入力し、GraphQL 公開設定を確認してください。
+                  プロフィール本文がまだ登録されていません。ACFの「プロフィール」フィールドを入力し、GraphQL
+                  公開設定を確認してください。
                 </p>
               )}
 
@@ -2399,38 +2377,36 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
                 <div className="mt-6">
                   <h4 className="text-lg font-bold text-gray-900">関連書籍</h4>
                   <ul className="mt-3 space-y-3">
-                    {profile.relatedBooks.map((book, index) => {
-                      const releaseDateLabel = formatBookReleaseDate(
-                        book.releaseDateText ?? book.releaseDate,
-                      );
-
-                      return (
-                        <li
-                          key={`${book.title ?? book.isbn ?? index}`}
-                          className="rounded-xl border border-gray-100 bg-white/70 p-4"
-                        >
-                          <div className="flex gap-3">
-                            {book.coverImage ? (
-                              <div className="h-20 w-16 overflow-hidden rounded-lg bg-gray-100 shadow-sm">
-                                <img
-                                  src={book.coverImage.url}
-                                  alt={book.coverImage.alt ?? `${book.title ?? '関連書籍'}の表紙`}
-                                  className="h-full w-full object-cover"
-                                />
-                              </div>
-                            ) : null}
-                            <div className="flex-1">
-                              {book.title && <p className="font-semibold text-gray-900">{book.title}</p>}
-                              <div className="mt-1 space-y-1 text-sm text-gray-600">
-                                {book.publisher && <p>出版社: {book.publisher}</p>}
-                                {releaseDateLabel && <p>発売日: {releaseDateLabel}</p>}
-                                {book.isbn && <p>ISBN: {book.isbn}</p>}
-                              </div>
+                    {profile.relatedBooks.map((book, index) => (
+                      <li
+                        key={`${book.title ?? book.isbn ?? index}`}
+                        className="rounded-xl border border-gray-100 bg-white/70 p-4"
+                      >
+                        <div className="flex gap-3">
+                          {book.coverImage ? (
+                            <div className="h-20 w-16 overflow-hidden rounded-lg bg-gray-100 shadow-sm">
+                              <img
+                                src={book.coverImage.url}
+                                alt={book.coverImage.alt ?? `${book.title ?? '関連書籍'}の表紙`}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          ) : null}
+                          <div className="flex-1">
+                            {book.title && (
+                              <p className="font-semibold text-gray-900">{book.title}</p>
+                            )}
+                            <div className="mt-1 space-y-1 text-sm text-gray-600">
+                              {book.publisher && <p>出版社: {book.publisher}</p>}
+                              {book.releaseDate && (
+                                <p>発売日: {formatIsoDate(book.releaseDate) ?? book.releaseDate}</p>
+                              )}
+                              {book.isbn && <p>ISBN: {book.isbn}</p>}
                             </div>
                           </div>
-                        </li>
-                      );
-                    })}
+                        </div>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               )}

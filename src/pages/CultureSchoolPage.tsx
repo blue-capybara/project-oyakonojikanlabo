@@ -4,7 +4,15 @@ import { gql, request } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
 import { withBase } from '../utils/paths';
 
-type CategoryKey = 'all' | 'reading' | 'art' | 'language' | 'wellness' | 'kids' | 'adult' | 'writing';
+type CategoryKey =
+  | 'all'
+  | 'reading'
+  | 'art'
+  | 'language'
+  | 'wellness'
+  | 'kids'
+  | 'adult'
+  | 'writing';
 type WeeklyTimeBucket = 'morning' | 'afternoon' | 'evening';
 
 interface CategoryFilter {
@@ -188,7 +196,8 @@ const FAQ_ITEMS = [
   },
   {
     question: '教材費は別途必要ですか？',
-    answer: '講座によって材料費が別途かかります。詳しいことは、それぞれの講座案内でご確認くださいね。',
+    answer:
+      '講座によって材料費が別途かかります。詳しいことは、それぞれの講座案内でご確認くださいね。',
   },
   {
     question: '初心者でも参加できますか？',
@@ -198,15 +207,71 @@ const FAQ_ITEMS = [
 ];
 
 const INSTAGRAM_POSTS = [
-  { id: 1, image: withBase('images/readdy/seq311-squarish-a-cozy-reading-corner-in-a.jpg'), likes: 245, comments: 18, alt: 'Reading Corner' },
-  { id: 2, image: withBase('images/readdy/seq312-squarish-children-engaged-in-a-creative-art.jpg'), likes: 189, comments: 12, alt: 'Art Workshop' },
-  { id: 3, image: withBase('images/readdy/seq313-squarish-a-storytelling-session-with-an-animated.jpg'), likes: 312, comments: 24, alt: 'Storytelling' },
-  { id: 4, image: withBase('images/readdy/seq314-squarish-parents-and-children-participating-in-a.jpg'), likes: 278, comments: 21, alt: 'Family Workshop' },
-  { id: 5, image: withBase('images/readdy/seq315-squarish-a-display-of-handmade-picture-books.jpg'), likes: 156, comments: 9, alt: 'Student Works' },
-  { id: 6, image: withBase('images/readdy/seq316-squarish-an-adult-art-class-in-progress.jpg'), likes: 203, comments: 15, alt: 'Adult Class' },
-  { id: 7, image: withBase('images/readdy/seq317-squarish-a-special-event-or-workshop-setup.jpg'), likes: 167, comments: 11, alt: 'Event Setup' },
-  { id: 8, image: withBase('images/readdy/seq318-squarish-children-proudly-displaying-their-completed-art.jpg'), likes: 289, comments: 23, alt: 'Children\'s Art' },
-  { id: 9, image: withBase('images/readdy/seq319-squarish-a-cozy-corner-of-the-facility.jpg'), likes: 198, comments: 14, alt: 'New Materials' },
+  {
+    id: 1,
+    image: withBase('images/readdy/seq311-squarish-a-cozy-reading-corner-in-a.jpg'),
+    likes: 245,
+    comments: 18,
+    alt: 'Reading Corner',
+  },
+  {
+    id: 2,
+    image: withBase('images/readdy/seq312-squarish-children-engaged-in-a-creative-art.jpg'),
+    likes: 189,
+    comments: 12,
+    alt: 'Art Workshop',
+  },
+  {
+    id: 3,
+    image: withBase('images/readdy/seq313-squarish-a-storytelling-session-with-an-animated.jpg'),
+    likes: 312,
+    comments: 24,
+    alt: 'Storytelling',
+  },
+  {
+    id: 4,
+    image: withBase('images/readdy/seq314-squarish-parents-and-children-participating-in-a.jpg'),
+    likes: 278,
+    comments: 21,
+    alt: 'Family Workshop',
+  },
+  {
+    id: 5,
+    image: withBase('images/readdy/seq315-squarish-a-display-of-handmade-picture-books.jpg'),
+    likes: 156,
+    comments: 9,
+    alt: 'Student Works',
+  },
+  {
+    id: 6,
+    image: withBase('images/readdy/seq316-squarish-an-adult-art-class-in-progress.jpg'),
+    likes: 203,
+    comments: 15,
+    alt: 'Adult Class',
+  },
+  {
+    id: 7,
+    image: withBase('images/readdy/seq317-squarish-a-special-event-or-workshop-setup.jpg'),
+    likes: 167,
+    comments: 11,
+    alt: 'Event Setup',
+  },
+  {
+    id: 8,
+    image: withBase(
+      'images/readdy/seq318-squarish-children-proudly-displaying-their-completed-art.jpg',
+    ),
+    likes: 289,
+    comments: 23,
+    alt: "Children's Art",
+  },
+  {
+    id: 9,
+    image: withBase('images/readdy/seq319-squarish-a-cozy-corner-of-the-facility.jpg'),
+    likes: 198,
+    comments: 14,
+    alt: 'New Materials',
+  },
 ];
 
 const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
@@ -218,11 +283,12 @@ const TIME_BUCKETS: { key: WeeklyTimeBucket; label: string; rangeLabel: string }
   { key: 'evening', label: '夜間', rangeLabel: '18:00-21:00' },
 ];
 
-const STATUS_BADGES: Record<'current' | 'upcoming' | 'past', { label: string; className: string }> = {
-  current: { label: '開催中', className: 'bg-sky-100 text-sky-800' },
-  upcoming: { label: '受付中', className: 'bg-emerald-100 text-emerald-800' },
-  past: { label: '終了', className: 'bg-gray-100 text-gray-600' },
-};
+const STATUS_BADGES: Record<'current' | 'upcoming' | 'past', { label: string; className: string }> =
+  {
+    current: { label: '開催中', className: 'bg-sky-100 text-sky-800' },
+    upcoming: { label: '受付中', className: 'bg-emerald-100 text-emerald-800' },
+    past: { label: '終了', className: 'bg-gray-100 text-gray-600' },
+  };
 
 const DISPLAY_BADGE_MAP: Record<string, { label: string; className: string }> = {
   open: { label: '予約受付中', className: 'bg-emerald-100 text-emerald-800' },
@@ -348,7 +414,10 @@ const GET_SCHOOL_EVENTS = gql`
 
 const stripHtml = (html?: string | null) => {
   if (!html) return '';
-  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 const truncateText = (text: string, limit = 100) => {
@@ -406,8 +475,8 @@ const buildSlots = (slots?: (GraphqlSlot | null)[] | null): NormalizedSlot[] => 
           ? `${startTimeLabel}〜${endTimeLabel}`
           : `${startTimeLabel}〜`
         : endTimeLabel
-        ? `〜${endTimeLabel}`
-        : undefined;
+          ? `〜${endTimeLabel}`
+          : undefined;
       return {
         isoDate,
         date,
@@ -462,14 +531,19 @@ const formatCapacityLabel = (capacity?: string | number | null) => {
   return '定員：お問い合わせください';
 };
 
-const buildLocationLabel = (eventCpt?: GraphqlEventCpt | null, regions?: GraphqlEventNode['eventRegions']) => {
+const buildLocationLabel = (
+  eventCpt?: GraphqlEventCpt | null,
+  regions?: GraphqlEventNode['eventRegions'],
+) => {
   const venueNames = eventCpt?.venueRef?.nodes
     ?.map((node) => node?.title)
     .filter((title): title is string => Boolean(title));
   if (venueNames && venueNames.length > 0) {
     return venueNames.join('・');
   }
-  const regionNames = regions?.nodes?.map((node) => node?.name).filter((name): name is string => Boolean(name));
+  const regionNames = regions?.nodes
+    ?.map((node) => node?.name)
+    .filter((name): name is string => Boolean(name));
   if (regionNames && regionNames.length > 0) {
     return regionNames.join('・');
   }
@@ -478,8 +552,9 @@ const buildLocationLabel = (eventCpt?: GraphqlEventCpt | null, regions?: Graphql
 
 const deriveStatusBadge = (eventCpt: GraphqlEventCpt | null | undefined, slot?: NormalizedSlot) => {
   if (eventCpt?.displayBadges) {
-    const matched = eventCpt.displayBadges.find((badge): badge is keyof typeof DISPLAY_BADGE_MAP =>
-      typeof badge === 'string' && DISPLAY_BADGE_MAP[badge],
+    const matched = eventCpt.displayBadges.find(
+      (badge): badge is keyof typeof DISPLAY_BADGE_MAP =>
+        typeof badge === 'string' && DISPLAY_BADGE_MAP[badge],
     );
     if (matched) {
       return DISPLAY_BADGE_MAP[matched];
@@ -502,7 +577,10 @@ const deriveStatusBadge = (eventCpt: GraphqlEventCpt | null | undefined, slot?: 
 };
 
 const deriveCategoryTags = (node: GraphqlEventNode, slots: NormalizedSlot[]): CategoryKey[] => {
-  const slugs = node.eventCategories?.nodes?.map((cat) => cat?.slug)?.filter((slug): slug is string => Boolean(slug)) ?? [];
+  const slugs =
+    node.eventCategories?.nodes
+      ?.map((cat) => cat?.slug)
+      ?.filter((slug): slug is string => Boolean(slug)) ?? [];
   const mappedFromSlugs = slugs
     .map((slug) => CATEGORY_SLUG_MAP[slug])
     .filter((key): key is CategoryKey => Boolean(key));
@@ -516,7 +594,9 @@ const deriveCategoryTags = (node: GraphqlEventNode, slots: NormalizedSlot[]): Ca
   mappedFromSlugs.forEach((key) => tags.add(key));
   fromKeywords.forEach((key) => tags.add(key));
 
-  const hasEarlySlot = slots.some((slot) => slot.startTimeLabel && Number(slot.startTimeLabel.slice(0, 2)) < 12);
+  const hasEarlySlot = slots.some(
+    (slot) => slot.startTimeLabel && Number(slot.startTimeLabel.slice(0, 2)) < 12,
+  );
   if (hasEarlySlot) {
     tags.add('kids');
   }
@@ -662,7 +742,10 @@ const CultureSchoolPage: React.FC = () => {
     return events.filter((event) => event.categoryTags.includes(activeTab));
   }, [events, activeTab]);
 
-  const calendarDays = useMemo(() => buildCalendarDays(calendarMonth, events), [calendarMonth, events]);
+  const calendarDays = useMemo(
+    () => buildCalendarDays(calendarMonth, events),
+    [calendarMonth, events],
+  );
   const weeklySchedule = useMemo(() => buildWeeklySchedule(events), [events]);
   const calendarMonthLabel = useMemo(() => monthFormatter.format(calendarMonth), [calendarMonth]);
   const heroEvent = filteredEvents[0] ?? events[0] ?? null;
@@ -769,19 +852,28 @@ const CultureSchoolPage: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center">
             <div className="w-full md:w-1/2 md:pr-12 mb-8 md:mb-0">
-              <Link to="/pico" className="inline-flex items-center text-gray-600 hover:text-primary mb-4">
+              <Link
+                to="/pico"
+                className="inline-flex items-center text-gray-600 hover:text-primary mb-4"
+              >
                 <div className="w-5 h-5 flex items-center justify-center mr-1">
                   <i className="ri-arrow-left-line"></i>
                 </div>
                 豊中PICOトップへ戻る
               </Link>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">カルチャーサークル/カルチャースクール</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+                カルチャーサークル/カルチャースクール
+              </h1>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                大人のための、あそびとまなびの時間です。<br />
+                大人のための、あそびとまなびの時間です。
                 <br />
-                「好きなことをもっとたのしみたい」<br />
-                「新しいことに、ちょっと挑戦してみたい」<br />
-                そんな気持ちを応援する、ユニークな講座をひらいています。<br />
+                <br />
+                「好きなことをもっとたのしみたい」
+                <br />
+                「新しいことに、ちょっと挑戦してみたい」
+                <br />
+                そんな気持ちを応援する、ユニークな講座をひらいています。
+                <br />
                 <br />
                 PICOではスクールやサークルをきっかけに、
                 <br />
@@ -794,7 +886,10 @@ const CultureSchoolPage: React.FC = () => {
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="relative">
                   <img
-                    src={heroEvent?.image ?? withBase('images/readdy/768d0223ae81cd791f14ac0c9ec38b83.jpeg')}
+                    src={
+                      heroEvent?.image ??
+                      withBase('images/readdy/768d0223ae81cd791f14ac0c9ec38b83.jpeg')
+                    }
                     alt={heroEvent?.title ?? 'カルチャースクール'}
                     className="w-full h-[480px] object-cover object-center"
                   />
@@ -809,9 +904,12 @@ const CultureSchoolPage: React.FC = () => {
                     </div>
                     {heroEvent?.locationLabel ?? '豊中PICO カルチャースクール'}
                   </div>
-                  <h3 className="font-bold text-lg mb-2">{heroEvent?.title ?? 'まもなく公開予定のスクール'}</h3>
+                  <h3 className="font-bold text-lg mb-2">
+                    {heroEvent?.title ?? 'まもなく公開予定のスクール'}
+                  </h3>
                   <p className="text-gray-600 text-sm mb-4">
-                    {heroEvent?.shortDescription ?? '近日公開の講座です。詳細が決まり次第こちらでお知らせします。'}
+                    {heroEvent?.shortDescription ??
+                      '近日公開の講座です。詳細が決まり次第こちらでお知らせします。'}
                   </p>
                   <div className="flex items-center justify-between">
                     <span
@@ -833,8 +931,12 @@ const CultureSchoolPage: React.FC = () => {
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-2 text-center sr-only">直近のカルチャースクール</h2>
-          <h2 className="text-3xl font-bold mb-2 text-center">直近のカルチャーサークル＆スクール</h2>
-          <p className="text-center text-gray-600 mb-8">WordPressのイベント登録で「スクール」種別になっている講座が自動表示されます。</p>
+          <h2 className="text-3xl font-bold mb-2 text-center">
+            直近のカルチャーサークル＆スクール
+          </h2>
+          <p className="text-center text-gray-600 mb-8">
+            WordPressのイベント登録で「スクール」種別になっている講座が自動表示されます。
+          </p>
 
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {CATEGORY_FILTERS.map((filter) => (
@@ -842,7 +944,9 @@ const CultureSchoolPage: React.FC = () => {
                 key={filter.key}
                 type="button"
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === filter.key ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  activeTab === filter.key
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
                 onClick={() => setActiveTab(filter.key)}
               >
@@ -857,9 +961,7 @@ const CultureSchoolPage: React.FC = () => {
             </div>
           )}
 
-          {loading && (
-            <p className="text-center text-sm text-gray-500 mb-6">読み込み中です…</p>
-          )}
+          {loading && <p className="text-center text-sm text-gray-500 mb-6">読み込み中です…</p>}
 
           {!loading && filteredEvents.length === 0 && (
             <div className="bg-gray-50 text-center py-12 rounded-lg text-gray-600">
@@ -874,12 +976,18 @@ const CultureSchoolPage: React.FC = () => {
               {filteredEvents.map((event) => (
                 <article key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="relative">
-                    <img src={event.image} alt={event.title} className="w-full h-72 object-cover object-top" />
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-72 object-cover object-top"
+                    />
                     <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
                       {event.scheduleLabel}
                     </div>
                     <div className="absolute top-3 right-3">
-                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${event.statusClassName}`}>
+                      <span
+                        className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${event.statusClassName}`}
+                      >
                         {event.statusLabel}
                       </span>
                     </div>
@@ -903,8 +1011,12 @@ const CultureSchoolPage: React.FC = () => {
                           .filter((tag) => tag !== 'all')
                           .slice(0, 2)
                           .map((tag) => (
-                            <span key={`${event.slug}-${tag}`} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                              {CATEGORY_FILTERS.find((filter) => filter.key === tag)?.label ?? 'カルチャー'}
+                            <span
+                              key={`${event.slug}-${tag}`}
+                              className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
+                            >
+                              {CATEGORY_FILTERS.find((filter) => filter.key === tag)?.label ??
+                                'カルチャー'}
                             </span>
                           ))}
                       </div>
@@ -927,11 +1039,15 @@ const CultureSchoolPage: React.FC = () => {
                 onClick={handleLoadMore}
                 disabled={loadingMore || !hasNextPage}
                 className={`inline-flex items-center bg-white border border-primary text-primary px-6 py-3 font-medium rounded-button whitespace-nowrap transition-colors ${
-                  loadingMore || !hasNextPage ? 'opacity-60 cursor-not-allowed' : 'hover:bg-primary/5'
+                  loadingMore || !hasNextPage
+                    ? 'opacity-60 cursor-not-allowed'
+                    : 'hover:bg-primary/5'
                 }`}
               >
                 <div className="w-5 h-5 flex items-center justify-center mr-2">
-                  <i className={loadingMore ? 'ri-loader-4-line animate-spin' : 'ri-refresh-line'}></i>
+                  <i
+                    className={loadingMore ? 'ri-loader-4-line animate-spin' : 'ri-refresh-line'}
+                  ></i>
                 </div>
                 {loadingMore ? '読み込み中…' : 'もっと読み込む'}
               </button>
@@ -948,7 +1064,11 @@ const CultureSchoolPage: React.FC = () => {
               <button
                 type="button"
                 className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100"
-                onClick={() => setCalendarMonth((prev) => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() - 1, 1)))}
+                onClick={() =>
+                  setCalendarMonth(
+                    (prev) => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() - 1, 1)),
+                  )
+                }
               >
                 <i className="ri-arrow-left-s-line"></i>
               </button>
@@ -956,7 +1076,11 @@ const CultureSchoolPage: React.FC = () => {
               <button
                 type="button"
                 className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100"
-                onClick={() => setCalendarMonth((prev) => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + 1, 1)))}
+                onClick={() =>
+                  setCalendarMonth(
+                    (prev) => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + 1, 1)),
+                  )
+                }
               >
                 <i className="ri-arrow-right-s-line"></i>
               </button>
@@ -1002,9 +1126,14 @@ const CultureSchoolPage: React.FC = () => {
                 </div>
                 <div className="space-y-3">
                   {selectedDay.events.map((item, index) => (
-                    <div key={`${item.event.slug}-${item.slot.isoDate}-${index}`} className="bg-white rounded-lg p-4 border border-gray-100">
+                    <div
+                      key={`${item.event.slug}-${item.slot.isoDate}-${index}`}
+                      className="bg-white rounded-lg p-4 border border-gray-100"
+                    >
                       <p className="font-semibold text-gray-800 mb-1">{item.event.title}</p>
-                      <p className="text-sm text-gray-600 mb-2">{item.slot.timeRangeLabel ?? '時間未定'}</p>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {item.slot.timeRangeLabel ?? '時間未定'}
+                      </p>
                       <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-3">
                         <span>{item.event.locationLabel}</span>
                         <span>{item.event.priceLabel}</span>
@@ -1045,15 +1174,24 @@ const CultureSchoolPage: React.FC = () => {
                         const cells = weeklySchedule[bucket.key][weekday];
                         if (cells.length === 0) {
                           return (
-                            <td key={`${bucket.key}-${weekday}`} className="py-3 px-4 text-center text-gray-300">
+                            <td
+                              key={`${bucket.key}-${weekday}`}
+                              className="py-3 px-4 text-center text-gray-300"
+                            >
                               ー
                             </td>
                           );
                         }
                         return (
-                          <td key={`${bucket.key}-${weekday}`} className="py-3 px-4 text-center bg-primary/5 text-gray-700">
+                          <td
+                            key={`${bucket.key}-${weekday}`}
+                            className="py-3 px-4 text-center bg-primary/5 text-gray-700"
+                          >
                             {cells.slice(0, 2).map((cell, index) => (
-                              <div key={`${cell.event.slug}-${cell.slot.isoDate}-${index}`} className="mb-2 last:mb-0">
+                              <div
+                                key={`${cell.event.slug}-${cell.slot.isoDate}-${index}`}
+                                className="mb-2 last:mb-0"
+                              >
                                 <p className="font-medium text-sm">{cell.event.title}</p>
                                 <p className="text-xs">{cell.slot.timeRangeLabel ?? '時間未定'}</p>
                               </div>
@@ -1085,13 +1223,17 @@ const CultureSchoolPage: React.FC = () => {
                       {step}
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg mb-2">{['講座を選ぶ', '体験・見学', '入会手続き'][step - 1]}</h4>
+                      <h4 className="font-bold text-lg mb-2">
+                        {['講座を選ぶ', '体験・見学', '入会手続き'][step - 1]}
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        {[
-                          '気になる講座をご覧いただき、詳細ページのフォームまたは店頭でお問い合わせください。',
-                          '講座によって体験や見学も可能です。お気軽にスタッフにご相談ください。',
-                          '申込書のご記入と初月受講料のお支払いで完了です。会員証をお渡しします。',
-                        ][step - 1]}
+                        {
+                          [
+                            '気になる講座をご覧いただき、詳細ページのフォームまたは店頭でお問い合わせください。',
+                            '講座によって体験や見学も可能です。お気軽にスタッフにご相談ください。',
+                            '申込書のご記入と初月受講料のお支払いで完了です。会員証をお渡しします。',
+                          ][step - 1]
+                        }
                       </p>
                     </div>
                   </div>
@@ -1108,7 +1250,9 @@ const CultureSchoolPage: React.FC = () => {
                     </div>
                     <h4 className="font-bold">オンライン予約</h4>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">各スクール詳細ページのフォームからお申し込みください。</p>
+                  <p className="text-gray-600 text-sm mb-3">
+                    各スクール詳細ページのフォームからお申し込みください。
+                  </p>
                 </div>
                 <div>
                   <div className="flex items-center mb-3">
@@ -1117,7 +1261,9 @@ const CultureSchoolPage: React.FC = () => {
                     </div>
                     <h4 className="font-bold">お電話</h4>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">お電話でもお問い合わせ・予約を承ります。</p>
+                  <p className="text-gray-600 text-sm mb-3">
+                    お電話でもお問い合わせ・予約を承ります。
+                  </p>
                   <p className="font-medium">
                     <a href="tel:06-7654-7069" className="hover:text-primary transition-colors">
                       06-7654-7069
@@ -1131,7 +1277,9 @@ const CultureSchoolPage: React.FC = () => {
                     </div>
                     <h4 className="font-bold">店頭</h4>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">豊中PICO店頭にて直接お申し込みいただけます。</p>
+                  <p className="text-gray-600 text-sm mb-3">
+                    豊中PICO店頭にて直接お申し込みいただけます。
+                  </p>
                   <p className="text-gray-600 text-xs mb-2">
                     〒560-0012
                     <br />
@@ -1166,8 +1314,13 @@ const CultureSchoolPage: React.FC = () => {
           <h2 className="text-3xl font-bold mb-8 text-center">よくある質問</h2>
           <div className="max-w-3xl mx-auto">
             {FAQ_ITEMS.map((faq, index) => (
-              <div key={faq.question} className="bg-white rounded-lg shadow-md overflow-hidden mb-4">
-                <div className={`faq-item ${index === activeFaq ? 'border-b border-gray-100' : ''}`}>
+              <div
+                key={faq.question}
+                className="bg-white rounded-lg shadow-md overflow-hidden mb-4"
+              >
+                <div
+                  className={`faq-item ${index === activeFaq ? 'border-b border-gray-100' : ''}`}
+                >
                   <button
                     type="button"
                     className="faq-question w-full flex justify-between items-center p-5 font-medium text-left hover:bg-gray-50 transition-colors"
@@ -1180,7 +1333,11 @@ const CultureSchoolPage: React.FC = () => {
                   </button>
                   <div
                     className={`faq-answer px-5 pb-5 ${activeFaq === index ? 'bg-gray-50' : ''}`}
-                    style={{ maxHeight: activeFaq === index ? '1000px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease-in-out' }}
+                    style={{
+                      maxHeight: activeFaq === index ? '1000px' : '0',
+                      overflow: 'hidden',
+                      transition: 'max-height 0.3s ease-in-out',
+                    }}
                   >
                     <p className="text-gray-600">{faq.answer}</p>
                   </div>
@@ -1217,7 +1374,11 @@ const CultureSchoolPage: React.FC = () => {
           <div className="grid grid-cols-3 gap-1 mb-8">
             {INSTAGRAM_POSTS.map((post) => (
               <div key={post.id} className="relative group">
-                <img src={post.image} alt={post.alt} className="w-full aspect-square object-cover" />
+                <img
+                  src={post.image}
+                  alt={post.alt}
+                  className="w-full aspect-square object-cover"
+                />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
                   <div className="flex items-center text-white space-x-4">
                     <span className="flex items-center">
@@ -1267,7 +1428,17 @@ const CultureSchoolPage: React.FC = () => {
                 <div>
                   <h3 className="text-xl font-bold mb-4">募集分野</h3>
                   <div className="grid grid-cols-3 gap-3 text-sm text-center text-gray-700">
-                    {['アート・クラフト', '文学・教養', '音楽・表現', '健康・癒し', 'プログラミング', '語学', '写真・動画', '自然・環境', 'STEM・テクノロジー'].map((label) => (
+                    {[
+                      'アート・クラフト',
+                      '文学・教養',
+                      '音楽・表現',
+                      '健康・癒し',
+                      'プログラミング',
+                      '語学',
+                      '写真・動画',
+                      '自然・環境',
+                      'STEM・テクノロジー',
+                    ].map((label) => (
                       <div key={label} className="bg-white rounded p-3">
                         <span>{label}</span>
                       </div>
@@ -1320,7 +1491,8 @@ const transformSchoolEvent = (node: GraphqlEventNode | null): SchoolEventDisplay
   const description = descriptionSource || '詳細はスクールページをご覧ください。';
 
   const detailUrl = `/school-detail/${node.slug}`;
-  const reservationUrl = node.eventDetailExt?.contact?.reservationOverrideUrl ?? node.eventDetailExt?.contact?.formUrl;
+  const reservationUrl =
+    node.eventDetailExt?.contact?.reservationOverrideUrl ?? node.eventDetailExt?.contact?.formUrl;
   const image = node.eventCpt?.mainImage?.node?.sourceUrl ?? EVENT_IMAGE_FALLBACK;
 
   return {

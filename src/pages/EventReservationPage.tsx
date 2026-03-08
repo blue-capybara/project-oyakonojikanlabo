@@ -199,11 +199,7 @@ const formatSlotRange = (slot: EventSlot, includeDate: boolean) => {
   const start = formatTimeLabel(slot.startTime);
   const end = formatTimeLabel(slot.endTime);
 
-  const timeLabel = start
-    ? `${start}${end ? `〜${end}` : ''}`
-    : end
-      ? `〜${end}`
-      : '';
+  const timeLabel = start ? `${start}${end ? `〜${end}` : ''}` : end ? `〜${end}` : '';
 
   const label = [dateLabel, timeLabel].filter(Boolean).join(' ');
   return label || null;
@@ -252,7 +248,7 @@ const formatSchedule = (slot?: EventSlot) => {
 
   const timeLabel = normalizedStart
     ? `${normalizedStart}${normalizedEnd ? `〜${normalizedEnd}` : ''}`
-    : normalizedEnd ?? '';
+    : (normalizedEnd ?? '');
 
   return [dateLabel, timeLabel].filter(Boolean).join(' ');
 };
@@ -351,7 +347,7 @@ const buildTimeScheduleEntries = (
       const timeParts = [startTime, endTime]
         .map((value) => (value ? value.trim() : ''))
         .filter((value) => value.length > 0);
-      const timeLabel = timeParts.length > 0 ? timeParts.join('〜') : label ?? '時間未定';
+      const timeLabel = timeParts.length > 0 ? timeParts.join('〜') : (label ?? '時間未定');
 
       const activityParts = [label, note]
         .map((value) => (value ? value.trim() : ''))
@@ -435,7 +431,9 @@ const formatReservationEvent = (node: EventNode): ReservationEvent => {
     price: formatPrice(eventCpt.price, eventCpt.priceType),
     capacity: formatCapacity(eventCpt.capacity),
     mapUrl: eventCpt.venueMapsUrl ?? undefined,
-    schedule: buildTimeScheduleEntries(node.eventDetailExt?.timeSchedule) ?? createScheduleEntries(eventCpt.singleSlots),
+    schedule:
+      buildTimeScheduleEntries(node.eventDetailExt?.timeSchedule) ??
+      createScheduleEntries(eventCpt.singleSlots),
     timeSlots: createTimeSlots(eventCpt.singleSlots),
     dateOptions,
     primarySlot,
@@ -571,30 +569,27 @@ const EventReservationPage: React.FC = () => {
     });
   }, [event?.timeSlots]);
 
-  const fetchReservationsForUser = useCallback(
-    async (user: User, eventSlug: string) => {
-      setReservationsLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('reservations')
-        .select(
-          'id, reservation_code, customer_name, customer_email, event_title, event_date, time_slot, quantity, status, phone, special_requests, created_at'
-        )
-        .eq('user_id', user.id)
-        .eq('event_slug', eventSlug)
-        .order('created_at', { ascending: false });
+  const fetchReservationsForUser = useCallback(async (user: User, eventSlug: string) => {
+    setReservationsLoading(true);
+    const { data, error: fetchError } = await supabase
+      .from('reservations')
+      .select(
+        'id, reservation_code, customer_name, customer_email, event_title, event_date, time_slot, quantity, status, phone, special_requests, created_at',
+      )
+      .eq('user_id', user.id)
+      .eq('event_slug', eventSlug)
+      .order('created_at', { ascending: false });
 
-      if (fetchError) {
-        setReservationError(`予約情報の取得に失敗しました: ${fetchError.message}`);
-        setExistingReservations([]);
-      } else {
-        setReservationError(null);
-        setExistingReservations((data ?? []) as ReservationRow[]);
-      }
+    if (fetchError) {
+      setReservationError(`予約情報の取得に失敗しました: ${fetchError.message}`);
+      setExistingReservations([]);
+    } else {
+      setReservationError(null);
+      setExistingReservations((data ?? []) as ReservationRow[]);
+    }
 
-      setReservationsLoading(false);
-    },
-    [],
-  );
+    setReservationsLoading(false);
+  }, []);
 
   const applyUserProfile = useCallback(
     (user: User | null) => {
@@ -741,14 +736,12 @@ const EventReservationPage: React.FC = () => {
     const metadataName = typeof metadata.name === 'string' ? metadata.name.trim() : '';
     const derivedName = profileName.trim() || metadataName;
     const resolvedEmail =
-      profileEmail.trim().length > 0
-        ? profileEmail.trim()
-        : (currentUser.email ?? '').trim();
+      profileEmail.trim().length > 0 ? profileEmail.trim() : (currentUser.email ?? '').trim();
     if (!derivedName) {
       setReservationError(
         showMembershipFeatures
           ? 'プロフィールに氏名が登録されていません。マイページから氏名を登録してからお申し込みください。'
-          : 'プロフィールに氏名が登録されていません。恐れ入りますがお問い合わせフォームよりご相談ください。'
+          : 'プロフィールに氏名が登録されていません。恐れ入りますがお問い合わせフォームよりご相談ください。',
       );
       return;
     }
@@ -756,7 +749,7 @@ const EventReservationPage: React.FC = () => {
       setReservationError(
         showMembershipFeatures
           ? 'プロフィールのメールアドレスが確認できません。マイページでメールアドレスを設定してください。'
-          : 'プロフィールのメールアドレスが確認できません。恐れ入りますがお問い合わせフォームよりご連絡ください。'
+          : 'プロフィールのメールアドレスが確認できません。恐れ入りますがお問い合わせフォームよりご連絡ください。',
       );
       return;
     }
@@ -870,8 +863,7 @@ const EventReservationPage: React.FC = () => {
     : fallbackEventDate;
   const displayedReservationTimeSlot =
     (completedReservation?.time_slot ?? selectedTimeSlot) || '調整中';
-  const displayedReservationQuantity =
-    completedReservation?.quantity ?? quantity;
+  const displayedReservationQuantity = completedReservation?.quantity ?? quantity;
   const displayedEventTitle = completedReservation?.event_title ?? event?.title ?? 'イベント情報';
 
   if (loading) {
@@ -909,11 +901,15 @@ const EventReservationPage: React.FC = () => {
       <div className="bg-gray-100 py-2">
         <div className="container mx-auto px-4">
           <div className="flex items-center text-sm text-gray-600">
-            <Link to="/" className="hover:text-primary">HOME</Link>
+            <Link to="/" className="hover:text-primary">
+              HOME
+            </Link>
             <div className="w-4 h-4 flex items-center justify-center mx-1">
               <i className="ri-arrow-right-s-line"></i>
             </div>
-            <Link to="/event" className="hover:text-primary">イベント</Link>
+            <Link to="/event" className="hover:text-primary">
+              イベント
+            </Link>
             <div className="w-4 h-4 flex items-center justify-center mx-1">
               <i className="ri-arrow-right-s-line"></i>
             </div>
@@ -931,9 +927,7 @@ const EventReservationPage: React.FC = () => {
                   <i className="ri-calendar-event-line mr-2"></i>
                   {event.region}
                 </p>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                  {event.title}
-                </h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{event.title}</h1>
                 {event.summaryHtml ? (
                   <div
                     className="text-gray-700 mb-6 leading-relaxed space-y-4"
@@ -942,7 +936,9 @@ const EventReservationPage: React.FC = () => {
                 ) : event.summaryText ? (
                   <p className="text-gray-700 mb-6 leading-relaxed">{event.summaryText}</p>
                 ) : (
-                  <p className="text-gray-700 mb-6 leading-relaxed">イベントの詳細は順次更新予定です。</p>
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    イベントの詳細は順次更新予定です。
+                  </p>
                 )}
                 <div className="space-y-3 text-gray-700">
                   <div className="flex items-start">
@@ -1060,7 +1056,10 @@ const EventReservationPage: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="loginPassword" className="block text-gray-700 font-medium mb-2">
+                      <label
+                        htmlFor="loginPassword"
+                        className="block text-gray-700 font-medium mb-2"
+                      >
                         パスワード
                       </label>
                       <div className="relative">
@@ -1092,9 +1091,7 @@ const EventReservationPage: React.FC = () => {
                         パスワードをお忘れの方
                       </button>
                     </div>
-                    {loginMessage && (
-                      <p className="text-sm text-red-600">{loginMessage}</p>
-                    )}
+                    {loginMessage && <p className="text-sm text-red-600">{loginMessage}</p>}
                     <button
                       type="submit"
                       className={`w-full bg-primary text-white px-6 py-3 font-medium rounded-button hover:bg-primary/90 transition-colors ${
@@ -1126,7 +1123,8 @@ const EventReservationPage: React.FC = () => {
                       </button>
                     </div>
                     <div className="bg-blue-50 border border-blue-100 text-blue-700 rounded-lg px-4 py-3 text-xs leading-relaxed">
-                      ※ 会員アカウントでログインすると、ご予約内容がマイページで確認できるようになります。
+                      ※
+                      会員アカウントでログインすると、ご予約内容がマイページで確認できるようになります。
                     </div>
                   </form>
                 </div>
@@ -1146,23 +1144,33 @@ const EventReservationPage: React.FC = () => {
                     <div className="bg-gray-50 rounded-lg p-6 mb-6 text-left space-y-3">
                       <div className="flex justify-between text-sm text-gray-600">
                         <span>予約番号</span>
-                        <span className="font-medium text-gray-800">{displayedReservationCode}</span>
+                        <span className="font-medium text-gray-800">
+                          {displayedReservationCode}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm text-gray-600">
                         <span>イベント名</span>
-                        <span className="font-medium text-gray-800 text-right ml-4">{displayedEventTitle}</span>
+                        <span className="font-medium text-gray-800 text-right ml-4">
+                          {displayedEventTitle}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm text-gray-600">
                         <span>日時</span>
-                        <span className="font-medium text-gray-800 text-right ml-4">{displayedReservationDate}</span>
+                        <span className="font-medium text-gray-800 text-right ml-4">
+                          {displayedReservationDate}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm text-gray-600">
                         <span>参加時間帯</span>
-                        <span className="font-medium text-gray-800">{displayedReservationTimeSlot}</span>
+                        <span className="font-medium text-gray-800">
+                          {displayedReservationTimeSlot}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm text-gray-600">
                         <span>参加人数</span>
-                        <span className="font-medium text-gray-800">{displayedReservationQuantity}名</span>
+                        <span className="font-medium text-gray-800">
+                          {displayedReservationQuantity}名
+                        </span>
                       </div>
                     </div>
                     <div className="bg-yellow-50 border border-yellow-100 text-yellow-800 rounded-lg px-4 py-4 text-sm mb-8">
@@ -1196,7 +1204,9 @@ const EventReservationPage: React.FC = () => {
                   </div>
                   <form onSubmit={handleReservationSubmit} className="p-6 md:p-8 space-y-6">
                     <div className="space-y-4">
-                      <h3 className="text-lg font-bold pb-2 border-b border-gray-200">お客様情報</h3>
+                      <h3 className="text-lg font-bold pb-2 border-b border-gray-200">
+                        お客様情報
+                      </h3>
                       <div>
                         <p className="block text-gray-700 font-medium mb-2">
                           氏名 <span className="text-primary">*</span>
@@ -1267,7 +1277,9 @@ const EventReservationPage: React.FC = () => {
                           autoComplete="tel"
                           required
                         />
-                        <p className="text-xs text-gray-500 mt-1">当日連絡の取れる番号をご記入ください。</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          当日連絡の取れる番号をご記入ください。
+                        </p>
                       </div>
                     </div>
 
@@ -1317,7 +1329,9 @@ const EventReservationPage: React.FC = () => {
                               <label
                                 key={label}
                                 className={`border border-gray-300 rounded-button px-4 py-3 flex items-center cursor-pointer transition-colors ${
-                                  selectedTimeSlot === label ? 'border-primary bg-primary/5' : 'hover:border-primary'
+                                  selectedTimeSlot === label
+                                    ? 'border-primary bg-primary/5'
+                                    : 'hover:border-primary'
                                 } ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
                               >
                                 <input
@@ -1335,11 +1349,16 @@ const EventReservationPage: React.FC = () => {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-sm text-gray-500">現在選択可能な時間帯は調整中です。後日ご案内いたします。</p>
+                          <p className="text-sm text-gray-500">
+                            現在選択可能な時間帯は調整中です。後日ご案内いたします。
+                          </p>
                         )}
                       </div>
                       <div>
-                        <label htmlFor="specialRequests" className="block text-gray-700 font-medium mb-2">
+                        <label
+                          htmlFor="specialRequests"
+                          className="block text-gray-700 font-medium mb-2"
+                        >
                           その他ご要望
                         </label>
                         <textarea
@@ -1360,7 +1379,9 @@ const EventReservationPage: React.FC = () => {
                         <ol className="list-decimal pl-5 space-y-2">
                           <li>予約は先着順で承ります。定員に達した場合は締め切ります。</li>
                           <li>キャンセルは前日までにメールまたはお電話でご連絡をお願いします。</li>
-                          <li>当日の無断欠席が続いた場合、以降のご予約をお断りする場合があります。</li>
+                          <li>
+                            当日の無断欠席が続いた場合、以降のご予約をお断りする場合があります。
+                          </li>
                           <li>イベント内容は予告なく変更となる可能性があります。</li>
                           <li>会場内ではスタッフの案内に従ってください。</li>
                           <li>取得した個人情報はイベント運営以外の目的には使用しません。</li>
@@ -1374,7 +1395,9 @@ const EventReservationPage: React.FC = () => {
                           className="mr-3 mt-1"
                           required
                         />
-                        <span>上記の予約規約に同意します <span className="text-primary">*</span></span>
+                        <span>
+                          上記の予約規約に同意します <span className="text-primary">*</span>
+                        </span>
                       </label>
                       {agreementError && (
                         <p className="text-sm text-primary">予約規約への同意が必要です。</p>
@@ -1382,7 +1405,8 @@ const EventReservationPage: React.FC = () => {
                     </div>
 
                     <div className="bg-blue-50 border border-blue-100 text-blue-700 rounded-lg px-4 py-3 text-xs leading-relaxed">
-                      ※ 送信された内容はSupabaseに保存されます。予約内容の変更・キャンセルをご希望の場合はお問い合わせください。
+                      ※
+                      送信された内容はSupabaseに保存されます。予約内容の変更・キャンセルをご希望の場合はお問い合わせください。
                     </div>
 
                     {reservationError && (
@@ -1429,7 +1453,9 @@ const EventReservationPage: React.FC = () => {
                       <li key={reservation.id} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                           <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wide">予約番号</p>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">
+                              予約番号
+                            </p>
                             <p className="text-base font-semibold text-gray-900">
                               {reservation.reservation_code || '未発行'}
                             </p>
@@ -1449,7 +1475,9 @@ const EventReservationPage: React.FC = () => {
                               {formatReservationDateTime(reservation.event_date)}
                             </p>
                             {reservation.time_slot && (
-                              <p className="mt-1 text-xs text-gray-500">時間帯: {reservation.time_slot}</p>
+                              <p className="mt-1 text-xs text-gray-500">
+                                時間帯: {reservation.time_slot}
+                              </p>
                             )}
                           </div>
                           <div>
@@ -1475,7 +1503,9 @@ const EventReservationPage: React.FC = () => {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-gray-500">まだこのイベントの予約は登録されていません。</p>
+                  <p className="text-sm text-gray-500">
+                    まだこのイベントの予約は登録されていません。
+                  </p>
                 )}
               </div>
             )}
@@ -1571,8 +1601,8 @@ const EventReservationPage: React.FC = () => {
               ご不明点は{' '}
               <Link to="/contact" className="underline text-primary hover:text-primary/80">
                 お問い合わせフォーム
-              </Link>
-              {' '}よりお気軽にご連絡ください。
+              </Link>{' '}
+              よりお気軽にご連絡ください。
             </div>
           </aside>
         </div>

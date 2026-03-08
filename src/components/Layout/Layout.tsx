@@ -64,11 +64,16 @@ const Layout: React.FC<LayoutProps> = ({ children, showNewsletter = false }) => 
         <section className="py-16 bg-primary text-white">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-2xl font-bold mb-4">親子の時間研究所ニュースレター会員（無料）</h2>
+              <h2 className="text-2xl font-bold mb-4">
+                親子の時間研究所ニュースレター会員（無料）
+              </h2>
               <p className="mb-8">
                 新作絵本グッズのご紹介や作家インタビュー、イベント案内など、カルチャーあふれるニュースレターをお届けします。
               </p>
-              <form className="flex flex-col gap-4 max-w-lg mx-auto" onSubmit={handleNewsletterSubmit}>
+              <form
+                className="flex flex-col gap-4 max-w-lg mx-auto"
+                onSubmit={handleNewsletterSubmit}
+              >
                 <div className="flex flex-col sm:flex-row gap-4">
                   <input
                     type="email"
@@ -87,8 +92,12 @@ const Layout: React.FC<LayoutProps> = ({ children, showNewsletter = false }) => 
                   </button>
                 </div>
               </form>
-              {newsletterMessage && <p className="text-sm mt-4 text-white/80">{newsletterMessage}</p>}
-              <p className="text-sm mt-4 text-white/80">※登録することで親子の時間研究所STOREのメールマガジン購読に登録されます。</p>
+              {newsletterMessage && (
+                <p className="text-sm mt-4 text-white/80">{newsletterMessage}</p>
+              )}
+              <p className="text-sm mt-4 text-white/80">
+                ※登録することで親子の時間研究所STOREのメールマガジン購読に登録されます。
+              </p>
               <p className="text-sm mt-4 text-white/80">※登録は無料です。いつでも解除できます。</p>
             </div>
           </div>

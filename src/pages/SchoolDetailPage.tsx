@@ -83,7 +83,12 @@ interface GraphqlEventDetailExt {
   contact?: GraphqlContact | null;
   benefits?: Array<{ text?: string | null } | null> | null;
   belongings?: Array<{ text?: string | null } | null> | null;
-  timeSchedule?: Array<{ startTime?: string | null; endTime?: string | null; label?: string | null; note?: string | null } | null> | null;
+  timeSchedule?: Array<{
+    startTime?: string | null;
+    endTime?: string | null;
+    label?: string | null;
+    note?: string | null;
+  } | null> | null;
   gallery?: {
     nodes?: (GraphqlImageNode | null)[] | null;
   } | null;
@@ -206,7 +211,10 @@ interface ArtistProfile {
 
 const stripHtml = (html?: string | null) => {
   if (!html) return '';
-  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 const createIsoDate = (value?: string | null) => {
@@ -246,12 +254,24 @@ const buildSlots = (slots?: (GraphqlSlot | null)[] | null): NormalizedSlot[] => 
       if (!date) return null;
       const startTime = formatTimeLabel(slot?.startTime);
       const endTime = formatTimeLabel(slot?.endTime);
-      const timeRange = startTime ? (endTime ? `${startTime}〜${endTime}` : `${startTime}〜`) : endTime ? `〜${endTime}` : undefined;
+      const timeRange = startTime
+        ? endTime
+          ? `${startTime}〜${endTime}`
+          : `${startTime}〜`
+        : endTime
+          ? `〜${endTime}`
+          : undefined;
       return {
         isoDate,
         date,
         weekday: date.getUTCDay(),
-        dateLabel: date.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short', timeZone: 'Asia/Tokyo' }),
+        dateLabel: date.toLocaleDateString('ja-JP', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          weekday: 'short',
+          timeZone: 'Asia/Tokyo',
+        }),
         timeRange,
         startTime,
         endTime,
@@ -262,14 +282,19 @@ const buildSlots = (slots?: (GraphqlSlot | null)[] | null): NormalizedSlot[] => 
   return normalized.sort((a, b) => a.date.getTime() - b.date.getTime());
 };
 
-const buildLocationLabel = (eventCpt?: GraphqlEventCpt | null, regions?: GraphqlEventNode['eventRegions']) => {
+const buildLocationLabel = (
+  eventCpt?: GraphqlEventCpt | null,
+  regions?: GraphqlEventNode['eventRegions'],
+) => {
   const venueNames = eventCpt?.venueRef?.nodes
     ?.map((node) => node?.title)
     .filter((title): title is string => Boolean(title));
   if (venueNames && venueNames.length > 0) {
     return venueNames.join('・');
   }
-  const regionNames = regions?.nodes?.map((node) => node?.name).filter((name): name is string => Boolean(name));
+  const regionNames = regions?.nodes
+    ?.map((node) => node?.name)
+    .filter((name): name is string => Boolean(name));
   if (regionNames && regionNames.length > 0) {
     return regionNames.join('・');
   }
@@ -278,7 +303,8 @@ const buildLocationLabel = (eventCpt?: GraphqlEventCpt | null, regions?: Graphql
 
 const formatPriceLabel = (price?: number | null, priceType?: string | null) => {
   if (priceType === 'free' || price === 0) return '参加費：無料';
-  if (typeof price === 'number' && Number.isFinite(price)) return `参加費：¥${price.toLocaleString()}`;
+  if (typeof price === 'number' && Number.isFinite(price))
+    return `参加費：¥${price.toLocaleString()}`;
   return '参加費：各講座ページをご確認ください';
 };
 
@@ -365,17 +391,29 @@ const transformSchoolEventDetail = (node: GraphqlEventNode | null): SchoolEventD
   if (!isSchoolEvent(node.eventCpt?.eventType)) return null;
 
   const slots = buildSlots(node.eventCpt?.singleSlots);
-  const scheduleLines = slots.length > 0 ? slots.map((slot) => formatScheduleLine(slot)) : ['日程調整中'];
-  const galleryNodes = node.eventDetailExt?.gallery?.nodes?.filter((img): img is GraphqlImageNode => Boolean(img?.sourceUrl)) ?? [];
+  const scheduleLines =
+    slots.length > 0 ? slots.map((slot) => formatScheduleLine(slot)) : ['日程調整中'];
+  const galleryNodes =
+    node.eventDetailExt?.gallery?.nodes?.filter((img): img is GraphqlImageNode =>
+      Boolean(img?.sourceUrl),
+    ) ?? [];
 
   if (galleryNodes.length === 0 && node.eventCpt?.mainImage?.node?.sourceUrl) {
     galleryNodes.push(node.eventCpt.mainImage.node);
   }
 
-  const benefits = node.eventDetailExt?.benefits?.map((benefit) => benefit?.text?.trim()).filter((text): text is string => Boolean(text)) ?? [];
-  const belongings = node.eventDetailExt?.belongings?.map((item) => item?.text?.trim()).filter((text): text is string => Boolean(text)) ?? [];
+  const benefits =
+    node.eventDetailExt?.benefits
+      ?.map((benefit) => benefit?.text?.trim())
+      .filter((text): text is string => Boolean(text)) ?? [];
+  const belongings =
+    node.eventDetailExt?.belongings
+      ?.map((item) => item?.text?.trim())
+      .filter((text): text is string => Boolean(text)) ?? [];
   const notes = splitNotes(node.eventCpt?.notes);
-  const timeSchedule = node.eventDetailExt?.timeSchedule?.filter((entry): entry is ScheduleEntry => Boolean(entry)) ?? [];
+  const timeSchedule =
+    node.eventDetailExt?.timeSchedule?.filter((entry): entry is ScheduleEntry => Boolean(entry)) ??
+    [];
   const openingLines = splitMultilineText(node.eventCpt?.schoolOpeningText);
   const venueLines = splitMultilineText(node.eventCpt?.schoolVenueText);
   const priceLines = splitMultilineText(node.eventCpt?.schoolPriceText);
@@ -384,10 +422,13 @@ const transformSchoolEventDetail = (node: GraphqlEventNode | null): SchoolEventD
   const curriculum = transformCurriculumEntries(node.eventCpt?.schoolCurriculum);
 
   const summaryHtml = node.eventCpt?.summary?.trim() || null;
-  const summaryText = stripHtml(summaryHtml ?? undefined) || stripHtml(node.eventDetailExt?.detailBody) || 'スクール詳細を確認してください。';
+  const summaryText =
+    stripHtml(summaryHtml ?? undefined) ||
+    stripHtml(node.eventDetailExt?.detailBody) ||
+    'スクール詳細を確認してください。';
   const artistNodes =
-    node.eventCpt?.artists?.nodes?.filter(
-      (artist): artist is GraphqlArtistRef => Boolean(artist?.slug),
+    node.eventCpt?.artists?.nodes?.filter((artist): artist is GraphqlArtistRef =>
+      Boolean(artist?.slug),
     ) ?? [];
   const artistSlugs = artistNodes.map((artist) => artist.slug!) ?? [];
   const artistRefs: ArtistSummary[] = artistNodes.map((artist) => ({
@@ -426,29 +467,34 @@ const transformSchoolEventDetail = (node: GraphqlEventNode | null): SchoolEventD
   };
 };
 
-const transformArtistDetail = (node: {
-  slug?: string | null;
-  title?: string | null;
-  content?: string | null;
-  featuredImage?: GraphqlImage | null;
-  artistInformation?: {
-    name?: string | null;
+const transformArtistDetail = (
+  node: {
+    slug?: string | null;
     title?: string | null;
-    email?: string | null;
-    phone?: string | null;
-    profileText?: string | null;
-    expertiseFields?: string[] | null;
-    website?: string | null;
-    instagram?: string | null;
-    notes?: string | null;
-    profileImage?: GraphqlImage | null;
-    thumbnails?: {
-      nodes?: (GraphqlImageNode | null)[] | null;
+    content?: string | null;
+    featuredImage?: GraphqlImage | null;
+    artistInformation?: {
+      name?: string | null;
+      title?: string | null;
+      email?: string | null;
+      phone?: string | null;
+      profileText?: string | null;
+      expertiseFields?: string[] | null;
+      website?: string | null;
+      instagram?: string | null;
+      notes?: string | null;
+      profileImage?: GraphqlImage | null;
+      thumbnails?: {
+        nodes?: (GraphqlImageNode | null)[] | null;
+      } | null;
     } | null;
-  } | null;
-} | null): ArtistProfile | null => {
+  } | null,
+): ArtistProfile | null => {
   if (!node || !node.slug) return null;
-  const gallery = node.artistInformation?.thumbnails?.nodes?.filter((img): img is GraphqlImageNode => Boolean(img?.sourceUrl)) ?? [];
+  const gallery =
+    node.artistInformation?.thumbnails?.nodes?.filter((img): img is GraphqlImageNode =>
+      Boolean(img?.sourceUrl),
+    ) ?? [];
   const snsLinks = buildArtistSnsLinks(node.artistInformation);
   return {
     slug: node.slug,
@@ -462,7 +508,11 @@ const transformArtistDetail = (node: {
   };
 };
 
-const FALLBACK_ITEMS = ['筆記用具', '生年月日のわかるもの（免許証など）', '相談内容のメモ（あれば）'];
+const FALLBACK_ITEMS = [
+  '筆記用具',
+  '生年月日のわかるもの（免許証など）',
+  '相談内容のメモ（あれば）',
+];
 
 const FALLBACK_NOTES = [
   '予約時間の10分前までにお越しください',
@@ -476,7 +526,10 @@ const FALLBACK_INSTRUCTOR = {
   title: '絵本作家 / イラストレーター',
   bio: '1980年大阪府生まれ。絵本作家、イラストレーター。大学で美術を学んだ後、出版社で編集者として勤務。2010年に独立し、代表作「もりのともだち」シリーズは累計10万部を突破。',
   image: withBase('images/readdy/a92976d454ad111841ae77d449541903.jpeg'),
-  gallery: [withBase('images/readdy/0c4b7443cdb1014111b64030c8b51ad9.jpeg'), withBase('images/readdy/b43238d65703b6c37b252ca7691ddf63.jpeg')],
+  gallery: [
+    withBase('images/readdy/0c4b7443cdb1014111b64030c8b51ad9.jpeg'),
+    withBase('images/readdy/b43238d65703b6c37b252ca7691ddf63.jpeg'),
+  ],
   expertise: ['アート', 'カウンセリング'],
   snsLinks: [{ label: 'Instagram', url: 'https://www.instagram.com/' }],
 };
@@ -642,7 +695,6 @@ const GET_ARTIST_DETAIL = gql`
   }
 `;
 
-
 const SchoolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const slug = id ?? '';
@@ -684,7 +736,11 @@ const SchoolDetailPage: React.FC = () => {
       setEventLoading(true);
       setEventError(null);
       try {
-        const data = await request<GraphqlEventResponse>(GRAPHQL_ENDPOINT, GET_SCHOOL_EVENT_DETAIL, { slug });
+        const data = await request<GraphqlEventResponse>(
+          GRAPHQL_ENDPOINT,
+          GET_SCHOOL_EVENT_DETAIL,
+          { slug },
+        );
         if (!isMounted) return;
         const transformed = transformSchoolEventDetail(data.event);
         if (!transformed) {
@@ -710,7 +766,9 @@ const SchoolDetailPage: React.FC = () => {
           setActiveArtistSlug(null);
           setArtistLoading(false);
           if (transformed.artistRefs.length > 0) {
-            setArtistError('講師情報が正しく設定されていません。管理画面で作家スラッグを確認してください。');
+            setArtistError(
+              '講師情報が正しく設定されていません。管理画面で作家スラッグを確認してください。',
+            );
           } else {
             setArtistError(null);
           }
@@ -757,7 +815,9 @@ const SchoolDetailPage: React.FC = () => {
       try {
         setArtistLoading(true);
         setArtistError(null);
-        const data = await request<GraphqlArtistResponse>(GRAPHQL_ENDPOINT, GET_ARTIST_DETAIL, { slug: activeArtistSlug });
+        const data = await request<GraphqlArtistResponse>(GRAPHQL_ENDPOINT, GET_ARTIST_DETAIL, {
+          slug: activeArtistSlug,
+        });
         if (cancelled) return;
         const transformed = transformArtistDetail(data.artist);
         if (!transformed) {
@@ -812,7 +872,10 @@ const SchoolDetailPage: React.FC = () => {
     setShowLoginModal(false);
   };
 
-  const shareLink = typeof window !== 'undefined' ? window.location.href : `https://oyakonojikanlabo.jp/school-detail/${slug}`;
+  const shareLink =
+    typeof window !== 'undefined'
+      ? window.location.href
+      : `https://oyakonojikanlabo.jp/school-detail/${slug}`;
 
   const handleCopyShareLink = async () => {
     try {
@@ -832,8 +895,10 @@ const SchoolDetailPage: React.FC = () => {
 
   const galleryImages = useMemo(() => {
     const title = eventData?.title ?? 'スクールのギャラリー画像';
-    const rawNodes = eventData?.gallery?.filter((img): img is GraphqlImageNode => Boolean(img?.sourceUrl)) ?? [];
-    const nodes = rawNodes.length > 0 ? rawNodes : [{ sourceUrl: EVENT_IMAGE_FALLBACK, altText: title }];
+    const rawNodes =
+      eventData?.gallery?.filter((img): img is GraphqlImageNode => Boolean(img?.sourceUrl)) ?? [];
+    const nodes =
+      rawNodes.length > 0 ? rawNodes : [{ sourceUrl: EVENT_IMAGE_FALLBACK, altText: title }];
     const seen = new Set<string>();
     const deduped: { url: string; alt: string }[] = [];
     nodes.forEach((node) => {
@@ -860,13 +925,21 @@ const SchoolDetailPage: React.FC = () => {
   const locationLabel = eventData?.locationLabel ?? '豊中PICO カルチャースクール';
   const priceLabel = eventData?.priceLabel ?? '参加費：お問い合わせください';
   const capacityLabel = eventData?.capacityLabel ?? '定員：お問い合わせください';
-  const openingLines = eventData?.openingLines && eventData.openingLines.length > 0 ? eventData.openingLines : scheduleLines;
-  const venueLines = eventData?.venueLines && eventData.venueLines.length > 0 ? eventData.venueLines : [locationLabel];
-  const priceLines = eventData?.priceLines && eventData.priceLines.length > 0 ? eventData.priceLines : [priceLabel];
+  const openingLines =
+    eventData?.openingLines && eventData.openingLines.length > 0
+      ? eventData.openingLines
+      : scheduleLines;
+  const venueLines =
+    eventData?.venueLines && eventData.venueLines.length > 0
+      ? eventData.venueLines
+      : [locationLabel];
+  const priceLines =
+    eventData?.priceLines && eventData.priceLines.length > 0 ? eventData.priceLines : [priceLabel];
   const capacityText = eventData?.capacityText ?? capacityLabel;
   const contactPhone = eventData?.contact?.phone ?? '06-7654-7069';
   const contactEmail = eventData?.contact?.email;
-  const reservationUrl = eventData?.contact?.reservationOverrideUrl ?? eventData?.contact?.formUrl ?? '';
+  const reservationUrl =
+    eventData?.contact?.reservationOverrideUrl ?? eventData?.contact?.formUrl ?? '';
   const mapUrl = eventData?.mapUrl ?? 'https://maps.app.goo.gl/TzUQQmCq7pUzkBRJ6';
   const benefits = eventData?.benefits ?? [];
   const belongingsList = eventData?.belongings?.length ? eventData.belongings : FALLBACK_ITEMS;
@@ -1003,16 +1076,17 @@ const SchoolDetailPage: React.FC = () => {
       </div>
 
       {eventError && (
-        <div className="bg-red-50 text-red-600 text-center text-sm py-3">
-          {eventError}
-        </div>
+        <div className="bg-red-50 text-red-600 text-center text-sm py-3">{eventError}</div>
       )}
 
       <section className="hero-gradient py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="w-full md:w-1/2">
-              <Link to="/culture-school" className="inline-flex items-center text-gray-600 hover:text-primary mb-4">
+              <Link
+                to="/culture-school"
+                className="inline-flex items-center text-gray-600 hover:text-primary mb-4"
+              >
                 <div className="w-5 h-5 flex items-center justify-center mr-1">
                   <i className="ri-arrow-left-line"></i>
                 </div>
@@ -1021,14 +1095,18 @@ const SchoolDetailPage: React.FC = () => {
               <span className="inline-block bg-primary/10 text-primary text-sm px-3 py-1 rounded-full mb-3">
                 {scheduleLines[0]}
               </span>
-              <h1 className="text-3xl md:text-4xl font-bold mb-6">{eventData?.title ?? 'スクール詳細'}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold mb-6">
+                {eventData?.title ?? 'スクール詳細'}
+              </h1>
               {eventData?.summaryHtml ? (
                 <div
                   className="event-rich-text text-lg text-gray-700 leading-relaxed mb-8"
                   dangerouslySetInnerHTML={{ __html: eventData.summaryHtml }}
                 />
               ) : (
-                <p className="text-lg text-gray-700 mb-8">{eventData?.summary ?? '詳細は近日公開予定です。'}</p>
+                <p className="text-lg text-gray-700 mb-8">
+                  {eventData?.summary ?? '詳細は近日公開予定です。'}
+                </p>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -1044,7 +1122,10 @@ const SchoolDetailPage: React.FC = () => {
                     ))}
                   </ul>
                   <div className="mt-3 text-sm">
-                    <a href={`tel:${contactPhone}`} className="inline-flex items-center text-primary hover:text-primary/80">
+                    <a
+                      href={`tel:${contactPhone}`}
+                      className="inline-flex items-center text-primary hover:text-primary/80"
+                    >
                       <div className="w-4 h-4 flex items-center justify-center mr-1">
                         <i className="ri-phone-line"></i>
                       </div>
@@ -1064,7 +1145,12 @@ const SchoolDetailPage: React.FC = () => {
                       <li key={`venue-${index}`}>{line}</li>
                     ))}
                   </ul>
-                  <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:text-primary/80 text-sm">
+                  <a
+                    href={mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-primary hover:text-primary/80 text-sm"
+                  >
                     <div className="w-4 h-4 flex items-center justify-center mr-1">
                       <i className="ri-map-2-line"></i>
                     </div>
@@ -1106,7 +1192,7 @@ const SchoolDetailPage: React.FC = () => {
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 {renderReservationButton(
-                  'bg-primary text-white px-8 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors flex-1 text-center'
+                  'bg-primary text-white px-8 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors flex-1 text-center',
                 )}
                 {showMembershipFeatures && (
                   <button
@@ -1220,11 +1306,19 @@ const SchoolDetailPage: React.FC = () => {
                   {!eventLoading && (
                     <>
                       {eventData?.detailHtml ? (
-                        <article className="event-rich-text" dangerouslySetInnerHTML={{ __html: eventData.detailHtml }} />
+                        <article
+                          className="event-rich-text"
+                          dangerouslySetInnerHTML={{ __html: eventData.detailHtml }}
+                        />
                       ) : eventData?.summaryHtml ? (
-                        <article className="event-rich-text" dangerouslySetInnerHTML={{ __html: eventData.summaryHtml }} />
+                        <article
+                          className="event-rich-text"
+                          dangerouslySetInnerHTML={{ __html: eventData.summaryHtml }}
+                        />
                       ) : (
-                        <p className="text-gray-700 leading-relaxed">{eventData?.summary ?? '詳細は準備中です。'}</p>
+                        <p className="text-gray-700 leading-relaxed">
+                          {eventData?.summary ?? '詳細は準備中です。'}
+                        </p>
                       )}
                       <div className="mt-8">
                         <h3 className="text-xl font-bold mb-3">持ち物</h3>
@@ -1259,13 +1353,18 @@ const SchoolDetailPage: React.FC = () => {
                   <h3 className="text-xl font-bold mb-4">こんな方におすすめです</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {audienceList.map((item, index) => (
-                      <div key={`${item.title}-${index}`} className="bg-gray-50 rounded-lg p-4 flex items-start">
+                      <div
+                        key={`${item.title}-${index}`}
+                        className="bg-gray-50 rounded-lg p-4 flex items-start"
+                      >
                         <div className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary rounded-full mr-3 flex-shrink-0 font-bold">
                           {item.icon ? <i className={item.icon}></i> : <span>{index + 1}</span>}
                         </div>
                         <div>
                           <h4 className="font-bold mb-1">{item.title}</h4>
-                          {item.description && <p className="text-gray-700 text-sm">{item.description}</p>}
+                          {item.description && (
+                            <p className="text-gray-700 text-sm">{item.description}</p>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1302,7 +1401,8 @@ const SchoolDetailPage: React.FC = () => {
                       {timeSchedule.map((entry, index) => (
                         <li key={`${entry.label}-${index}`} className="flex items-start">
                           <div className="w-24 text-sm text-gray-500">
-                            {formatTimeLabel(entry.startTime) ?? '--:--'}〜{formatTimeLabel(entry.endTime) ?? '--:--'}
+                            {formatTimeLabel(entry.startTime) ?? '--:--'}〜
+                            {formatTimeLabel(entry.endTime) ?? '--:--'}
                           </div>
                           <div>
                             <p className="font-bold">{entry.label ?? 'プログラム'}</p>
@@ -1328,7 +1428,7 @@ const SchoolDetailPage: React.FC = () => {
                     予約は専用フォームから受け付けております。下記のボタンから予約ページへお進みください。
                   </p>
                   {renderReservationButton(
-                    'block w-full bg-primary text-white text-center px-6 py-3 rounded-button font-medium hover:bg-primary/90 transition-colors'
+                    'block w-full bg-primary text-white text-center px-6 py-3 rounded-button font-medium hover:bg-primary/90 transition-colors',
                   )}
                 </div>
               </div>
@@ -1341,7 +1441,10 @@ const SchoolDetailPage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-bold mb-1">電話</h3>
-                      <a href={`tel:${contactPhone}`} className="text-gray-600 hover:text-primary transition-colors">
+                      <a
+                        href={`tel:${contactPhone}`}
+                        className="text-gray-600 hover:text-primary transition-colors"
+                      >
                         {contactPhone}
                       </a>
                     </div>
@@ -1353,7 +1456,10 @@ const SchoolDetailPage: React.FC = () => {
                       </div>
                       <div>
                         <h3 className="font-bold mb-1">メール</h3>
-                        <a href={`mailto:${contactEmail}`} className="text-gray-600 hover:text-primary transition-colors">
+                        <a
+                          href={`mailto:${contactEmail}`}
+                          className="text-gray-600 hover:text-primary transition-colors"
+                        >
                           {contactEmail}
                         </a>
                       </div>
@@ -1365,7 +1471,12 @@ const SchoolDetailPage: React.FC = () => {
                 <div className="p-6">
                   <h2 className="text-xl font-bold mb-4">アクセス</h2>
                   <p className="text-gray-600 mb-4">{locationLabel}</p>
-                  <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary font-medium hover:underline">
+                  <a
+                    href={mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-primary font-medium hover:underline"
+                  >
                     Googleマップを開く
                     <div className="w-5 h-5 flex items-center justify-center ml-1">
                       <i className="ri-arrow-right-line"></i>
@@ -1399,19 +1510,19 @@ const SchoolDetailPage: React.FC = () => {
                 ))}
               </div>
             )}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-                <div className="md:col-span-1">
-                  <div
-                    className="overflow-hidden rounded-2xl shadow-md"
-                    style={{ aspectRatio: '1 / 1', touchAction: instructorSwipe.touchAction }}
-                    {...instructorSwipe.bind}
-                  >
-                    <img
-                      src={activeInstructorImage.url}
-                      alt={activeInstructorImage.alt ?? instructor.name ?? '講師'}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+              <div className="md:col-span-1">
+                <div
+                  className="overflow-hidden rounded-2xl shadow-md"
+                  style={{ aspectRatio: '1 / 1', touchAction: instructorSwipe.touchAction }}
+                  {...instructorSwipe.bind}
+                >
+                  <img
+                    src={activeInstructorImage.url}
+                    alt={activeInstructorImage.alt ?? instructor.name ?? '講師'}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 {hasMultipleInstructorImages && (
                   <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
                     {instructorImages.map((image, index) => (
@@ -1426,22 +1537,36 @@ const SchoolDetailPage: React.FC = () => {
                         }`}
                         aria-label={`講師ギャラリー画像${index + 1}を表示`}
                       >
-                        <img src={image.url} alt={image.alt} className="h-full w-full object-cover" loading="lazy" />
+                        <img
+                          src={image.url}
+                          alt={image.alt}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
                       </button>
                     ))}
                   </div>
                 )}
               </div>
               <div className="md:col-span-2">
-                <h3 className="text-2xl font-bold mb-2">{instructor.name ?? FALLBACK_INSTRUCTOR.name}</h3>
-                <p className="text-primary font-medium mb-4">{instructor.title ?? FALLBACK_INSTRUCTOR.title}</p>
-                <p className="text-gray-700 leading-relaxed mb-6">{instructor.profileText ?? FALLBACK_INSTRUCTOR.bio}</p>
+                <h3 className="text-2xl font-bold mb-2">
+                  {instructor.name ?? FALLBACK_INSTRUCTOR.name}
+                </h3>
+                <p className="text-primary font-medium mb-4">
+                  {instructor.title ?? FALLBACK_INSTRUCTOR.title}
+                </p>
+                <p className="text-gray-700 leading-relaxed mb-6">
+                  {instructor.profileText ?? FALLBACK_INSTRUCTOR.bio}
+                </p>
                 {instructor.expertise && instructor.expertise.length > 0 && (
                   <div className="mb-4">
                     <h4 className="font-bold mb-2">得意分野</h4>
                     <div className="flex flex-wrap gap-2">
                       {instructor.expertise.map((field) => (
-                        <span key={field} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm">
+                        <span
+                          key={field}
+                          className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm"
+                        >
                           {field}
                         </span>
                       ))}
@@ -1453,7 +1578,13 @@ const SchoolDetailPage: React.FC = () => {
                     <h4 className="font-bold mb-2">SNS</h4>
                     <div className="flex flex-wrap gap-3 text-primary">
                       {instructor.snsLinks.map((sns) => (
-                        <a key={`${sns.label}-${sns.url}`} href={sns.url ?? '#'} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        <a
+                          key={`${sns.label}-${sns.url}`}
+                          href={sns.url ?? '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline"
+                        >
                           {sns.label ?? '公式サイト'}
                         </a>
                       ))}
@@ -1512,8 +1643,16 @@ const SchoolDetailPage: React.FC = () => {
               </button>
             </div>
             <div className="relative">
-              <input type="text" value={shareLink} readOnly className="w-full bg-gray-50 px-4 py-3 pr-24 rounded-lg text-sm" />
-              <button onClick={handleCopyShareLink} className="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:text-primary/80 font-medium text-sm">
+              <input
+                type="text"
+                value={shareLink}
+                readOnly
+                className="w-full bg-gray-50 px-4 py-3 pr-24 rounded-lg text-sm"
+              />
+              <button
+                onClick={handleCopyShareLink}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:text-primary/80 font-medium text-sm"
+              >
                 コピー
               </button>
             </div>
@@ -1536,10 +1675,16 @@ const SchoolDetailPage: React.FC = () => {
               お気に入りにチェックを付けると、マイページにアーカイブされ、いつでもチェックできます。機能を使用するには、ログインまたは会員登録が必要です。
             </p>
             <div className="flex flex-col gap-3">
-              <Link to="/login" className="bg-primary text-white px-6 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors text-center">
+              <Link
+                to="/login"
+                className="bg-primary text-white px-6 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors text-center"
+              >
                 ログイン
               </Link>
-              <Link to="/register" className="border border-primary text-primary px-6 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors text-center">
+              <Link
+                to="/register"
+                className="border border-primary text-primary px-6 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors text-center"
+              >
                 新規会員登録
               </Link>
             </div>

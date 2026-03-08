@@ -46,7 +46,9 @@ export const useFavorite = ({ targetType, targetId }: UseFavoriteOptions): UseFa
   const latestTargetId = useRef<string | null | undefined>(targetId);
 
   const sanitizedTargetId =
-    typeof targetId === 'string' && targetId.trim().length > 0 ? targetId.trim() : targetId ?? null;
+    typeof targetId === 'string' && targetId.trim().length > 0
+      ? targetId.trim()
+      : (targetId ?? null);
 
   const refresh = useCallback(async () => {
     latestTargetId.current = sanitizedTargetId;

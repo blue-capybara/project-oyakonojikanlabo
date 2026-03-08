@@ -71,11 +71,14 @@ const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
               <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
                 <i className="ri-vip-crown-line text-primary"></i>
               </div>
-              <span className="text-xs font-medium text-gray-400 px-2 py-1 bg-white rounded-full">準備中</span>
+              <span className="text-xs font-medium text-gray-400 px-2 py-1 bg-white rounded-full">
+                準備中
+              </span>
             </div>
             <h3 className="font-bold text-gray-900 mb-2">プレミアム会員になる</h3>
             <p className="text-sm text-gray-600 mb-3">
-              日々がちょっと楽しくなる特典を考えています。<br />
+              日々がちょっと楽しくなる特典を考えています。
+              <br />
               ご案内まで、もうしばらくお待ちください。
             </p>
             <ul className="text-sm text-gray-600 mb-4 space-y-2">
@@ -104,7 +107,10 @@ const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
                 年に数回の読みもの冊子など
               </li>
             </ul>
-            <button disabled className="w-full bg-gray-200 text-gray-500 px-4 py-2 font-medium !rounded-button whitespace-nowrap cursor-not-allowed flex items-center justify-center">
+            <button
+              disabled
+              className="w-full bg-gray-200 text-gray-500 px-4 py-2 font-medium !rounded-button whitespace-nowrap cursor-not-allowed flex items-center justify-center"
+            >
               準備中
               <div className="w-4 h-4 flex items-center justify-center ml-1">
                 <i className="ri-time-line"></i>
@@ -129,7 +135,11 @@ const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
             </div>
             <span>お問い合わせ</span>
           </a>
-          <a href="#" onClick={handleLogout} className="flex items-center text-gray-700 hover:text-primary">
+          <a
+            href="#"
+            onClick={handleLogout}
+            className="flex items-center text-gray-700 hover:text-primary"
+          >
             <div className="w-5 h-5 flex items-center justify-center mr-3">
               <i className="ri-logout-box-r-line"></i>
             </div>
