@@ -6,6 +6,7 @@ import Layout from '../components/Layout/Layout';
 import { supabase } from '../lib/supabaseClient';
 import { getFeatureFlag } from '../config/featureFlags';
 import { withBase } from '../utils/paths';
+import { sendEventReserveEvent } from '../lib/ga';
 
 interface EventSlot {
   date?: string | null;
@@ -815,6 +816,7 @@ const EventReservationPage: React.FC = () => {
       setReservationReference(createdRecord?.reservation_code ?? reservationCode);
       setCompletedReservation(createdRecord);
       setReservationComplete(true);
+      sendEventReserveEvent({ event_slug: eventSlug, event_title: event.title, quantity });
       setSpecialRequests('');
       setAgreement(true);
 

@@ -84,4 +84,125 @@ export const sendRelatedPostClickEvent = ({
   });
 };
 
+// --- ニュースレター登録 ---
+type NewsletterSignupEventParams = {
+  method: string;
+};
+
+export const sendNewsletterSignupEvent = ({ method }: NewsletterSignupEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'newsletter_signup', { method });
+};
+
+// --- SNS シェア ---
+type ShareClickEventParams = {
+  platform: 'x' | 'facebook' | 'line' | 'email';
+  content_type: 'post' | 'event';
+  content_slug: string;
+};
+
+export const sendShareClickEvent = ({
+  platform,
+  content_type,
+  content_slug,
+}: ShareClickEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'share_click', { platform, content_type, content_slug });
+};
+
+// --- お問い合わせ送信 ---
+type ContactSubmitEventParams = {
+  inquiry_type: string;
+};
+
+export const sendContactSubmitEvent = ({ inquiry_type }: ContactSubmitEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'contact_submit', { inquiry_type });
+};
+
+// --- 会員登録完了 ---
+type SignupCompleteEventParams = {
+  method: 'email' | 'google';
+  store_consent: boolean;
+};
+
+export const sendSignupCompleteEvent = ({
+  method,
+  store_consent,
+}: SignupCompleteEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'signup_complete', { method, store_consent });
+};
+
+// --- ログイン完了 ---
+type LoginCompleteEventParams = {
+  method: 'email' | 'google';
+};
+
+export const sendLoginCompleteEvent = ({ method }: LoginCompleteEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'login_complete', { method });
+};
+
+// --- お気に入り追加・削除 ---
+type FavoriteEventParams = {
+  target_type: 'post' | 'event' | 'school';
+  target_id: string;
+};
+
+export const sendFavoriteAddEvent = ({ target_type, target_id }: FavoriteEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'favorite_add', { target_type, target_id });
+};
+
+export const sendFavoriteRemoveEvent = ({ target_type, target_id }: FavoriteEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'favorite_remove', { target_type, target_id });
+};
+
+// --- イベント予約 ---
+type EventReserveEventParams = {
+  event_slug: string;
+  event_title: string;
+  quantity: number;
+};
+
+export const sendEventReserveEvent = ({
+  event_slug,
+  event_title,
+  quantity,
+}: EventReserveEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'event_reserve', { event_slug, event_title, quantity });
+};
+
+// --- 外部リンククリック ---
+type OutboundClickEventParams = {
+  url: string;
+  link_text: string;
+};
+
+export const sendOutboundClickEvent = ({ url, link_text }: OutboundClickEventParams) => {
+  if (!canTrack()) return;
+  const gtagFn = window.gtag;
+  if (!gtagFn) return;
+  gtagFn('event', 'outbound_click', { url, link_text });
+};
+
 export {}; // TypeScript module augment 確認用

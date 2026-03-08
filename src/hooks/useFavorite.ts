@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { getFeatureFlag } from '../config/featureFlags';
+import { sendFavoriteAddEvent, sendFavoriteRemoveEvent } from '../lib/ga';
 
 export type FavoriteTargetType = 'post' | 'event' | 'school';
 
@@ -210,6 +211,7 @@ export const useFavorite = ({ targetType, targetId }: UseFavoriteOptions): UseFa
         }
 
         setIsFavorited(false);
+        sendFavoriteRemoveEvent({ target_type: targetType, target_id: currentTargetId });
         return { success: true };
       }
 
@@ -225,6 +227,7 @@ export const useFavorite = ({ targetType, targetId }: UseFavoriteOptions): UseFa
         // Gracefully handle unique constraint violations
         if (pgError.code === '23505') {
           setIsFavorited(true);
+          sendFavoriteAddEvent({ target_type: targetType, target_id: currentTargetId });
           return { success: true };
         }
 
@@ -232,6 +235,7 @@ export const useFavorite = ({ targetType, targetId }: UseFavoriteOptions): UseFa
       }
 
       setIsFavorited(true);
+      sendFavoriteAddEvent({ target_type: targetType, target_id: currentTargetId });
       return { success: true };
     } catch (err) {
       if (isAuthSessionMissingError(err)) {
