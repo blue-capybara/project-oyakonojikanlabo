@@ -2,10 +2,10 @@ import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { GA4_B_LINKER_DOMAINS, initGa4B } from './analytics/ga4b';
 import { useGa4BPageView } from './analytics/useGa4BPageView';
+import AuthConversionTracker from './analytics/AuthConversionTracker';
 import Seo from './components/seo/Seo';
 import NormalizeUrl from './components/seo/NormalizeUrl';
 import ScrollToTop from './components/ScrollToTop';
-import GaPageView from './components/GaPageView';
 import HomePage from './pages/HomePage';
 import { getFeatureFlag } from './config/featureFlags';
 import { shouldNoIndex } from './utils/seo';
@@ -59,7 +59,7 @@ function App() {
       {globalNoindex && <Seo noindex />}
       <NormalizeUrl />
       <ScrollToTop />
-      <GaPageView />
+      <AuthConversionTracker />
       <Ga4BPageView domains={GA4_B_LINKER_DOMAINS} />
       <div className="App">
         <Suspense fallback={null}>

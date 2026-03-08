@@ -8,12 +8,6 @@ declare global {
   }
 }
 
-declare const process:
-  | {
-      env?: Record<string, string | undefined>;
-    }
-  | undefined;
-
 const GA4_B_ID = import.meta.env.VITE_GA4_B_ID ?? '';
 
 const DEFAULT_LINKER_DOMAINS = [
@@ -28,8 +22,8 @@ const ensureGtag = () => {
   if (typeof window === 'undefined') return;
   window.dataLayer = window.dataLayer || [];
   if (typeof window.gtag !== 'function') {
-    window.gtag = function () {
-      window.dataLayer!.push(arguments);
+    window.gtag = (...args: unknown[]) => {
+      window.dataLayer!.push(args);
     };
   }
 };
@@ -98,6 +92,18 @@ export const sendGa4BPageView = ({ path, title, referrer, location }: PageViewPa
   }
 
   gtagFn('event', 'page_view', params);
+};
+
+export const getGa4BMeasurementId = (): string | undefined => {
+  if (!GA4_B_ID) return undefined;
+  return GA4_B_ID;
+};
+
+export const ensureGa4BReady = (domains?: string[]) => {
+  if (!GA4_B_ID || typeof window === 'undefined') return undefined;
+  initGa4B(domains);
+  ensureGtag();
+  return window.gtag;
 };
 
 export const GA4_B_LINKER_DOMAINS = DEFAULT_LINKER_DOMAINS;
