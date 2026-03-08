@@ -1,52 +1,61 @@
-// GA4 計測ヘルパー。
-// - 本番のみ index.html 側で gtag を初期化（allowedHosts チェック）。
-// - ステージでは VITE_GA_MEASUREMENT_ID を空にして無効化する運用。
+import { GA4_B_LINKER_DOMAINS, ensureGa4BReady, getGa4BMeasurementId } from '../analytics/ga4b';
+
+// GA4-B 計測ヘルパー。
+// React SPA 側の PV / イベントは send_to を付与して GA4-B に統一する。
 
 declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
-    __GA_MEASUREMENT_ID__?: string;
   }
 }
 
 const getMeasurementId = (): string | undefined => {
-  if (typeof window === 'undefined') return undefined;
-  return window.__GA_MEASUREMENT_ID__ || import.meta.env.VITE_GA_MEASUREMENT_ID;
+  return getGa4BMeasurementId();
 };
 
-const canTrack = (): boolean => {
-  if (typeof window === 'undefined') return false;
+type TrackerContext = {
+  id: string;
+  gtagFn: (...args: unknown[]) => void;
+};
+
+const resolveTracker = (): TrackerContext | null => {
   const id = getMeasurementId();
-  return !!id && typeof window.gtag === 'function';
+  const gtagFn = ensureGa4BReady(GA4_B_LINKER_DOMAINS);
+  if (!id || !gtagFn) return null;
+  return { id, gtagFn };
+};
+
+const canTrack = (tracker: TrackerContext | null): tracker is TrackerContext => tracker !== null;
+
+const sendEvent = (eventName: string, params: Record<string, unknown>) => {
+  const tracker = resolveTracker();
+  if (!canTrack(tracker)) return;
+  tracker.gtagFn('event', eventName, {
+    send_to: tracker.id,
+    ...params,
+  });
 };
 
 export const sendPageView = (path: string) => {
-  if (!canTrack()) return;
-  const id = getMeasurementId();
-  if (!id) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return; // gtag が未初期化の場合の型安全なガード
-  gtagFn('config', id, {
+  if (typeof window === 'undefined') return;
+  sendEvent('page_view', {
     page_path: path,
+    page_location: `${window.location.origin}${path}`,
+    page_title: document.title,
   });
 };
 
 // SEO: 301 への安易な転換でパーマリンク評価を落とさないよう、確定した 404 を別イベントで計測する
 export const send404Event = () => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
+  if (typeof window === 'undefined') return;
 
-  const pageLocation = typeof window !== 'undefined' ? window.location.href : undefined;
-  const pagePath =
-    typeof window !== 'undefined'
-      ? `${window.location.pathname}${window.location.search}`
-      : undefined;
+  const pageLocation = window.location.href;
+  const pagePath = `${window.location.pathname}${window.location.search}`;
   const referrer =
     typeof document !== 'undefined' && document.referrer ? document.referrer : undefined;
 
-  gtagFn('event', 'page_404', {
+  sendEvent('page_404', {
     page_location: pageLocation,
     page_path: pagePath,
     ...(referrer ? { referrer } : {}),
@@ -70,11 +79,7 @@ export const sendRelatedPostClickEvent = ({
   relatedPostSource,
   position,
 }: RelatedPostClickEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-
-  gtagFn('event', 'related_post_click', {
+  sendEvent('related_post_click', {
     current_post_slug: currentPostSlug,
     ...(currentPostId ? { current_post_id: currentPostId } : {}),
     related_post_id: relatedPostId,
@@ -90,10 +95,7 @@ type NewsletterSignupEventParams = {
 };
 
 export const sendNewsletterSignupEvent = ({ method }: NewsletterSignupEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'newsletter_signup', { method });
+  sendEvent('newsletter_signup', { method });
 };
 
 // --- SNS シェア ---
@@ -108,10 +110,7 @@ export const sendShareClickEvent = ({
   content_type,
   content_slug,
 }: ShareClickEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'share_click', { platform, content_type, content_slug });
+  sendEvent('share_click', { platform, content_type, content_slug });
 };
 
 // --- お問い合わせ送信 ---
@@ -120,10 +119,7 @@ type ContactSubmitEventParams = {
 };
 
 export const sendContactSubmitEvent = ({ inquiry_type }: ContactSubmitEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'contact_submit', { inquiry_type });
+  sendEvent('contact_submit', { inquiry_type });
 };
 
 // --- 会員登録完了 ---
@@ -132,14 +128,8 @@ type SignupCompleteEventParams = {
   store_consent: boolean;
 };
 
-export const sendSignupCompleteEvent = ({
-  method,
-  store_consent,
-}: SignupCompleteEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'signup_complete', { method, store_consent });
+export const sendSignupCompleteEvent = ({ method, store_consent }: SignupCompleteEventParams) => {
+  sendEvent('signup_complete', { method, store_consent });
 };
 
 // --- ログイン完了 ---
@@ -148,10 +138,7 @@ type LoginCompleteEventParams = {
 };
 
 export const sendLoginCompleteEvent = ({ method }: LoginCompleteEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'login_complete', { method });
+  sendEvent('login_complete', { method });
 };
 
 // --- お気に入り追加・削除 ---
@@ -161,17 +148,11 @@ type FavoriteEventParams = {
 };
 
 export const sendFavoriteAddEvent = ({ target_type, target_id }: FavoriteEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'favorite_add', { target_type, target_id });
+  sendEvent('favorite_add', { target_type, target_id });
 };
 
 export const sendFavoriteRemoveEvent = ({ target_type, target_id }: FavoriteEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'favorite_remove', { target_type, target_id });
+  sendEvent('favorite_remove', { target_type, target_id });
 };
 
 // --- イベント予約 ---
@@ -186,10 +167,7 @@ export const sendEventReserveEvent = ({
   event_title,
   quantity,
 }: EventReserveEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'event_reserve', { event_slug, event_title, quantity });
+  sendEvent('event_reserve', { event_slug, event_title, quantity });
 };
 
 // --- 外部リンククリック ---
@@ -199,10 +177,7 @@ type OutboundClickEventParams = {
 };
 
 export const sendOutboundClickEvent = ({ url, link_text }: OutboundClickEventParams) => {
-  if (!canTrack()) return;
-  const gtagFn = window.gtag;
-  if (!gtagFn) return;
-  gtagFn('event', 'outbound_click', { url, link_text });
+  sendEvent('outbound_click', { url, link_text });
 };
 
 export {}; // TypeScript module augment 確認用
