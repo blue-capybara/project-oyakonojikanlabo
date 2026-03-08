@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, supabaseAnonKey, supabaseUrl } from '../../lib/supabaseClient';
+import { sendContactSubmitEvent } from '../../lib/ga';
 
 interface FileUpload {
   file: File;
@@ -251,6 +252,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
         throw new Error('failed to send mail');
       }
 
+      sendContactSubmitEvent({ inquiry_type: selectedInquiryType });
       showNotification(
         'お問い合わせを受け付けました。担当者からの返信をお待ちください。',
         'success',

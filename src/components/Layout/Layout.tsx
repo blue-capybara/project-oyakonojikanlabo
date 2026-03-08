@@ -3,6 +3,7 @@ import Header from './Header';
 import Footer from './Footer';
 import useHeaderHeight from '../../hooks/useHeaderHeight';
 import { supabase } from '../../lib/supabaseClient';
+import { sendNewsletterSignupEvent } from '../../lib/ga';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -42,6 +43,7 @@ const Layout: React.FC<LayoutProps> = ({ children, showNewsletter = false }) => 
       }
 
       setNewsletterMessage('登録が完了しました。ご利用ありがとうございます。');
+      sendNewsletterSignupEvent({ method: 'email' });
       setNewsletterEmail('');
     } catch (err) {
       console.error('Newsletter subscription failed', err);

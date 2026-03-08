@@ -6,7 +6,7 @@ import Breadcrumb from '../components/Breadcrumb';
 import useFavorite from '../hooks/useFavorite';
 import WordPressContent from '../components/Post/WordPressContent';
 import { getFeatureFlag } from '../config/featureFlags';
-import { send404Event, sendRelatedPostClickEvent } from '../lib/ga';
+import { send404Event, sendRelatedPostClickEvent, sendShareClickEvent } from '../lib/ga';
 import Seo from '../components/seo/Seo';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
@@ -218,6 +218,8 @@ const PostDetailPage: React.FC = () => {
 
     const encodedUrl = encodeURIComponent(shareUrl);
     const encodedText = encodeURIComponent(shareText);
+
+    sendShareClickEvent({ platform, content_type: 'post', content_slug: slug ?? '' });
 
     switch (platform) {
       case 'x': {

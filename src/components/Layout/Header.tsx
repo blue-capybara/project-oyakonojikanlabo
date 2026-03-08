@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { searchHistoryApi, SearchHistory } from '../../lib/searchHistory';
 import { getFeatureFlag } from '../../config/featureFlags';
 import { withBase } from '../../utils/paths';
+import { sendOutboundClickEvent } from '../../lib/ga';
 
 const menuItems = [
   { label: 'ホーム', to: '/' },
@@ -62,7 +63,15 @@ const Header: React.FC = () => {
           {item.label}
         </Link>
       ) : (
-        <a key={i} href={item.href} onClick={onItemClick} className={itemClassName}>
+        <a
+          key={i}
+          href={item.href}
+          onClick={() => {
+            sendOutboundClickEvent({ url: item.href!, link_text: item.label });
+            onItemClick?.();
+          }}
+          className={itemClassName}
+        >
           {item.label}
         </a>
       ),

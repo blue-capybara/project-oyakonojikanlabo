@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { sendOutboundClickEvent } from '../../lib/ga';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -61,6 +62,12 @@ const Footer: React.FC = () => {
                 <Link
                   to="https://shop.oyakonojikanlabo.jp/"
                   className="text-gray-400 hover:text-white"
+                  onClick={() =>
+                    sendOutboundClickEvent({
+                      url: 'https://shop.oyakonojikanlabo.jp/',
+                      link_text: 'おかいもの',
+                    })
+                  }
                 >
                   おかいもの
                 </Link>
@@ -69,6 +76,12 @@ const Footer: React.FC = () => {
                 <a
                   href="https://ehonyasan-moe.oyakonojikanlabo.jp/socks/"
                   className="text-gray-400 hover:text-white"
+                  onClick={() =>
+                    sendOutboundClickEvent({
+                      url: 'https://ehonyasan-moe.oyakonojikanlabo.jp/socks/',
+                      link_text: '絵本の靴下',
+                    })
+                  }
                 >
                   絵本の靴下
                 </a>
