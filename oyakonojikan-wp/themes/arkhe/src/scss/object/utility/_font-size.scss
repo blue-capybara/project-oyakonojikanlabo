@@ -1,0 +1,39 @@
+
+.u-fz-xs,
+.has-xsmall-font-size {
+	font-size: var(--ark-fz--xs, .75em) !important;
+
+}
+
+.u-fz-s,
+.has-small-font-size {
+	font-size: var(--ark-fz--s, .9em) !important;
+}
+
+.u-fz-n,
+.has-normal-font-size {
+	font-size: var(--ark-fz--n, 1rem) !important;
+}
+
+.u-fz-m {
+	font-size: var(--ark-fz--m, 1.1em) !important;
+}
+
+.u-fz-l,
+.has-large-font-size {
+	font-size: var(--ark-fz--l, 1.25em) !important;
+}
+
+.u-fz-xl,
+.has-xlarge-font-size {
+	font-size: var(--ark-fz--xl, 1.5em) !important;
+}
+
+.u-fz-xxl,
+.has-xxlarge-font-size {
+	font-size: var(--ark-fz--xxl, 2em) !important;
+}
+
+.has-huge-font-size {
+	font-size: var(--ark-fz--huge, 2.75em) !important;
+}

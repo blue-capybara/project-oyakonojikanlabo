@@ -1,0 +1,15 @@
+/*
+ * プレビュー画面の調整
+ */
+
+// スタイル選択したときの黒線が太いので1pに。
+// .block-editor-block-styles__item.is-active .block-editor-block-styles__item-preview {
+// 	border-width: 1px;
+// }
+
+
+// ブロックパターンのプレビューでボーダーが見えなくなるのを阻止
+// .block-editor-block-patterns-list__item .block-editor-block-preview__container {
+// 	box-sizing: content-box;
+// 	padding: 1px 0;
+// }

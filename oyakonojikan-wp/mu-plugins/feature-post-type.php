@@ -49,5 +49,8 @@ add_action('init', function () {
 		'show_in_nav_menus'  => true,
 		'show_ui'            => true,
 		'capability_type'    => 'post',
+		'show_in_graphql'     => true,
+		'graphql_single_name' => 'Feature',
+		'graphql_plural_name' => 'Features',
 	]);
 }, 5);

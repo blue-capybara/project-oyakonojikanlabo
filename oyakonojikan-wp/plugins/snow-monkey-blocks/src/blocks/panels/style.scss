@@ -1,0 +1,201 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-panels {
+	--smb-panels--item-background-color: var(--wp--preset--color--white);
+	--smb-panels--item-color: var(--wp--preset--color--sm-text);
+	--smb-panels--box-shadow: 0 0 35px 0 rgba(0, 0, 0, .1);
+	--smb-panels--box-shadow--hover: 0 7px 35px 0 rgba(0, 0, 0, .15);
+	--smb-panels--item-box-shadow: none;
+	--smb-panels--item-box-shadow--hover: none;
+	--smb-panels--glue--box-shadow: none;
+	--smb-panels--glue--border-color: var(--wp--preset--color--sm-lighter-gray);
+
+	> .c-row {
+		> .c-row__col {
+			background-color: transparent !important;
+			background-image: none !important;
+			padding-top: 0;
+			padding-bottom: 0;
+		}
+	}
+
+	&__item {
+		--smb-panel--background-color: var(--smb-panels--item-background-color);
+		--smb-panel--background-image: initial;
+		--smb-panel--color: var(--smb-panels--item-color);
+
+		flex: 1;
+		position: relative;
+		display: block;
+		background-color: var(--smb-panel--background-color);
+		background-image: var(--smb-panel--background-image);
+		padding: 0;
+    color: var(--smb-panel--color);
+		text-decoration: none;
+		box-shadow: var(--smb-panels--item-box-shadow);
+		@include core.transition(box-shadow);
+
+		@include core.hover() {
+			box-shadow: var(--smb-panels--item-box-shadow--hover)
+		}
+
+		&__figure {
+			> img {
+				width: 100%;
+			}
+		}
+
+		&__body {
+			padding: var(--_padding1);
+
+			a {
+				position: relative;
+				z-index: 1;
+			}
+		}
+
+		&__title {
+			margin: 0;
+			font-weight: bold;
+		}
+
+		&__content {
+			margin-top: var(--_margin-1);
+		}
+
+		&__action {
+			margin-top: var(--_margin-1);
+
+			&--nolabel {
+				margin-top: 0;
+			}
+
+			> a {
+				position: initial;
+				z-index: initial;
+				text-decoration: none;
+				outline: none;
+			}
+		}
+	}
+}
+
+.smb-panels__item--vertical {
+	text-align: center;
+}
+
+.smb-panels__item--horizontal {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+
+	@include core.media-min(md) {
+		flex-direction: row;
+		text-align: left;
+
+		> .smb-panels__item__body {
+			flex: 1 1 auto;
+		}
+
+		> .smb-panels__item__figure {
+			position: relative;
+			max-width: 50%;
+			flex: 0 0 50%;
+			overflow: hidden;
+
+			img {
+				position: relative;
+				top: 50%;
+				max-height: none;
+				max-width: none;
+				height: auto;
+				width: 100%;
+				transform: translateY(-50%);
+			}
+		}
+
+		> .smb-panels__item__body {
+			align-self: center;
+		}
+	}
+
+	&.smb-panels__item--reverse {
+		> .smb-panels__item__figure {
+			order: 1;
+		}
+	}
+}
+
+.smb-panels__item--free,
+.smb-panels__item--block-link {
+	> .smb-panels__item__body {
+		> * {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+	}
+}
+
+.smb-panels__item--block-link,
+.smb-panels__item--vertical,
+.smb-panels__item--horizontal {
+	cursor: pointer;
+
+	&:has(:focus-visible) {
+		outline: auto;
+		outline: auto -webkit-focus-ring-color; /* for Chrome */
+	}
+}
+
+.smb-panels[data-image-padding="true"] {
+	.smb-panels__item__figure {
+		padding: var(--_padding-1) var(--_padding-1) 0;
+	}
+
+	.smb-panels__item--horizontal {
+		> .smb-panels__item__figure {
+			@include core.media-min(md) {
+				padding: var(--_padding-1) 0 var(--_padding-1) var(--_padding-1);
+			}
+		}
+
+		&.smb-panels__item--reverse {
+			> .smb-panels__item__figure {
+				padding: 0 var(--_padding-1) var(--_padding-1) var(--_padding-1);
+
+				@include core.media-min(md) {
+					padding: var(--_padding-1) var(--_padding-1) var(--_padding-1) 0;
+				}
+			}
+		}
+	}
+}
+
+.smb-panels:not(.smb-panels--glue) {
+	--smb-panels--item-box-shadow: var(--smb-panels--box-shadow);
+	--smb-panels--item-box-shadow--hover: var(--smb-panels--box-shadow--hover);
+}
+
+.smb-panels.smb-panels--glue {
+	--smb-panels--glue--box-shadow: var(--smb-panels--box-shadow);
+
+	overflow: hidden;
+
+	box-shadow: var(--smb-panels--glue--box-shadow);
+
+	> .c-row {
+		margin-right: -1px;
+		margin-left: -1px;
+		margin-bottom: -1px;
+
+		> .c-row__col {
+			border-right: 1px solid var(--smb-panels--glue--border-color);
+			border-bottom: 1px solid var(--smb-panels--glue--border-color);
+		}
+	}
+}
+
+:where(.smb-panels__item__body.is-layout-constrained > *) {
+	--wp--style--global--content-size: 100%;
+	--wp--style--global--wide-size: 100%;
+}

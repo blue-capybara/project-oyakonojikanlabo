@@ -1,0 +1,41 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/rating-box-item",
+	"title": "Rating",
+	"description": "It is a child block of the rating box block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/rating-box" ],
+	"attributes": {
+		"title": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-rating-box__item__title",
+			"default": ""
+		},
+		"rating": {
+			"type": "number",
+			"default": 0
+		},
+		"color": {
+			"type": "string"
+		},
+		"titleFontSizeSlug": {
+			"type": "string"
+		},
+		"titleFontSize": {
+			"type": "string"
+		},
+		"numericFontSizeSlug": {
+			"type": "string"
+		},
+		"numericFontSize": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js"
+}

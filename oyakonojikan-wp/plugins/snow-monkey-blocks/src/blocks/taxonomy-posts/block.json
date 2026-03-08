@@ -1,0 +1,115 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/taxonomy-posts",
+	"title": "Taxonomy posts",
+	"description": "You can display recent posts linked to any taxonomy.",
+	"category": "smb",
+	"attributes": {
+		"taxonomy": {
+			"type": "string",
+			"default": null
+		},
+		"termId": {
+			"type": "number",
+			"default": 0
+		},
+		"postsPerPage": {
+			"type": "number",
+			"default": 6
+		},
+		"layout": {
+			"type": "string",
+			"default": "rich-media"
+		},
+		"gap": {
+			"type": "string",
+			"default": ""
+		},
+		"ignoreStickyPosts": {
+			"type": "boolean",
+			"default": true
+		},
+		"smCols": {
+			"type": "number",
+			"default": 0
+		},
+		"noPostsText": {
+			"type": "string",
+			"default": ""
+		},
+		"itemTitleTagName": {
+			"type": "string",
+			"default": "h3"
+		},
+		"itemThumbnailSizeSlug": {
+			"type": "string",
+			"default": "full"
+		},
+		"forceDisplayItemMeta": {
+			"type": "boolean",
+			"default": false
+		},
+		"forceDisplayItemTerms": {
+			"type": "boolean",
+			"default": false
+		},
+		"displayItemAuthor": {
+			"type": "boolean"
+		},
+		"displayItemPublished": {
+			"type": "boolean",
+			"default": true
+		},
+		"displayItemModified": {
+			"type": "boolean",
+			"default": false
+		},
+		"displayItemExcerpt": {
+			"type": "boolean"
+		},
+		"categoryLabelTaxonomy": {
+			"type": "string",
+			"default": ""
+		},
+		"arrows": {
+			"type": "boolean",
+			"default": false
+		},
+		"dots": {
+			"type": "boolean",
+			"default": true
+		},
+		"interval": {
+			"type": "number",
+			"default": 0
+		},
+		"autoplayButton": {
+			"type": "boolean",
+			"default": false
+		},
+		"anchor": {
+			"type": "string",
+			"default": ""
+		},
+		"clientId": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"anchor": true,
+		"spacing": {
+			"margin": true
+		}
+	},
+	"example": {
+		"attributes": {
+			"postsPerPage": 3,
+			"taxonomy": "category",
+			"termId": 0
+		}
+	},
+	"editorScript": "file:./index.js"
+}

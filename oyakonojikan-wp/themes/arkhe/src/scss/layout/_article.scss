@@ -1,0 +1,16 @@
+// スリム幅
+.post-template-default,
+.page-template-one-column-slim,
+.post-template-one-column-slim {
+	--ark-width--article: var(--ark-width--article--slim);
+}
+
+.l-article {
+	max-width: var(--ark-width--article);
+
+	[data-sidebar="off"] & {
+		// max-width: 964px;
+		margin-right: auto;
+		margin-left: auto;
+	}
+}

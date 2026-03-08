@@ -1,0 +1,8 @@
+.dinopedia {
+	.container{
+		grid-template-rows: 342px 1fr 240px;
+		@include mq(xs){
+			grid-template-rows: 58.439vw 1fr 90.606756vw;
+		}
+	}
+}

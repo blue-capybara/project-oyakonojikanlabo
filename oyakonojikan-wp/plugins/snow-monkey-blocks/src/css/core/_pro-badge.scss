@@ -1,0 +1,13 @@
+@mixin pro-badge() {
+	position: absolute;
+	top: 0;
+	right: 0;
+	content: 'Pro';
+	display: inline-block;
+	font-size: 10px;
+	line-height: 1;
+	color: var(--wp--preset--color--white);
+	background-color: #cd3034;
+	border-radius: 2px;
+	padding: 3px 4px;
+}

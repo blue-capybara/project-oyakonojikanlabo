@@ -1,0 +1,65 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/spider-contents-slider-item",
+	"title": "Slide",
+	"description": "It is a child block of the contents slider block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/spider-contents-slider" ],
+	"attributes": {
+		"sliderId": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".spider__slide",
+			"attribute": "data-id",
+			"default": ""
+		},
+		"contentPosition": {
+			"type": "string",
+			"default": ""
+		},
+		"contentPadding": {
+			"type": "string"
+		},
+		"border": {
+			"type": "object",
+			"default": {
+				"color": "",
+				"style": "",
+				"width": 1,
+				"radius": 0
+			}
+		},
+		"boxShadow": {
+			"type": "object",
+			"default": {
+				"color": "",
+				"opacity": 0.1,
+				"blur": 10,
+				"position": ""
+			}
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"text": true,
+			"background": true,
+			"gradients": false
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		}
+	},
+	"editorScript": "file:./index.js"
+}

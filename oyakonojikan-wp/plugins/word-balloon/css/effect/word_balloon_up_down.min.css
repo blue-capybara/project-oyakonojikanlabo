@@ -1,0 +1,1 @@
+.w_b_up_down{-webkit-animation:up_down 1s infinite alternate;animation:up_down 1s infinite alternate}@-webkit-keyframes up_down{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}@keyframes up_down{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}

@@ -1,0 +1,28 @@
+.smb-limited-datetime-placeholder {
+	min-height: auto;
+
+	> .components-placeholder__fieldset {
+		max-width: none;
+
+		> * {
+			flex: 1 1 auto;
+		}
+	}
+
+	dl {
+		display: flex;
+
+		> dt {
+			margin-right: var(--_margin-2);
+		}
+	}
+
+	& + * {
+		margin-top: 1em;
+	}
+}
+
+:where(.smb-limited-datetime.is-layout-constrained > *) {
+	--wp--style--global--content-size: 100%;
+	--wp--style--global--wide-size: 100%;
+}

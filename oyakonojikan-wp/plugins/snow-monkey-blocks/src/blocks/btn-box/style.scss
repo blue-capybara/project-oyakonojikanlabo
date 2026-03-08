@@ -1,0 +1,34 @@
+.smb-btn-box {
+	--smb-btn-box--background-color: transparent;
+	--smb-btn-box--padding: var(--_padding2);
+	--smb-btn--style--ghost--border-color: var(--smb-btn--background-color, currentColor);
+	--smb-btn--style--ghost--color: currentColor;
+
+	background-color: var(--smb-btn-box--background-color);
+	padding-top: var(--smb-btn-box--padding);
+	padding-bottom: var(--smb-btn-box--padding);
+
+	&__lede {
+		margin-bottom: var(--_margin-1);
+		font-weight: bold;
+		text-align: center;
+	}
+
+	&__btn-wrapper {
+		text-align: center;
+	}
+
+	&__note {
+		margin-top: var(--_margin-1);
+		text-align: center;
+	}
+}
+
+.smb-btn-box.is-style-ghost {
+	.smb-btn {
+		--smb-btn--color: var(--smb-btn--style--ghost--color);
+
+		border: 1px solid var(--smb-btn--style--ghost--border-color);
+		background-color: transparent;
+	}
+}

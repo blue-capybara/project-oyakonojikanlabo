@@ -1,0 +1,400 @@
+// 操作を不可能にする設定
+[data-ark-disabled="true"] {
+	position: relative;
+	cursor: not-allowed;
+	opacity: .25;
+
+	&::before {
+		position: absolute;
+		z-index: 99;
+		content: "";
+		inset: 0;
+	}
+}
+
+// マージンを少なくするコントロール
+.arkb-ctrl--mb--s {
+	margin-bottom: 16px !important;
+}
+
+.arkb-ctrl--mb--xs {
+	margin-bottom: 8px !important;
+}
+
+.arkb-ctrl--mt--s {
+	margin-top: 16px !important;
+}
+
+
+// トグルコントロールが集まったエリア
+.arkb-toggles {
+
+	.components-base-control__label,
+	.components-base-control {
+		margin-bottom: 12px;
+	}
+}
+
+// チェックボックスが集まったエリア
+.arkb-checkboxes.arkb-checkboxes {
+
+	.components-base-control {
+		margin-bottom: 12px;
+	}
+}
+
+// メディアURL
+.arkb-input--mediaUrl {
+	margin-bottom: 8px !important;
+}
+
+// メディアボタン & 削除ボタン
+.arkb-btns--media {
+	// margin-bottom: 24px;
+	display: flex;
+
+	.components-button {
+		text-align: center;
+	}
+
+	.is-primary {
+		display: block;
+		flex-basis: 100%;
+	}
+
+	.__delete {
+		margin-left: 8px;
+	}
+}
+
+
+// 小さく表示したいボタン
+.arkb-btns--small .components-button {
+	height: 28px;
+	padding: 4px 8px;
+	font-size: 12px;
+}
+
+.arkb-btns--flex {
+	display: flex !important;
+	flex-wrap: wrap;
+}
+
+.arkb-btns--50 .components-button {
+	justify-content: center;
+	min-width: 50%;
+}
+
+.arkb-btns--5em .components-button {
+	justify-content: center;
+	min-width: 5em;
+}
+
+.arkb-btns--logicalRelation {
+
+	display: flex;
+
+	.components-button {
+		flex-basis: 40%;
+		justify-content: center;
+	}
+}
+
+
+// リセット付きレンジコントロール
+.arkb-range--useReset {
+
+	.components-range-control__root {
+		flex-wrap: wrap;
+
+		> :last-child {
+			width: 100%;
+			margin-top: 8px;
+			text-align: right;
+		}
+	}
+
+	.components-range-control__reset {
+		height: auto !important;
+		min-height: 0 !important;
+		box-shadow: none !important;
+	}
+}
+
+// サイドバーの<TabPanel>
+.arkb-tabPanel {
+
+	.components-panel__body-title + & {
+		margin-top: -4px;
+	}
+
+	.components-tab-panel__tabs {
+		border-bottom: 1px solid #e0e0e0;
+
+		.components-button {
+			display: flex;
+			flex-basis: 50%;
+			justify-content: center;
+
+			i {
+				margin-right: 4px;
+			}
+		}
+	}
+
+	.components-tab-panel__tabs-item {
+		height: 40px;
+		padding-top: 0;
+	}
+
+	&.-section-svg {
+
+		.components-tab-panel__tab-content {
+			padding-top: 16px;
+		}
+	}
+
+	&.-device {
+
+		.components-tab-panel__tab-content {
+			padding-top: 16px;
+		}
+	}
+
+	&.-triple {
+
+		.components-tab-panel__tabs-item > span {
+			display: none;
+		}
+	}
+
+
+	&.-media {
+
+		&.has-no-pcimg {
+
+			.components-tab-panel__tabs-item.__sp {
+				opacity: .5;
+				pointer-events: none;
+			}
+		}
+
+		// sectionブロックでタブ部分非表示にする場合
+		&.is-hide {
+
+			.components-tab-panel__tabs {
+				display: none;
+			}
+
+			.components-tab-panel__tab-content {
+				padding-top: 0;
+			}
+		}
+	}
+}
+
+
+.arkb-imgPreview {
+	max-width: 100%;
+	margin-bottom: 8px;
+	padding: 8px;
+	border: dashed 1px #e0e0e0;
+
+	img {
+		display: block;
+		width: 100%;
+		max-width: 100%;
+		max-height: 160px;
+		object-fit: contain;
+	}
+
+	&.-noimage {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		svg {
+			margin: 0 8px;
+		}
+	}
+}
+
+
+// ArkbUnitNumber
+.arkb-unitNumber {
+	display: flex;
+	gap: .75em;
+	align-items: center;
+
+	> .components-base-control {
+		margin-bottom: 0 !important; // 6.2対応
+	}
+
+	.components-input-control__container {
+		min-width: 56px;
+		max-width: 80px;
+	}
+
+	.components-unit-control__select {
+		text-transform: unset !important;
+	}
+
+	> .components-range-control {
+		flex: 1;
+		margin: 0;
+
+		> div {
+			margin: 0;
+		}
+	}
+
+	// クリアボタン
+	// >.components-button {}
+}
+
+
+// multipleセレクト
+.components-select-control__input[multiple] {
+	min-height: 8em !important;
+	padding: 8px !important;
+
+	+.components-input-control__suffix {
+		display: none;
+	}
+}
+
+// セレクトコントロールのlabelが長いと隠れてしまうのを防ぐ
+.components-select-control .components-input-control__label {
+	white-space: unset !important;
+}
+
+
+// ターム選択
+.arkb-tabPanel.-terms {
+
+	.components-tab-panel__tabs {
+		margin-bottom: 24px;
+	}
+
+	.arkb-tabPanel__menu {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		height: auto;
+		padding: 6px 0 8px;
+
+		svg {
+			display: block;
+			flex: 0 0 20px;
+		}
+
+		span {
+			font-size: 10px;
+			letter-spacing: -.5px;
+			white-space: nowrap;
+		}
+	}
+}
+
+// 説明文
+.arkb-helpText {
+	font-size: .9em;
+	font-style: italic;
+	opacity: .8;
+}
+
+.arkb-helpPanel {
+	padding: 16px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.arkb-helpInput {
+	display: block;
+	width: 100%;
+	font-size: 12px;
+}
+
+
+// ArkbHelpTip
+.arkb-helpPopover {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	// margin: -20px 0 16px;
+	margin: 4px 0;
+	font-size: 12px;
+
+	.components-base-control + & {
+		margin: -20px 0 16px;
+	}
+
+
+	.arkb-helpPopover__label {
+		font-style: italic;
+		opacity: .8;
+	}
+
+	.arkb-helpPopover__icon {
+		margin-left: 4px;
+		cursor: help;
+	}
+
+	.arkb-helpPopover__icon:hover ~ .arkb-helpPopover__desc {
+		visibility: visible;
+		opacity: 1;
+	}
+
+	.arkb-helpPopover__desc:hover {
+		visibility: visible;
+		opacity: 1;
+	}
+
+
+	.arkb-helpPopover__desc {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		z-index: 100;
+		padding: 10px;
+		color: #333;
+		font-size: 12px;
+		background-color: #fff;
+		border-radius: 3px;
+		box-shadow: 0 0 8px rgba(0, 0, 0, .2);
+		visibility: hidden;
+		opacity: 0;
+		transition: visibility .25s, opacity .25s;
+
+		code {
+			padding: 1px 2px;
+			font-size: 1em;
+			letter-spacing: 1;
+			border-radius: 2px;
+		}
+	}
+
+	.components-base-control__help:has(&) {
+		height: 0;
+		margin: 0;
+	}
+}
+
+.has-helptip.components-checkbox-control {
+	position: relative;
+	padding-right: 24px;
+
+	.arkb-helpPopover {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 100%;
+		margin: 0;
+		pointer-events: none;
+	}
+
+	.arkb-helpPopover .arkb-helpPopover__icon {
+		pointer-events: auto;
+	}
+
+}

@@ -1,0 +1,155 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-section-with-bgimage {
+	--smb-section-with-bgimage--mask-color: var(--wp--preset--color--black)
+	--smb-section-with-bgimage--mask-image: initial;
+	--smb-section-with-bgimage--mask-opacity: 1;
+	--smb-section-with-bgimage--lg-media-position: 50%;
+	--smb-section-with-bgimage--lg-repeatable-image: initial;
+	--smb-section-with-bgimage--md-media-position: 50%;
+	--smb-section-with-bgimage--md-repeatable-image: initial;
+	--smb-section-with-bgimage--sm-media-position: 50%;
+	--smb-section-with-bgimage--sm-repeatable-image: initial;
+
+	position: relative;
+	overflow: hidden;
+
+	&__repeatable-image {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-repeat: repeat;
+		background-position: 50% 50%;
+		opacity: var(--smb-section-with-bgimage--mask-opacity);
+
+		img {
+			display: none;
+		}
+	}
+
+	&__bgimage {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: var(--wp--preset--color--white);
+
+		&--lg {
+			video,
+			img {
+				opacity: var(--smb-section-with-bgimage--mask-opacity);
+				object-position: var(--smb-section-with-bgimage--lg-media-position);
+			}
+
+			.smb-section-with-bgimage__repeatable-image {
+				background-position: var(--smb-section-with-bgimage--lg-media-position);
+				background-image: var(--smb-section-with-bgimage--lg-repeatable-image);
+			}
+		}
+
+		&--md {
+			@include core.media-min(lg) {
+				display: none;
+			}
+
+			video,
+			img {
+				opacity: var(--smb-section-with-bgimage--mask-opacity);
+				object-position: var(--smb-section-with-bgimage--md-media-position);
+			}
+
+			.smb-section-with-bgimage__repeatable-image {
+				background-position: var(--smb-section-with-bgimage--md-media-position);
+				background-image: var(--smb-section-with-bgimage--md-repeatable-image);
+			}
+		}
+
+		&--sm {
+			@include core.media-min(md) {
+				display: none;
+			}
+
+			video,
+			img {
+				opacity: var(--smb-section-with-bgimage--mask-opacity);
+				object-position: var(--smb-section-with-bgimage--sm-media-position);
+			}
+
+			.smb-section-with-bgimage__repeatable-image {
+				background-position: var(--smb-section-with-bgimage--sm-media-position);
+				background-image: var(--smb-section-with-bgimage--sm-repeatable-image);
+			}
+		}
+
+		img,
+		iframe,
+		video {
+			position: absolute;
+			height: 100%;
+			width: 100%;
+		}
+
+		img,
+		video {
+			object-fit: cover;
+			// object-position: 50% 50%;
+		}
+	}
+
+	&__mask {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: var(--smb-section-with-bgimage--mask-color);
+		background-image: var(--smb-section-with-bgimage--mask-image);
+	}
+
+	// @deprecated
+	&--left:not([class*="smb-section--"]) {
+		> .c-container {
+			> .smb-section__subtitle,
+			> .smb-section__title,
+			> .smb-section__lede,
+			> .smb-section__lede-wrapper > .smb-section__lede,
+			> .smb-section__body {
+				text-align: left;
+			}
+
+			> .smb-section__lede-wrapper {
+				display: block;
+			}
+		}
+	}
+
+	// @deprecated
+	&--center:not([class*="smb-section--"]) {
+		> .c-container {
+			> .smb-section__title,
+			> .smb-section__body {
+				text-align: center;
+			}
+		}
+	}
+
+	// @deprecated
+	&--right:not([class*="smb-section--"]) {
+		> .c-container {
+			> .smb-section__subtitle,
+			> .smb-section__title,
+			> .smb-section__lede,
+			> .smb-section__lede-wrapper > .smb-section__lede,
+			> .smb-section__body {
+				text-align: right;
+			}
+
+			> .smb-section__lede-wrapper {
+				display: block;
+			}
+		}
+	}
+}

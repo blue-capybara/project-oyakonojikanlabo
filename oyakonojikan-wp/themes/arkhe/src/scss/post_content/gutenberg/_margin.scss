@@ -1,0 +1,81 @@
+
+html :where(.editor-styles-wrapper) p {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+// 本文エリア
+.editor-styles-wrapper {
+
+	//最初のブロックの上にはマージン付けない
+	.is-root-container > [data-type="core/heading"]:first-child {
+		margin-top: 0 !important;
+	}
+
+	// ブロック感のマージン ( default: 28px )
+	// .block-editor-block-list__block,
+	.wp-block {
+		margin-top: var(--ark-mt);
+		margin-bottom: 0;
+	}
+
+	[data-type="core/heading"] {
+		--ark-mt: var(--ark-mt--h);
+	}
+
+	// memo: 6.1 からリストの各項目がブロック化された。
+	[data-type="core/list"] .wp-block {
+		--ark-mt: 0;
+	}
+
+
+	// block-editor-block-list__layout is-root-container
+	.is-root-container {
+
+		> [data-align="full"] + [data-align="full"],
+		> [data-align="full"] + style + [data-align="full"] {
+			margin-top: 0;
+		}
+	}
+
+
+	// 余白を小さくするエリア。
+	// カラムブロック・メディアと文章ブロックの中 / 通常幅のカバー・グループブロックの中
+	:is(
+	.wp-block-details,
+	.wp-block-quote,
+	.wp-block-column,
+	.wp-block-media-text__content,
+	.wp-block-cover__inner-container,
+	.wp-block-group:where(:not(.is-layout-flex):not(.is-layout-grid)),
+	.wp-block-group__inner-container) {
+
+		> .wp-block:not(:first-child) {
+			margin-top: var(--ark-mt--inner, var(--ark-mt--s));
+		}
+
+		// :first-childの mt0 化は全体的には行わず、ここで具体的にブロックを指定してる
+		> .wp-block:first-child {
+			margin-top: 0;
+			// --ark-mt--inner: 0;
+		}
+	}
+
+	[data-align="full"] {
+		--ark-mt--inner: var(--ark-mt);
+	}
+
+	// ウィジェットグループブロック
+	.wp-block-widget-group {
+
+		.widget-title {
+			margin-top: 0;
+			margin-bottom: 1.25rem;
+		}
+
+		> .block-editor-inner-blocks > .block-editor-block-list__layout > .wp-block {
+			margin-top: 0;
+		}
+	}
+
+}

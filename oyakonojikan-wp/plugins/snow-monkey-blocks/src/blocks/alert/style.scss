@@ -1,0 +1,85 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+@use 'sass:color';
+
+$alert-color: #fff9e6 !default;
+
+.smb-alert {
+	--smb-alert--border-radius: var(--_global--border-radius);
+	--smb-alert--background-color: #{ $alert-color };
+	--smb-alert--border-color: #{ color.adjust($alert-color, $lightness: -5%) };
+	--smb-alert--color: #{ color.adjust(color.adjust($alert-color, $saturation: -60%), $lightness: -70%) };
+	--smb-alert--padding: var(--_padding1);
+	--smb-alert--icon-color: #{ color.adjust($alert-color, $lightness: -40%) };
+
+	--smb-alert--warning-background-color: #{ color.adjust($alert-color, $hue: -30deg) };
+	--smb-alert--warning-border-color: #{ color.adjust(color.adjust($alert-color, $lightness: -5%), $hue: -30deg) };
+	--smb-alert--warning-color: #{ color.adjust(color.adjust(color.adjust($alert-color, $saturation: -60%), $lightness: -80%), $hue: -30deg) };
+	--smb-alert--warning-icon-color: #{ color.adjust(color.adjust($alert-color, $lightness: -40%), $hue: -30deg) };
+
+	--smb-alert--success-background-color: #{ color.adjust($alert-color, $hue: 40deg) };
+	--smb-alert--success-border-color: #{ color.adjust(color.adjust($alert-color, $lightness: -10%), $hue: 40deg) };
+	--smb-alert--success-color: #{ color.adjust(color.adjust(color.adjust($alert-color, $saturation: -70%), $lightness: -80%), $hue: 40deg) };
+	--smb-alert--success-icon-color: #{ color.adjust(color.adjust($alert-color, $lightness: -50%), $hue: 40deg) };
+
+	--smb-alert--remark-background-color: var(--_lightest-color-gray);
+	--smb-alert--remark-border-color: var(--_lighter-color-gray);
+	--smb-alert--remark-color: var(--_color-text);
+	--smb-alert--remark-icon-color: var(--_color-gray);
+
+	@include core.alert();
+	background-color: var(--smb-alert--background-color);
+	border: 1px solid var(--smb-alert--border-color);
+	border-radius: var(--smb-alert--border-radius);
+	color: var(--smb-alert--color);
+	padding: var(--smb-alert--padding);
+
+	.svg-inline--fa {
+		color: var(--smb-alert--icon-color);
+	}
+
+	&--warning {
+		--smb-alert--background-color: var(--smb-alert--warning-background-color);
+		--smb-alert--border-color: var(--smb-alert--warning-border-color);
+		--smb-alert--color: var(--smb-alert--warning-color);
+		--smb-alert--icon-color: var(--smb-alert--warning-icon-color);
+	}
+
+	&--success {
+		--smb-alert--background-color: var(--smb-alert--success-background-color);
+		--smb-alert--border-color: var(--smb-alert--success-border-color);
+		--smb-alert--color: var(--smb-alert--success-color);
+		--smb-alert--icon-color: var(--smb-alert--success-icon-color);
+	}
+
+	&--remark {
+		--smb-alert--background-color: var(--smb-alert--remark-background-color);
+		--smb-alert--border-color: var(--smb-alert--remark-border-color);
+		--smb-alert--color: var(--smb-alert--remark-color);
+		--smb-alert--icon-color: var(--smb-alert--remark-icon-color);
+	}
+
+	&__body {
+	}
+
+	&__title {
+		position: relative;
+		display: flex;
+		align-items: center;
+		margin-bottom: var(--_margin-1);
+
+		.svg-inline--fa {
+			flex: 0 0 auto;
+			position: relative;
+			top: -1px;
+			margin-right: var(--_margin-2);
+			@include core.set-fluid-font-size-level(3);
+			height: 1em;
+		}
+	}
+}
+
+:where(.smb-alert__body.is-layout-constrained > *) {
+	--wp--style--global--content-size: 100%;
+	--wp--style--global--wide-size: 100%;
+}

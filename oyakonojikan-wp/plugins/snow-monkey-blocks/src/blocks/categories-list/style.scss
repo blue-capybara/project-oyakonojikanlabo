@@ -1,0 +1,157 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-categories-list {
+	--smb-categories-list--count-background-color: var(--_lighter-color-gray);
+	--smb-categories-list--count-color: inherit;
+	--smb-categories-list--gap: var(--_margin-2);
+
+	&__list {
+		@include core.list-unstyled();
+		display: grid;
+		gap: var(--smb-categories-list--gap);
+
+		@include core.media-min(md) {
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		&.masonry-active {
+			display: block;
+
+			.smb-categories-list__item {
+				&:not(:first-child) {
+					margin-top: var(--smb-categories-list--gap);
+				}
+
+				@include core.media-min(md) {
+					width: calc((100% - var(--smb-categories-list--gap)) / 2);
+
+					&:nth-child(2) {
+						margin-top: 0;
+					}
+
+					&:nth-child(2n) {
+						transform: translateX(var(--smb-categories-list--gap));
+					}
+				}
+			}
+
+			.smb-categories-list__item:nth-child(2n - 1) {
+				.smb-categories-list__item__count {
+					@include core.media-min(md) {
+						order: 1;
+
+						&::after {
+							left: auto;
+							right: 100%;
+							@include core.triangle-left(8px, 16px, var(--smb-categories-list--count-background-color));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	&__item {
+		right: 0; // Masonry width 100% hack
+		border: 1px solid var(--smb-categories-list--count-background-color);
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: row;
+
+		&__count {
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			background-color: var(--smb-categories-list--count-background-color);
+			color: var(--smb-categories-list--count-color);
+			padding: var(--_padding1);
+			text-align: center;
+
+			> span {
+				white-space: nowrap;
+			}
+
+			&::after {
+				position: absolute;
+				left: 100%;
+				content: '';
+				@include core.triangle-right(8px, 16px, var(--smb-categories-list--count-background-color));
+			}
+
+			span {
+				@include core.set-font-size-level(-1);
+			}
+		}
+
+		&__category-name {
+			margin-bottom: var(--_margin-2);
+			font-weight: bold;
+		}
+
+		&__category-description {
+			margin-bottom: var(--_margin-2);
+			@include core.set-font-size-level(-1);
+		}
+
+		&__recent-label {
+			margin-top: var(--_margin-1);
+			margin-bottom: var(--_margin-2);
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+			@include core.set-font-size-level(-1);
+			font-weight: bold;
+
+			&:before,
+			&:after {
+				display: block;
+				content: "";
+				height: 1px;
+				background-color: currentColor;
+				flex: 1 0 0%;
+				min-width: 20px;
+			}
+
+			&:before {
+				margin-right: .5em;
+			}
+
+			&:after {
+				margin-left: .5em;
+			}
+		}
+
+		&__list {
+			@include core.list-unstyled();
+			@include core.set-font-size-level(-1);
+			word-break: break-word;
+
+			> * + * {
+				margin-top: var(--_margin-2);
+			}
+		}
+
+		&__detail {
+			flex-grow: 1;
+			padding: var(--_padding1) var(--_padding1) var(--_padding1) var(--_padding2);
+
+			@include core.media-min(md) {
+				.smb-categories-list__item:nth-child(2n - 1) & {
+					padding: var(--_padding1) var(--_padding2) var(--_padding1) var(--_padding1);
+				}
+			}
+
+			a {
+				color: inherit;
+				text-decoration: none;
+
+				@include core.hover() {
+					text-decoration: underline;
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,30 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-price-menu {
+	--smb-price-menu--border-color: var(--_lighter-color-gray);
+	--smb-price-menu--item-padding: var(--_padding-1);
+
+	border-top: 1px solid var(--smb-price-menu--border-color);
+
+	> .smb-price-menu__item {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+
+	&__item {
+		border-bottom: 1px solid var(--smb-price-menu--border-color);
+		padding: var(--smb-price-menu--item-padding) 0;
+
+		@include core.media-min(md) {
+			display: flex;
+			flex-wrap: nowrap;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+
+			> * {
+				flex: 0 0 auto;
+			}
+		}
+	}
+}

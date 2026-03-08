@@ -1,0 +1,72 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-box {
+	--smb-box--background-color: transparent;
+	--smb-box--background-image: initial;
+	--smb-box--background-opacity: 1;
+	--smb-box--border-color: var(--_lighter-color-gray);
+	--smb-box--border-style: solid;
+	--smb-box--border-width: 0px;
+	--smb-box--border-radius: var(--_global--border-radius);
+	--smb-box--box-shadow: initial;
+	--smb-box--color: inherit;
+	--smb-box--padding: var(--_padding1);
+
+	position: relative;
+	border-width: 0; // @todo For /wp-includes/css/dist/block-library/common.css
+	border-radius: var(--smb-box--border-radius);
+	box-shadow: var(--smb-box--box-shadow);
+	color: var(--smb-box--color);
+	padding: var(--smb-box--padding);
+	overflow: visible;
+
+	// @deprecated
+	&--p-s {
+		--smb-box--padding: var(--_padding-1);
+	}
+
+	// @deprecated
+	&--p-l {
+		--smb-box--padding: var(--_padding2);
+	}
+
+	&__background {
+		@include core.alert();
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: var(--smb-box--background-color);
+		background-image: var(--smb-box--background-image);
+		border: var(--smb-box--border-width) var(--smb-box--border-style) var(--smb-box--border-color);
+		border-radius: var(--smb-box--border-radius);
+		opacity: var(--smb-box--background-opacity);
+	}
+
+	&__body {
+		position: relative;
+	}
+}
+
+.smb-box--has-link {
+	cursor: pointer;
+
+	&:has(:focus-visible) {
+		outline: auto;
+		outline: auto -webkit-focus-ring-color; /* for Chrome */
+	}
+}
+
+.smb-box__link {
+	position: static !important;
+	display: block !important;
+	height: 0 !important;
+	width: 0 !important;
+	text-indent: -99999px !important;
+}
+
+:where(.smb-box__body.is-layout-constrained > *) {
+	--wp--style--global--content-size: 100%;
+	--wp--style--global--wide-size: 100%;
+}

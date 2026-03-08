@@ -1,0 +1,19 @@
+//left: 50%; transform: translateX(-50%);を使いたいけど、background-attachment: fixed;との併用ができない。
+
+.alignwide {
+	position: relative;
+	left: calc(var(--ark-alignwide_ex_width) * -1);
+	width: calc(100% + var(--ark-alignwide_ex_width) * 2);
+	max-width: unset !important; // embedなどのmax100%のものを上書き
+
+	// div中の全幅は、内部に収まるように。（ネスト内でも広げたいケースはそれぞれにrevertで0を打ち消す）
+	:where(.c-postContent > div) & {
+		--ark-alignwide_ex_width: 0px;
+	}
+}
+
+// サイドバーありの時、コンテンツエリアでは幅を制限
+[data-sidebar="on"] .l-main .alignwide {
+	left: 0;
+	width: 100%;
+}

@@ -1,0 +1,103 @@
+{
+    "apiVersion": 2,
+    "name": "arkhe-blocks/slider-item",
+    "title": "Step item",
+    "category": "arkhe-blocks",
+    "supports": {
+        "className": false,
+        "reusable": false,
+        "customClassName": false,
+        "html": false
+    },
+    "parent": [
+        "arkhe-blocks/slider"
+    ],
+    "attributes": {
+        "variation": {
+            "type": "string",
+            "default": ""
+        },
+        "paddingPC": {
+            "type": "object",
+            "default": {
+                "top": "2rem",
+                "left": "2rem",
+                "right": "2rem",
+                "bottom": "2rem"
+            }
+        },
+        "paddingSP": {
+            "type": "object"
+        },
+        "widthPC": {
+            "type": "string",
+            "default": "100%"
+        },
+        "widthSP": {
+            "type": "string",
+            "default": "100%"
+        },
+        "bgColor": {
+            "type": "string",
+            "default": ""
+        },
+        "bgGradient": {
+            "type": "string",
+            "default": "linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%)"
+        },
+        "opacity": {
+            "type": "number"
+        },
+        "textColor": {
+            "type": "string",
+            "default": ""
+        },
+        "filter": {
+            "type": "string",
+            "default": "off"
+        },
+        "media": {
+            "type": "object",
+            "default": {
+                "id": 0,
+                "url": ""
+            }
+        },
+        "mediaSP": {
+            "type": "object",
+            "default": {
+                "id": 0,
+                "url": ""
+            }
+        },
+        "focalPoint": {
+            "type": "object"
+        },
+        "focalPointSP": {
+            "type": "object"
+        },
+        "contentPosition": {
+            "type": "string",
+            "default": "center center"
+        },
+        "href": {
+            "type": "string"
+        },
+        "isNewTab": {
+            "type": "boolean",
+            "default": false
+        },
+        "rel": {
+            "type": "string"
+        },
+        "ariaLabel": {
+            "type": "string"
+        },
+        "alt": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "editorScript": "file:./index.js",
+    "textdomain": "arkhe-blocks"
+}

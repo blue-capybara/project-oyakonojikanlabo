@@ -1,0 +1,56 @@
+//------------------------------------------
+// Media Query用
+//------------------------------------------
+
+// mobileのみ
+@mixin mobile {
+
+	// 600px未満
+	@media not all and (min-width: 600px) {
+		@content;
+	}
+}
+
+//tab以上
+@mixin tab {
+
+	@media (min-width: 600px) {
+		@content;
+	}
+}
+
+@mixin sp {
+
+	// 1000px未満
+	@media not all and (min-width: 1000px) {
+
+		@content;
+	}
+}
+
+
+//pc以上
+@mixin pc {
+
+	@media (min-width: 1000px) {
+		@content;
+	}
+}
+
+
+@mixin wide {
+
+	@media (min-width: 1200px) {
+		@content;
+	}
+}
+
+
+//任意の数値
+@mixin max-width($break-point) {
+
+	@media (max-width: $break-point) {
+		@content;
+	}
+
+}

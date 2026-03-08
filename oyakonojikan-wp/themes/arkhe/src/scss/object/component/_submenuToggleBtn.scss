@@ -1,0 +1,57 @@
+
+// サブメニューの展開
+.c-submenuToggleBtn {
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	z-index: 1;
+	width: var(--ark-submenu_btn_size);
+	height: var(--ark-submenu_btn_size);
+	padding: 0;
+	color: inherit;
+	text-align: center;
+	background: none !important;
+	border: none !important;
+	outline-offset: -1px; // borderに重ねる
+	box-shadow: none !important;
+	transform: translateY(-50%);
+	cursor: pointer;
+
+	&:focus {
+		// タブキー操作のときは標準の青色になるように、プロパティは分けて指定している
+		outline-width: 2px;
+		outline-style: solid;
+	}
+
+	.c-submenuToggleBtn__svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+		padding: 25%;
+		transform: rotate(0deg);
+		transition: transform .25s;
+	}
+
+	&::after {
+		box-shadow: inset 0 0 0 1px currentColor;
+		opacity: .2;
+		content: "";
+
+		@extend %absLayer;
+	}
+
+	@media (hover: hover) {
+
+		&:hover {
+			outline: solid 2px;
+		}
+	}
+
+
+	&.is-opened {
+
+		.c-submenuToggleBtn__svg {
+			transform: rotate(-180deg);
+		}
+	}
+}

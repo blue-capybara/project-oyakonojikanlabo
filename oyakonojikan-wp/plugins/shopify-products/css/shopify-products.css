@@ -1,0 +1,13 @@
+#product-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1em;
+}
+.product {
+	border: 1px solid #ddd;
+	padding: 1em;
+	width: 200px;
+	box-shadow: 2px 2px 6px #ccc;
+	text-align: center;
+	background: #fff;
+}

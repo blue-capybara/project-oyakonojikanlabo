@@ -1,0 +1,37 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-section-side-heading {
+	// @deprecated
+	&__subtitle,
+	&__title {
+		text-align: left;
+	}
+
+	&__header {
+		text-align: left;
+
+		> * {
+			text-align: inherit;
+		}
+	}
+
+	&__lede-wrapper {
+		justify-content: flex-start;
+	}
+
+	:where(.smb-section__contents-wrapper > .c-row > * + *) {
+		@include core.media-max(sm) {
+			margin-top: var(--_margin2);
+		}
+	}
+
+	> .smb-section__inner {
+		> .c-container {
+			> .smb-section__contents-wrapper {
+				> .c-row {
+					justify-content: space-between;
+				}
+			}
+		}
+	}
+}

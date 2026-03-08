@@ -1,0 +1,131 @@
+@charset "utf-8";
+
+// メニュークローズ時
+[data-drawer="closed"] {
+
+	.p-drawer {
+		visibility: hidden;
+		opacity: 0;
+		pointer-events: none;
+	}
+}
+// メニューオープン時
+[data-drawer="opened"] {
+
+	body {
+		// ( iOSでスクロールできてしまうことはひとまず無視 )
+		// @include sp {
+		// height: 100%;
+		overflow-y: hidden;
+		touch-action: none;
+		// }
+	}
+
+	.l-header__left,
+	.l-header__center,
+	.l-header__right,
+	.l-header__searchBtn {
+		pointer-events: none;
+	}
+
+}
+
+
+//メニュー
+.p-drawer {
+	--ark-color--border: rgba(255, 255, 255, .15);
+	--ark-nav-padding--Y: 1rem;
+
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1; //ロゴなどより上に
+	width: 100%;
+	height: 100%;
+	padding: var(--ark-header_height) 0 1rem;
+	color: #fff;
+	font-size: .9rem;
+	background: rgba(#000, .92);
+	transition: opacity .5s, visibility .5s;
+	pointer-events: none; // .p-drawerUnderlayer をクリックできるように。
+
+
+	@include pc {
+		padding-bottom: var(--ark-header_height);
+	}
+
+	[data-loaded="false"] & {
+		display: none;
+	}
+
+	// .p-drawer 内の a 全て
+	// a {
+	// 	color: inherit;
+	// }
+
+	.admin-bar & {
+		top: var(--ark-adminbar_height);
+		height: calc(100% - var(--ark-adminbar_height));
+	}
+}
+
+.p-drawer__inner {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	overflow-y: auto;
+	pointer-events: auto; // 内部のリンクなどをクリックできるように & スクロール可能にする
+	-webkit-overflow-scrolling: touch;
+}
+
+.p-drawer__body {
+	position: relative;
+	margin: 0;
+	padding: 4vw 6vw;
+	// pointer-events: auto; // 内部のリンクなどをクリックできるように。
+
+	@include pc {
+		padding: 2rem;
+	}
+
+}
+
+.c-drawerNav {
+
+	.__subText {
+		margin-left: 1em;
+		font-size: .75em;
+		opacity: .6;
+	}
+}
+
+// menuアイコンだけを見せたい
+[data-drawer-move="fade"] {
+
+	.p-drawer__inner {
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	&[data-drawer="opened"] {
+
+		.l-header__drawerBtn {
+			color: #fff;
+		}
+	}
+}
+
+.c-modalClose {
+	background: none;
+	border: none;
+
+	.arkhe-svg-close {
+		margin-right: .5em;
+	}
+}
+
+.p-drawer__close {
+	margin: 1rem auto .5em;
+	color: inherit;
+}

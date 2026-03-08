@@ -1,0 +1,73 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/faq-item",
+	"title": "FAQ",
+	"description": "It is a child block of the FAQ block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/faq" ],
+	"attributes": {
+		"question": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-faq__item__question__body",
+			"default": ""
+		},
+		"questionFontSizeSlug": {
+			"type": "string"
+		},
+		"questionFontSize": {
+			"type": "string"
+		},
+		"questionLabelFontSizeSlug": {
+			"type": "string"
+		},
+		"questionLabelFontSize": {
+			"type": "string"
+		},
+		"answerLabelFontSizeSlug": {
+			"type": "string"
+		},
+		"answerLabelFontSize": {
+			"type": "string"
+		},
+		"questionColor": {
+			"type": "string"
+		},
+		"answerColor": {
+			"type": "string"
+		},
+		"questionLabel": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-faq__item__question__label",
+			"default": "Q"
+		},
+		"answerLabel": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-faq__item__answer__label",
+			"default": "A"
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"anchor": true,
+		"spacing": {
+			"padding": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		}
+	},
+	"editorScript": "file:./index.js"
+}

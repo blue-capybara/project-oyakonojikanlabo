@@ -1,0 +1,84 @@
+@charset "UTF-8";
+
+.p-breadcrumb {
+	position: relative;
+	width: 100%;
+	margin: 0 auto;
+	padding: 8px 0;
+
+}
+
+.p-breadcrumb__list {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+	overflow: hidden;
+	list-style: none;
+}
+
+.p-breadcrumb__item {
+	position: relative;
+	max-width: 100%;
+	margin-right: 10px;
+	padding-right: 12px;
+
+	&::after {
+		position: absolute;
+		top: 50%;
+		right: 0;
+		display: block;
+		width: 4px;
+		height: 4px;
+		color: inherit;
+		border-top: solid 1px currentColor;
+		border-right: solid 1px currentColor;
+		transform: translateY(-50%) rotate(45deg);
+		opacity: var(--ark-opacity--thin);
+		content: "";
+	}
+
+	&:last-child {
+
+		&::after {
+			content: none;
+		}
+	}
+}
+
+.p-breadcrumb__text {
+	display: block;
+	overflow: hidden;
+	color: inherit;
+	font-size: 10px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+
+	&:where(:not(:hover)) {
+		text-decoration: none;
+	}
+
+	@include tab {
+		font-size: 11px;
+	}
+
+}
+
+
+.p-breadcrumb__item:first-child {
+
+	> .p-breadcrumb__text {
+		display: flex;
+		align-items: center;
+	}
+
+	.arkhe-svg-home {
+		margin-right: 4px;
+		margin-bottom: 1px;
+	}
+}
+
+
+// 投稿名は非表示
+// .single span.p-breadcrumb__text {
+//     display: none;
+// }

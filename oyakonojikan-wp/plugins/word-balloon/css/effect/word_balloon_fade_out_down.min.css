@@ -1,0 +1,1 @@
+.w_b_fade_out_down{transform:translateY(-25%);animation:fade_out_down 2s ease infinite}@keyframes fade_out_down{60%{opacity:0;transform:translateY(50%)}61%{transform:translateY(-25%)}}

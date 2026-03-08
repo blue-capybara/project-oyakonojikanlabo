@@ -1,0 +1,3 @@
+from,to,note
+/old-event-url/,/event/new-event-url/,移行先あり
+/old-tag-format/,/tag/new-tag-format/,URL構造変更

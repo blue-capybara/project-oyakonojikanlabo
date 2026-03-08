@@ -1,0 +1,43 @@
+.box {
+  &.box-wa-mailbox {
+    .mailbox-read-info {
+      position: relative;
+      padding-left: 28px;
+
+      &:before {
+        position: absolute;
+        left: 10px;
+        top: 7px;
+        content: "\f106";
+        font-size: 16px;
+        font-family: FontAwesome;
+      }
+    }
+
+    .mailbox-read-info {
+      h5 {
+        padding-top: 8px;
+
+        &:first-child {
+          padding-top: 0;
+        }
+      }
+    }
+  }
+
+  &.box-collapsed {
+    .mailbox-read-message {
+      display: none;
+    }
+
+    .mailbox-read-info {
+      &:before {
+        content: "\f107";
+      }
+    }
+
+    .box-footer {
+      display: none;
+    }
+  }
+}

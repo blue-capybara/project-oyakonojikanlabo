@@ -1,0 +1,11 @@
+{
+  "name": "advanced-ads-pro",
+  "dependencies": {},
+  "devDependencies": {
+    "uglify-js2": "^2.1.11"
+  },
+  "scripts": {
+    "minify": "cd modules/cache-busting/inc && uglifyjs2 postscribe.js base.js -o base.min.js",
+    "release": "npm run minify"
+  }
+}

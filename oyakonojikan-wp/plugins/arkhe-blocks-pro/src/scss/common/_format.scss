@@ -1,0 +1,79 @@
+// 注釈
+.arkb-small {
+	font-size: .75em;
+	opacity: .75;
+}
+
+.arkb-marker {
+	display: inline;
+	padding: 1px;
+	font-weight: var(--arkb-marker-txt-weight, unset);
+	background: var(--arkb-marker-style);
+}
+
+// フォントサイズ
+.arkb-fz-xs {
+	font-size: .75em !important;
+}
+
+.arkb-fz-s {
+	font-size: .9em !important;
+}
+
+.arkb-fz-l {
+	font-size: 1.25em !important;
+}
+
+.arkb-fz-xl {
+	font-size: 1.5em !important;
+}
+
+.arkb-fz-xxl {
+	font-size: 2em !important;
+}
+
+
+// インラインアイコン
+.arkb-inline-icon {
+	position: relative;
+	display: inline-block;
+	min-width: 1em;
+	// margin-right: .1em;
+	// margin-left: .1em;
+	font-family: arial; // &emsp; と1emの関係性がフォントで変わるので、フォントを固定する
+	letter-spacing: 0;
+
+	&.-has-margin {
+		margin-right: .1em;
+		margin-left: .1em;
+	}
+
+
+	// &nbsp;だけだとテキストカーソル位置が半分くらいで終わるので、少し調整する
+	// &::before {
+	//     display: inline-block;
+	//     width: 1ch;
+	//     content: "";
+	// }
+
+	// + .arkb-inline-icon {
+	// 	margin-left: 0;
+	// }
+
+	// テキストカーソルが見えなくなるので、テキストカーソルの位置を調整する
+	&::after {
+		position: absolute;
+		top: 0;
+		left: 0;
+		display: block;
+		width: 100%;
+		max-width: 1em;
+		height: 100%;
+		background: currentColor;
+		content: "";
+		mask-repeat: no-repeat;
+		mask-position: center center;
+		mask-size: contain;
+		mask-image: var(--the-icon-svg);
+	}
+}

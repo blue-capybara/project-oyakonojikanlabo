@@ -1,0 +1,4662 @@
+/* eslint-disable react/no-unknown-property */
+
+import classnames from 'classnames';
+import hexToRgba from 'hex-to-rgba';
+import { omit, without } from 'lodash';
+
+import {
+	RichText,
+	InnerBlocks,
+	useBlockProps,
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
+
+import { generateSpacingProperties } from '@smb/helper';
+
+import { Save as Header } from '../section/components/header';
+import { SectionBackgroundV2 } from '../section/components/deprecated';
+
+import {
+	generateStylesForSectionBackground,
+	SectionBackground,
+} from '../section/components/background';
+
+import metadata from './block.json';
+
+const blockAttributes = metadata.attributes;
+const blockSupports = metadata.supports;
+
+export default [
+	{
+		attributes: {
+			...blockAttributes,
+			padding: {
+				type: 'object',
+				default: {},
+			},
+		},
+
+		supports: {
+			...blockSupports,
+		},
+
+		migrate( attributes ) {
+			const newAttributes = {
+				...attributes,
+				style: {
+					...attributes?.style,
+					spacing: {
+						...attributes?.style?.spacing,
+						padding: {
+							...attributes?.padding,
+						},
+					},
+				},
+			};
+			return newAttributes;
+		},
+
+		save( { attributes, className } ) {
+			const {
+				align,
+
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageWidth,
+				lgImageHeight,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageWidth,
+				mdImageHeight,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageWidth,
+				smImageHeight,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				contentsAlignment,
+				maskColor,
+				maskGradientColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				contentJustification,
+				itemsAlignment,
+
+				title,
+				subtitle,
+				lede,
+
+				wrapperTagName,
+				titleTagName,
+				height,
+				disableCustomHeight,
+				containerAlign,
+				disableContainerPadding,
+				contentsMaxWidth,
+				isSlim,
+				padding,
+
+				topDividerType,
+				topDividerLevel,
+				topDividerColor,
+				topDividerVerticalPosition,
+				topDividerOverlay,
+				bottomDividerType,
+				bottomDividerLevel,
+				bottomDividerColor,
+				bottomDividerVerticalPosition,
+				bottomDividerOverlay,
+				backgroundText,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const isItemsAlignmentable = 'fit' !== height;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				className,
+				{
+					[ `smb-section--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					[ `smb-section--${ height }` ]:
+						!! height && disableCustomHeight,
+					[ `is-items-alignment-${ itemsAlignment }` ]:
+						!! itemsAlignment && isItemsAlignmentable,
+					[ `smb-section--top-divider-no-overlay` ]:
+						! topDividerOverlay,
+					[ `smb-section--bottom-divider-no-overlay` ]:
+						! bottomDividerOverlay,
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const innerClasses = classnames( 'smb-section__inner', {
+				[ `is-content-justification-${ contentJustification }` ]:
+					!! contentJustification,
+			} );
+
+			const containerClasses = classnames( 'c-container', {
+				alignfull:
+					( 'full' === containerAlign ||
+						'contents-full' === containerAlign ) &&
+					'full' === align,
+				alignwide:
+					'wide' === containerAlign ||
+					( 'contents-wide' === containerAlign && 'full' === align ),
+				'c-container--no-padding': disableContainerPadding,
+			} );
+
+			let headerContainerClasses = containerClasses
+				.replace( 'c-container--no-padding', '' )
+				.trim();
+			if (
+				'contents-wide' === containerAlign ||
+				'contents-full' === containerAlign
+			) {
+				headerContainerClasses = headerContainerClasses
+					.replace( 'alignfull', '' )
+					.replace( 'alignwide', '' )
+					.trim();
+			}
+
+			const contentsWrapperClasses = classnames(
+				'smb-section__contents-wrapper',
+				{
+					[ `smb-section__contents-wrapper--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					'u-slim-width': isSlim && ! contentsMaxWidth,
+				}
+			);
+
+			const hasMask = 0 < Number( ( 1 - maskOpacity ).toFixed( 1 ) );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const styles = {
+				'--smb-section--color': textColor || undefined,
+				'--smb-section--contents-wrapper-width':
+					!! contentsMaxWidth && ! isSlim
+						? contentsMaxWidth
+						: undefined,
+				'--smb-section--min-height':
+					!! height && ! disableCustomHeight ? height : undefined,
+				'--smb-section-with-bgimage--mask-color':
+					maskColor || undefined,
+				'--smb-section-with-bgimage--mask-image':
+					maskGradientColor || undefined,
+				'--smb-section-with-bgimage--mask-opacity':
+					String( maskOpacity ),
+				'--smb-section-with-bgimage--lg-media-position': lgPointValue,
+				'--smb-section-with-bgimage--lg-repeatable-image':
+					lgImageRepeat && !! lgImageURL
+						? `url(${ lgImageURL })`
+						: undefined,
+				'--smb-section-with-bgimage--md-media-position': mdPointValue,
+				'--smb-section-with-bgimage--md-repeatable-image':
+					mdImageRepeat && !! mdImageURL
+						? `url(${ mdImageURL })`
+						: undefined,
+				'--smb-section-with-bgimage--sm-media-position': smPointValue,
+				'--smb-section-with-bgimage--sm-repeatable-image':
+					smImageRepeat && !! smImageURL
+						? `url(${ smImageURL })`
+						: undefined,
+				...generateSpacingProperties( padding ),
+				...generateStylesForSectionBackground( {
+					topDividerVerticalPosition,
+					topDividerLevel,
+					bottomDividerVerticalPosition,
+					bottomDividerLevel,
+					backgroundText,
+				} ),
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: styles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ hasMask && (
+								<div className="smb-section-with-bgimage__mask" />
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div className="smb-section-with-bgimage__repeatable-image">
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											width={ lgImageWidth }
+											height={ lgImageHeight }
+											className={ `wp-image-${ lgImageID }` }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										width={ lgImageWidth }
+										height={ lgImageHeight }
+										className={ `wp-image-${ lgImageID }` }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									width={ lgImageWidth }
+									height={ lgImageHeight }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ hasMask && (
+								<div className="smb-section-with-bgimage__mask" />
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div className="smb-section-with-bgimage__repeatable-image">
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											width={ mdImageWidth }
+											height={ mdImageHeight }
+											className={ `wp-image-${ mdImageID }` }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										width={ mdImageWidth }
+										height={ mdImageHeight }
+										className={ `wp-image-${ mdImageID }` }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									width={ mdImageWidth }
+									height={ mdImageHeight }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ hasMask && (
+								<div className="smb-section-with-bgimage__mask" />
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div className="smb-section-with-bgimage__repeatable-image">
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											width={ smImageWidth }
+											height={ smImageHeight }
+											className={ `wp-image-${ smImageID }` }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										width={ smImageWidth }
+										height={ smImageHeight }
+										className={ `wp-image-${ smImageID }` }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									width={ smImageWidth }
+									height={ smImageHeight }
+								/>
+							) }
+						</div>
+					) }
+
+					<SectionBackground
+						{ ...{
+							topDividerType,
+							topDividerLevel,
+							topDividerColor,
+							bottomDividerType,
+							bottomDividerLevel,
+							bottomDividerColor,
+							backgroundText,
+							containerClasses,
+						} }
+					/>
+
+					<div className={ innerClasses }>
+						<div className={ containerClasses }>
+							<div className={ contentsWrapperClasses }>
+								<Header
+									{ ...{
+										title,
+										titleTagName,
+										subtitle,
+										lede,
+										hasContainer:
+											( disableContainerPadding &&
+												'full' === containerAlign &&
+												'full' === align ) ||
+											'contents-wide' ===
+												containerAlign ||
+											'contents-full' === containerAlign,
+										containerClassName:
+											headerContainerClasses,
+									} }
+								/>
+
+								<div
+									{ ...useInnerBlocksProps.save( {
+										className: 'smb-section__body',
+									} ) }
+								/>
+							</div>
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+			padding: {
+				type: 'object',
+				default: {},
+			},
+		},
+
+		supports: {
+			...blockSupports,
+		},
+
+		save( { attributes, className } ) {
+			const {
+				align,
+
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageWidth,
+				lgImageHeight,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageWidth,
+				mdImageHeight,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageWidth,
+				smImageHeight,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				contentsAlignment,
+				maskColor,
+				maskGradientColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				contentJustification,
+				itemsAlignment,
+
+				title,
+				subtitle,
+				lede,
+
+				wrapperTagName,
+				titleTagName,
+				height,
+				disableCustomHeight,
+				containerAlign,
+				disableContainerPadding,
+				contentsMaxWidth,
+				isSlim,
+				padding,
+
+				topDividerType,
+				topDividerLevel,
+				topDividerColor,
+				topDividerVerticalPosition,
+				topDividerOverlay,
+				bottomDividerType,
+				bottomDividerLevel,
+				bottomDividerColor,
+				bottomDividerVerticalPosition,
+				bottomDividerOverlay,
+				backgroundText,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const isItemsAlignmentable = 'fit' !== height;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				className,
+				{
+					[ `smb-section--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					[ `smb-section--${ height }` ]:
+						!! height && disableCustomHeight,
+					[ `is-items-alignment-${ itemsAlignment }` ]:
+						!! itemsAlignment && isItemsAlignmentable,
+					[ `smb-section--top-divider-no-overlay` ]:
+						! topDividerOverlay,
+					[ `smb-section--bottom-divider-no-overlay` ]:
+						! bottomDividerOverlay,
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const innerClasses = classnames( 'smb-section__inner', {
+				[ `is-content-justification-${ contentJustification }` ]:
+					!! contentJustification,
+			} );
+
+			const containerClasses = classnames( 'c-container', {
+				alignfull:
+					( 'full' === containerAlign ||
+						'contents-full' === containerAlign ) &&
+					'full' === align,
+				alignwide:
+					'wide' === containerAlign ||
+					( 'contents-wide' === containerAlign && 'full' === align ),
+				'c-container--no-padding':
+					disableContainerPadding &&
+					( 'full' === containerAlign ||
+						'contents-full' === containerAlign ) &&
+					'full' === align,
+			} );
+
+			let headerContainerClasses = containerClasses
+				.replace( 'c-container--no-padding', '' )
+				.trim();
+			if (
+				'contents-wide' === containerAlign ||
+				'contents-full' === containerAlign
+			) {
+				headerContainerClasses = headerContainerClasses
+					.replace( 'alignfull', '' )
+					.replace( 'alignwide', '' )
+					.trim();
+			}
+
+			const contentsWrapperClasses = classnames(
+				'smb-section__contents-wrapper',
+				{
+					[ `smb-section__contents-wrapper--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					'u-slim-width': isSlim && ! contentsMaxWidth,
+				}
+			);
+
+			const hasMask = 0 < Number( ( 1 - maskOpacity ).toFixed( 1 ) );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const styles = {
+				'--smb-section--color': textColor || undefined,
+				'--smb-section--contents-wrapper-width':
+					!! contentsMaxWidth && ! isSlim
+						? contentsMaxWidth
+						: undefined,
+				'--smb-section--min-height':
+					!! height && ! disableCustomHeight ? height : undefined,
+				'--smb-section-with-bgimage--mask-color':
+					maskColor || undefined,
+				'--smb-section-with-bgimage--mask-image':
+					maskGradientColor || undefined,
+				'--smb-section-with-bgimage--mask-opacity':
+					String( maskOpacity ),
+				'--smb-section-with-bgimage--lg-media-position': lgPointValue,
+				'--smb-section-with-bgimage--lg-repeatable-image':
+					lgImageRepeat && !! lgImageURL
+						? `url(${ lgImageURL })`
+						: undefined,
+				'--smb-section-with-bgimage--md-media-position': mdPointValue,
+				'--smb-section-with-bgimage--md-repeatable-image':
+					mdImageRepeat && !! mdImageURL
+						? `url(${ mdImageURL })`
+						: undefined,
+				'--smb-section-with-bgimage--sm-media-position': smPointValue,
+				'--smb-section-with-bgimage--sm-repeatable-image':
+					smImageRepeat && !! smImageURL
+						? `url(${ smImageURL })`
+						: undefined,
+				...generateSpacingProperties( padding ),
+				...generateStylesForSectionBackground( {
+					topDividerVerticalPosition,
+					topDividerLevel,
+					bottomDividerVerticalPosition,
+					bottomDividerLevel,
+					backgroundText,
+				} ),
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: styles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ hasMask && (
+								<div className="smb-section-with-bgimage__mask" />
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div className="smb-section-with-bgimage__repeatable-image">
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											width={ lgImageWidth }
+											height={ lgImageHeight }
+											className={ `wp-image-${ lgImageID }` }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										width={ lgImageWidth }
+										height={ lgImageHeight }
+										className={ `wp-image-${ lgImageID }` }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									width={ lgImageWidth }
+									height={ lgImageHeight }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ hasMask && (
+								<div className="smb-section-with-bgimage__mask" />
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div className="smb-section-with-bgimage__repeatable-image">
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											width={ mdImageWidth }
+											height={ mdImageHeight }
+											className={ `wp-image-${ mdImageID }` }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										width={ mdImageWidth }
+										height={ mdImageHeight }
+										className={ `wp-image-${ mdImageID }` }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									width={ mdImageWidth }
+									height={ mdImageHeight }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ hasMask && (
+								<div className="smb-section-with-bgimage__mask" />
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div className="smb-section-with-bgimage__repeatable-image">
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											width={ smImageWidth }
+											height={ smImageHeight }
+											className={ `wp-image-${ smImageID }` }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										width={ smImageWidth }
+										height={ smImageHeight }
+										className={ `wp-image-${ smImageID }` }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									width={ smImageWidth }
+									height={ smImageHeight }
+								/>
+							) }
+						</div>
+					) }
+
+					<SectionBackground
+						{ ...{
+							topDividerType,
+							topDividerLevel,
+							topDividerColor,
+							bottomDividerType,
+							bottomDividerLevel,
+							bottomDividerColor,
+							backgroundText,
+							containerClasses,
+						} }
+					/>
+
+					<div className={ innerClasses }>
+						<div className={ containerClasses }>
+							<div className={ contentsWrapperClasses }>
+								<Header
+									{ ...{
+										title,
+										titleTagName,
+										subtitle,
+										lede,
+										hasContainer:
+											( disableContainerPadding &&
+												'full' === containerAlign &&
+												'full' === align ) ||
+											'contents-wide' ===
+												containerAlign ||
+											'contents-full' === containerAlign,
+										containerClassName:
+											headerContainerClasses,
+									} }
+								/>
+
+								<div
+									{ ...useInnerBlocksProps.save( {
+										className: 'smb-section__body',
+									} ) }
+								/>
+							</div>
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		supports: {
+			...blockSupports,
+		},
+
+		save( { attributes, className } ) {
+			const {
+				align,
+
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				contentsAlignment,
+				maskColor,
+				maskGradientColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				contentJustification,
+				itemsAlignment,
+
+				title,
+				subtitle,
+				lede,
+
+				wrapperTagName,
+				titleTagName,
+				height,
+				containerAlign,
+				disableContainerPadding,
+				contentsMaxWidth,
+				isSlim,
+
+				backgroundText,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const isItemsAlignmentable = 'fit' !== height;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				className,
+				{
+					[ `smb-section--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					[ `smb-section--${ height }` ]: !! height,
+					[ `is-items-alignment-${ itemsAlignment }` ]:
+						!! itemsAlignment && isItemsAlignmentable,
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const innerClasses = classnames( 'smb-section__inner', {
+				[ `is-content-justification-${ contentJustification }` ]:
+					!! contentJustification,
+			} );
+
+			const containerClasses = classnames( 'c-container', {
+				alignfull:
+					( 'full' === containerAlign ||
+						'contents-full' === containerAlign ) &&
+					'full' === align,
+				alignwide:
+					'wide' === containerAlign ||
+					( 'contents-wide' === containerAlign && 'full' === align ),
+				'c-container--no-padding':
+					disableContainerPadding &&
+					( 'full' === containerAlign ||
+						'contents-full' === containerAlign ) &&
+					'full' === align,
+			} );
+
+			let headerContainerClasses = containerClasses
+				.replace( 'c-container--no-padding', '' )
+				.trim();
+			if (
+				'contents-wide' === containerAlign ||
+				'contents-full' === containerAlign
+			) {
+				headerContainerClasses = headerContainerClasses
+					.replace( 'alignfull', '' )
+					.replace( 'alignwide', '' )
+					.trim();
+			}
+
+			const contentsWrapperClasses = classnames(
+				'smb-section__contents-wrapper',
+				{
+					[ `smb-section__contents-wrapper--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					'u-slim-width': isSlim && ! contentsMaxWidth,
+				}
+			);
+
+			const hasMask = 0 < Number( ( 1 - maskOpacity ).toFixed( 1 ) );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor || maskGradientColor ) {
+				maskStyles.backgroundColor = maskColor;
+				maskStyles.backgroundImage = maskGradientColor;
+			}
+
+			const lgVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const norepeatableLgImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const repeatableLgImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ lgImageURL } )`,
+				backgroundPosition: lgPointValue,
+			};
+
+			const mdVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const norepeatableMdImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const repeatableMdImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ mdImageURL } )`,
+				backgroundPosition: mdPointValue,
+			};
+
+			const smVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const norepeatableSmImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const repeatableSmImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ smImageURL } )`,
+				backgroundPosition: smPointValue,
+			};
+
+			const innerStyles = {};
+
+			const contentsWrapperStyles = {
+				width:
+					!! contentsMaxWidth && ! isSlim
+						? contentsMaxWidth
+						: undefined,
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: sectionStyles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableLgImageStyles }
+									>
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											className={ `wp-image-${ lgImageID }` }
+											style={ norepeatableLgImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										className={ `wp-image-${ lgImageID }` }
+										style={ norepeatableLgImageStyles }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ lgVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableMdImageStyles }
+									>
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											className={ `wp-image-${ mdImageID }` }
+											style={ norepeatableMdImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										className={ `wp-image-${ mdImageID }` }
+										style={ norepeatableMdImageStyles }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ mdVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableSmImageStyles }
+									>
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											className={ `wp-image-${ smImageID }` }
+											style={ norepeatableSmImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										className={ `wp-image-${ smImageID }` }
+										style={ norepeatableSmImageStyles }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ smVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					<SectionBackgroundV2
+						{ ...{
+							backgroundText,
+							containerClasses,
+						} }
+					/>
+
+					<div className={ innerClasses } style={ innerStyles }>
+						<div className={ containerClasses }>
+							<div
+								className={ contentsWrapperClasses }
+								style={ contentsWrapperStyles }
+							>
+								<Header
+									{ ...{
+										title,
+										titleTagName,
+										subtitle,
+										lede,
+										hasContainer:
+											( disableContainerPadding &&
+												'full' === containerAlign &&
+												'full' === align ) ||
+											'contents-wide' ===
+												containerAlign ||
+											'contents-full' === containerAlign,
+										containerClassName:
+											headerContainerClasses,
+									} }
+								/>
+
+								<div
+									{ ...useInnerBlocksProps.save( {
+										className: 'smb-section__body',
+									} ) }
+								/>
+							</div>
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				contentsAlignment,
+				maskColor,
+				maskGradientColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				contentJustification,
+				itemsAlignment,
+
+				title,
+				subtitle,
+				lede,
+
+				wrapperTagName,
+				titleTagName,
+				height,
+				containerAlign,
+				contentsMaxWidth,
+				isSlim,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const isItemsAlignmentable = 'fit' !== height;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				className,
+				{
+					[ `smb-section--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					[ `smb-section--${ height }` ]: !! height,
+					[ `is-items-alignment-${ itemsAlignment }` ]:
+						!! itemsAlignment && isItemsAlignmentable,
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const innerClasses = classnames( 'smb-section__inner', {
+				[ `is-content-justification-${ contentJustification }` ]:
+					!! contentJustification,
+			} );
+
+			const containerClasses = classnames( 'c-container', {
+				alignfull: 'full' === containerAlign,
+				alignwide: 'wide' === containerAlign,
+			} );
+
+			const contentsWrapperClasses = classnames(
+				'smb-section__contents-wrapper',
+				{
+					[ `smb-section__contents-wrapper--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					'u-slim-width': isSlim && ! contentsMaxWidth,
+				}
+			);
+
+			const hasMask = 0 < Number( ( 1 - maskOpacity ).toFixed( 1 ) );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor || maskGradientColor ) {
+				maskStyles.backgroundColor = maskColor;
+				maskStyles.backgroundImage = maskGradientColor;
+			}
+
+			const lgVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const norepeatableLgImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const repeatableLgImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ lgImageURL } )`,
+				backgroundPosition: lgPointValue,
+			};
+
+			const mdVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const norepeatableMdImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const repeatableMdImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ mdImageURL } )`,
+				backgroundPosition: mdPointValue,
+			};
+
+			const smVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const norepeatableSmImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const repeatableSmImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ smImageURL } )`,
+				backgroundPosition: smPointValue,
+			};
+
+			const innerStyles = {};
+
+			const contentsWrapperStyles = {
+				maxWidth:
+					!! contentsMaxWidth && ! isSlim
+						? contentsMaxWidth
+						: undefined,
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: sectionStyles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableLgImageStyles }
+									>
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											className={ `wp-image-${ lgImageID }` }
+											style={ norepeatableLgImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										className={ `wp-image-${ lgImageID }` }
+										style={ norepeatableLgImageStyles }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ lgVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableMdImageStyles }
+									>
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											className={ `wp-image-${ mdImageID }` }
+											style={ norepeatableMdImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										className={ `wp-image-${ mdImageID }` }
+										style={ norepeatableMdImageStyles }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ mdVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableSmImageStyles }
+									>
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											className={ `wp-image-${ smImageID }` }
+											style={ norepeatableSmImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										className={ `wp-image-${ smImageID }` }
+										style={ norepeatableSmImageStyles }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ smVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					<div className={ innerClasses } style={ innerStyles }>
+						<div className={ containerClasses }>
+							<div
+								className={ contentsWrapperClasses }
+								style={ contentsWrapperStyles }
+							>
+								<Header
+									{ ...{
+										title,
+										titleTagName,
+										subtitle,
+										lede,
+									} }
+								/>
+
+								<div className="smb-section__body">
+									<InnerBlocks.Content />
+								</div>
+							</div>
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		migrate( attributes ) {
+			if ( !! attributes.className ) {
+				attributes.className = without(
+					attributes.className.split( ' ' ),
+					'smb-section--left',
+					'smb-section--center',
+					'smb-section--right'
+				).join( ' ' );
+			}
+
+			if ( ! attributes.className ) {
+				attributes = omit( attributes, 'className' );
+			}
+
+			return {
+				...attributes,
+			};
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				subtitle,
+				lede,
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskGradientColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+				contentJustification,
+				itemsAlignment,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const isItemsAlignmentable = 'fit' !== height;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				className,
+				{
+					[ `smb-section--${ contentsAlignment }` ]:
+						!! contentsAlignment,
+					[ `smb-section--${ height }` ]: !! height,
+					[ `is-content-justification-${ contentJustification }` ]:
+						!! contentJustification,
+					[ `is-items-alignment-${ itemsAlignment }` ]:
+						!! itemsAlignment && isItemsAlignmentable,
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const hasTitle =
+				! RichText.isEmpty( title ) && 'none' !== titleTagName;
+			const hasSubTitle = ! RichText.isEmpty( subtitle );
+			const hasLede = ! RichText.isEmpty( lede );
+			const hasMask = 0 < Number( ( 1 - maskOpacity ).toFixed( 1 ) );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor || maskGradientColor ) {
+				maskStyles.backgroundColor = maskColor;
+				maskStyles.backgroundImage = maskGradientColor;
+			}
+
+			const lgVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const norepeatableLgImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const repeatableLgImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ lgImageURL } )`,
+				backgroundPosition: lgPointValue,
+			};
+
+			const mdVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const norepeatableMdImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const repeatableMdImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ mdImageURL } )`,
+				backgroundPosition: mdPointValue,
+			};
+
+			const smVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const norepeatableSmImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const repeatableSmImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ smImageURL } )`,
+				backgroundPosition: smPointValue,
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: sectionStyles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableLgImageStyles }
+									>
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											className={ `wp-image-${ lgImageID }` }
+											style={ norepeatableLgImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										className={ `wp-image-${ lgImageID }` }
+										style={ norepeatableLgImageStyles }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ lgVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableMdImageStyles }
+									>
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											className={ `wp-image-${ mdImageID }` }
+											style={ norepeatableMdImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										className={ `wp-image-${ mdImageID }` }
+										style={ norepeatableMdImageStyles }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ mdVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableSmImageStyles }
+									>
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											className={ `wp-image-${ smImageID }` }
+											style={ norepeatableSmImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										className={ `wp-image-${ smImageID }` }
+										style={ norepeatableSmImageStyles }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ smVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					<div className="smb-section__inner">
+						<div className={ containerClasses }>
+							{ hasTitle && hasSubTitle && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__subtitle"
+									value={ subtitle }
+								/>
+							) }
+
+							{ hasTitle && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+
+							{ hasTitle && hasLede && (
+								<div className="smb-section__lede-wrapper">
+									<RichText.Content
+										tagName="div"
+										className="smb-section__lede"
+										value={ lede }
+									/>
+								</div>
+							) }
+
+							<div className="smb-section__body">
+								<InnerBlocks.Content />
+							</div>
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				subtitle,
+				lede,
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskGradientColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const hasTitle =
+				! RichText.isEmpty( title ) && 'none' !== titleTagName;
+			const hasSubTitle = ! RichText.isEmpty( subtitle );
+			const hasLede = ! RichText.isEmpty( lede );
+			const hasMask = 0 < Number( ( 1 - maskOpacity ).toFixed( 1 ) );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor || maskGradientColor ) {
+				maskStyles.backgroundColor = maskColor;
+				maskStyles.backgroundImage = maskGradientColor;
+			}
+
+			const lgVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const norepeatableLgImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const repeatableLgImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ lgImageURL } )`,
+				backgroundPosition: lgPointValue,
+			};
+
+			const mdVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const norepeatableMdImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const repeatableMdImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ mdImageURL } )`,
+				backgroundPosition: mdPointValue,
+			};
+
+			const smVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const norepeatableSmImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const repeatableSmImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ smImageURL } )`,
+				backgroundPosition: smPointValue,
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: sectionStyles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableLgImageStyles }
+									>
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											className={ `wp-image-${ lgImageID }` }
+											style={ norepeatableLgImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										className={ `wp-image-${ lgImageID }` }
+										style={ norepeatableLgImageStyles }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ lgVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableMdImageStyles }
+									>
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											className={ `wp-image-${ mdImageID }` }
+											style={ norepeatableMdImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										className={ `wp-image-${ mdImageID }` }
+										style={ norepeatableMdImageStyles }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ mdVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableSmImageStyles }
+									>
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											className={ `wp-image-${ smImageID }` }
+											style={ norepeatableSmImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										className={ `wp-image-${ smImageID }` }
+										style={ norepeatableSmImageStyles }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ smVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					<div className={ containerClasses }>
+						{ hasTitle && hasSubTitle && (
+							<RichText.Content
+								tagName="div"
+								className="smb-section__subtitle"
+								value={ subtitle }
+							/>
+						) }
+
+						{ hasTitle && (
+							<RichText.Content
+								tagName={ titleTagName }
+								className="smb-section__title"
+								value={ title }
+							/>
+						) }
+
+						{ hasTitle && hasLede && (
+							<div className="smb-section__lede-wrapper">
+								<RichText.Content
+									tagName="div"
+									className="smb-section__lede"
+									value={ lede }
+								/>
+							</div>
+						) }
+
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				subtitle,
+				lede,
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskGradientColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const hasTitle =
+				! RichText.isEmpty( title ) && 'none' !== titleTagName;
+			const hasSubTitle = ! RichText.isEmpty( subtitle );
+			const hasLede = ! RichText.isEmpty( lede );
+			const hasMask = 0 < Number( ( 1 - maskOpacity ).toFixed( 1 ) );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor || maskGradientColor ) {
+				maskStyles.backgroundColor = maskColor;
+				maskStyles.backgroundImage = maskGradientColor;
+			}
+
+			const lgVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const norepeatableLgImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const repeatableLgImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ lgImageURL } )`,
+				backgroundPosition: lgPointValue,
+			};
+
+			const mdVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const norepeatableMdImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const repeatableMdImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ mdImageURL } )`,
+				backgroundPosition: mdPointValue,
+			};
+
+			const smVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const norepeatableSmImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const repeatableSmImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ smImageURL } )`,
+				backgroundPosition: smPointValue,
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: sectionStyles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableLgImageStyles }
+									>
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											className={ `wp-image-${ lgImageID }` }
+											style={ norepeatableLgImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										className={ `wp-image-${ lgImageID }` }
+										style={ norepeatableLgImageStyles }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ lgVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableMdImageStyles }
+									>
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											className={ `wp-image-${ mdImageID }` }
+											style={ norepeatableMdImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										className={ `wp-image-${ mdImageID }` }
+										style={ norepeatableMdImageStyles }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ mdVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ hasMask && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableSmImageStyles }
+									>
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											className={ `wp-image-${ smImageID }` }
+											style={ norepeatableSmImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										className={ `wp-image-${ smImageID }` }
+										style={ norepeatableSmImageStyles }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ smVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					<div className={ containerClasses }>
+						{ hasTitle && hasSubTitle && (
+							<RichText.Content
+								tagName="div"
+								className="smb-section__subtitle"
+								value={ subtitle }
+							/>
+						) }
+
+						{ hasTitle && (
+							<RichText.Content
+								tagName={ titleTagName }
+								className="smb-section__title"
+								value={ title }
+							/>
+						) }
+
+						{ hasTitle && hasLede && (
+							<RichText.Content
+								tagName="div"
+								className="smb-section__lede"
+								value={ lede }
+							/>
+						) }
+
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				subtitle,
+				lede,
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskColor2,
+				maskColorAngle,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor ) {
+				maskStyles.backgroundColor = maskColor;
+				if ( maskColor2 ) {
+					maskStyles.backgroundImage = `linear-gradient(${ maskColorAngle }deg, ${ maskColor } 0%, ${ maskColor2 } 100%)`;
+				}
+			}
+
+			const lgVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const norepeatableLgImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const repeatableLgImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ lgImageURL } )`,
+				backgroundPosition: lgPointValue,
+			};
+
+			const mdVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const norepeatableMdImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const repeatableMdImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ mdImageURL } )`,
+				backgroundPosition: mdPointValue,
+			};
+
+			const smVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const norepeatableSmImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const repeatableSmImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ smImageURL } )`,
+				backgroundPosition: smPointValue,
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: sectionStyles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableLgImageStyles }
+									>
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											className={ `wp-image-${ lgImageID }` }
+											style={ norepeatableLgImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										className={ `wp-image-${ lgImageID }` }
+										style={ norepeatableLgImageStyles }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ lgVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableMdImageStyles }
+									>
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											className={ `wp-image-${ mdImageID }` }
+											style={ norepeatableMdImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										className={ `wp-image-${ mdImageID }` }
+										style={ norepeatableMdImageStyles }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ mdVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableSmImageStyles }
+									>
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											className={ `wp-image-${ smImageID }` }
+											style={ norepeatableSmImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										className={ `wp-image-${ smImageID }` }
+										style={ norepeatableSmImageStyles }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ smVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					<div className={ containerClasses }>
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( subtitle ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__subtitle"
+									value={ subtitle }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( lede ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__lede"
+									value={ lede }
+								/>
+							) }
+
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+			maskColor2: {
+				type: 'string',
+			},
+			maskColorAngle: {
+				type: 'number',
+				default: 0,
+			},
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		migrate( attributes ) {
+			let maskGradientColor;
+			if ( attributes.maskColor2 ) {
+				maskGradientColor = `linear-gradient(${
+					attributes.maskColorAngle
+				}deg, ${ hexToRgba( attributes.maskColor ) } 0%, ${ hexToRgba(
+					attributes.maskColor2
+				) } 100%)`;
+				attributes.maskColor = undefined;
+			}
+
+			return {
+				...attributes,
+				maskGradientColor,
+			};
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				subtitle,
+				lede,
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				lgImageRepeat,
+				lgFocalPoint,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				mdImageRepeat,
+				mdFocalPoint,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				smImageRepeat,
+				smFocalPoint,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskColor2,
+				maskColorAngle,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const TagName = wrapperTagName;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const isLgVideo = 'video' === lgImageMediaType;
+			const isLgImage =
+				'image' === lgImageMediaType || undefined === lgImageMediaType;
+			const hasLgBackground = !! lgImageURL;
+			const lgPointValue =
+				lgFocalPoint && ! parallax
+					? `${ lgFocalPoint.x * 100 }% ${ lgFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isMdVideo = 'video' === mdImageMediaType;
+			const isMdImage =
+				'image' === mdImageMediaType || undefined === mdImageMediaType;
+			const hasMdBackground = !! mdImageURL;
+			const mdPointValue =
+				mdFocalPoint && ! parallax
+					? `${ mdFocalPoint.x * 100 }% ${ mdFocalPoint.y * 100 }%`
+					: undefined;
+
+			const isSmVideo = 'video' === smImageMediaType;
+			const isSmImage =
+				'image' === smImageMediaType || undefined === smImageMediaType;
+			const hasSmBackground = !! smImageURL;
+			const smPointValue =
+				smFocalPoint && ! parallax
+					? `${ smFocalPoint.x * 100 }% ${ smFocalPoint.y * 100 }%`
+					: undefined;
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor ) {
+				maskStyles.backgroundColor = maskColor;
+				if ( maskColor2 ) {
+					maskStyles.backgroundImage = `linear-gradient(${ maskColorAngle }deg, ${ maskColor } 0%, ${ maskColor2 } 100%)`;
+				}
+			}
+
+			const lgVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const norepeatableLgImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: lgPointValue,
+			};
+
+			const repeatableLgImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ lgImageURL } )`,
+				backgroundPosition: lgPointValue,
+			};
+
+			const mdVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const norepeatableMdImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: mdPointValue,
+			};
+
+			const repeatableMdImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ mdImageURL } )`,
+				backgroundPosition: mdPointValue,
+			};
+
+			const smVideoStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const norepeatableSmImageStyles = {
+				opacity: maskOpacity,
+				objectPosition: smPointValue,
+			};
+
+			const repeatableSmImageStyles = {
+				opacity: maskOpacity,
+				backgroundImage: `url( ${ smImageURL } )`,
+				backgroundPosition: smPointValue,
+			};
+
+			return (
+				<TagName
+					{ ...useBlockProps.save( {
+						className: classes,
+						style: sectionStyles,
+					} ) }
+				>
+					{ hasLgBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isLgImage &&
+								( lgImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableLgImageStyles }
+									>
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											className={ `wp-image-${ lgImageID }` }
+											style={ norepeatableLgImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										className={ `wp-image-${ lgImageID }` }
+										style={ norepeatableLgImageStyles }
+									/>
+								) ) }
+
+							{ isLgVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ lgVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasMdBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isMdImage &&
+								( mdImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableMdImageStyles }
+									>
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											className={ `wp-image-${ mdImageID }` }
+											style={ norepeatableMdImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										className={ `wp-image-${ mdImageID }` }
+										style={ norepeatableMdImageStyles }
+									/>
+								) ) }
+
+							{ isMdVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ mdVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ hasSmBackground && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ isSmImage &&
+								( smImageRepeat ? (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ repeatableSmImageStyles }
+									>
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											className={ `wp-image-${ smImageID }` }
+											style={ norepeatableSmImageStyles }
+										/>
+									</div>
+								) : (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										className={ `wp-image-${ smImageID }` }
+										style={ norepeatableSmImageStyles }
+									/>
+								) ) }
+
+							{ isSmVideo && (
+								<video
+									playsInline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ smVideoStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					<div className={ containerClasses }>
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( subtitle ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__subtitle"
+									value={ subtitle }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( lede ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__lede"
+									value={ lede }
+								/>
+							) }
+
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</TagName>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+			maskColor2: {
+				type: 'string',
+			},
+			maskColorAngle: {
+				type: 'number',
+				default: 0,
+			},
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				subtitle,
+				lede,
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				lgImageRepeat,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				mdImageRepeat,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				smImageRepeat,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskColor2,
+				maskColorAngle,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const Wrapper = wrapperTagName;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor ) {
+				maskStyles.backgroundColor = maskColor;
+				if ( maskColor2 ) {
+					maskStyles.backgroundImage = `linear-gradient(${ maskColorAngle }deg, ${ maskColor } 0%, ${ maskColor2 } 100%)`;
+				}
+			}
+
+			const bgimageStyles = {
+				opacity: maskOpacity,
+			};
+
+			return (
+				<Wrapper className={ classes } style={ sectionStyles }>
+					{ lgImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ ( 'image' === lgImageMediaType ||
+								undefined === lgImageMediaType ) &&
+								lgImageRepeat && (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ {
+											backgroundImage: `url( ${ lgImageURL } )`,
+										} }
+									>
+										<img
+											src={ lgImageURL }
+											alt={ lgImageAlt }
+											className={ `wp-image-${ lgImageID }` }
+											style={ bgimageStyles }
+										/>
+									</div>
+								) }
+
+							{ ( 'image' === lgImageMediaType ||
+								undefined === lgImageMediaType ) &&
+								! lgImageRepeat && (
+									<img
+										src={ lgImageURL }
+										alt={ lgImageAlt }
+										className={ `wp-image-${ lgImageID }` }
+										style={ bgimageStyles }
+									/>
+								) }
+
+							{ 'video' === lgImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ bgimageStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ mdImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ ( 'image' === mdImageMediaType ||
+								undefined === mdImageMediaType ) &&
+								mdImageRepeat && (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ {
+											backgroundImage: `url( ${ mdImageURL } )`,
+										} }
+									>
+										<img
+											src={ mdImageURL }
+											alt={ mdImageAlt }
+											className={ `wp-image-${ mdImageID }` }
+											style={ bgimageStyles }
+										/>
+									</div>
+								) }
+
+							{ ( 'image' === mdImageMediaType ||
+								undefined === mdImageMediaType ) &&
+								! mdImageRepeat && (
+									<img
+										src={ mdImageURL }
+										alt={ mdImageAlt }
+										className={ `wp-image-${ mdImageID }` }
+										style={ bgimageStyles }
+									/>
+								) }
+
+							{ 'video' === mdImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ bgimageStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					{ smImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							{ 0 < Math.abs( 1 - maskOpacity ) && (
+								<div
+									className="smb-section-with-bgimage__mask"
+									style={ maskStyles }
+								/>
+							) }
+
+							{ ( 'image' === smImageMediaType ||
+								undefined === smImageMediaType ) &&
+								smImageRepeat && (
+									<div
+										className="smb-section-with-bgimage__repeatable-image"
+										style={ {
+											backgroundImage: `url( ${ smImageURL } )`,
+										} }
+									>
+										<img
+											src={ smImageURL }
+											alt={ smImageAlt }
+											className={ `wp-image-${ smImageID }` }
+											style={ bgimageStyles }
+										/>
+									</div>
+								) }
+
+							{ ( 'image' === smImageMediaType ||
+								undefined === smImageMediaType ) &&
+								! smImageRepeat && (
+									<img
+										src={ smImageURL }
+										alt={ smImageAlt }
+										className={ `wp-image-${ smImageID }` }
+										style={ bgimageStyles }
+									/>
+								) }
+
+							{ 'video' === smImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ bgimageStyles }
+								/>
+							) }
+						</div>
+					) }
+
+					<div className={ containerClasses }>
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( subtitle ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__subtitle"
+									value={ subtitle }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( lede ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__lede"
+									value={ lede }
+								/>
+							) }
+
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</Wrapper>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+			maskColor2: {
+				type: 'string',
+			},
+			maskColorAngle: {
+				type: 'number',
+				default: 0,
+			},
+			textColor: {
+				type: 'string',
+				default: '#fff',
+			},
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				subtitle,
+				lede,
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskColor2,
+				maskColorAngle,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const Wrapper = wrapperTagName;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor ) {
+				maskStyles.backgroundColor = maskColor;
+				if ( maskColor2 ) {
+					maskStyles.backgroundImage = `linear-gradient(${ maskColorAngle }deg, ${ maskColor } 0%, ${ maskColor2 } 100%)`;
+				}
+			}
+
+			const bgimageStyles = {
+				opacity: maskOpacity,
+			};
+
+			return (
+				<Wrapper className={ classes } style={ sectionStyles }>
+					{ lgImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+						>
+							<div
+								className="smb-section-with-bgimage__mask"
+								style={ maskStyles }
+							/>
+							{ ( 'image' === lgImageMediaType ||
+								undefined === lgImageMediaType ) && (
+								<img
+									src={ lgImageURL }
+									alt={ lgImageAlt }
+									className={ `wp-image-${ lgImageID }` }
+									style={ bgimageStyles }
+								/>
+							) }
+							{ 'video' === lgImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+									style={ bgimageStyles }
+								/>
+							) }
+						</div>
+					) }
+					{ mdImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+						>
+							<div
+								className="smb-section-with-bgimage__mask"
+								style={ maskStyles }
+							/>
+							{ ( 'image' === mdImageMediaType ||
+								undefined === mdImageMediaType ) && (
+								<img
+									src={ mdImageURL }
+									alt={ mdImageAlt }
+									className={ `wp-image-${ mdImageID }` }
+									style={ bgimageStyles }
+								/>
+							) }
+							{ 'video' === mdImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+									style={ bgimageStyles }
+								/>
+							) }
+						</div>
+					) }
+					{ smImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+						>
+							<div
+								className="smb-section-with-bgimage__mask"
+								style={ maskStyles }
+							/>
+							{ ( 'image' === smImageMediaType ||
+								undefined === smImageMediaType ) && (
+								<img
+									src={ smImageURL }
+									alt={ smImageAlt }
+									className={ `wp-image-${ smImageID }` }
+									style={ bgimageStyles }
+								/>
+							) }
+							{ 'video' === smImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+									style={ bgimageStyles }
+								/>
+							) }
+						</div>
+					) }
+					<div className={ containerClasses }>
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( subtitle ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__subtitle"
+									value={ subtitle }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( lede ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__lede"
+									value={ lede }
+								/>
+							) }
+
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</Wrapper>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+			maskColor2: {
+				type: 'string',
+			},
+			maskColorAngle: {
+				type: 'number',
+				default: 0,
+			},
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				subtitle,
+				lede,
+				lgImageID,
+				lgImageURL,
+				lgImageAlt,
+				lgImageMediaType,
+				mdImageID,
+				mdImageURL,
+				mdImageAlt,
+				mdImageMediaType,
+				smImageID,
+				smImageURL,
+				smImageAlt,
+				smImageMediaType,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskColor2,
+				maskColorAngle,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const Wrapper = wrapperTagName;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor ) {
+				maskStyles.backgroundColor = maskColor;
+				if ( maskColor2 ) {
+					maskStyles.backgroundImage = `linear-gradient(${ maskColorAngle }deg, ${ maskColor } 0%, ${ maskColor2 } 100%)`;
+				}
+			}
+
+			const bgimageStyles = {
+				opacity: maskOpacity,
+			};
+
+			return (
+				<Wrapper className={ classes } style={ sectionStyles }>
+					<div
+						className="smb-section-with-bgimage__mask"
+						style={ maskStyles }
+					/>
+					{ lgImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--lg'
+							) }
+							style={ bgimageStyles }
+						>
+							{ ( 'image' === lgImageMediaType ||
+								undefined === lgImageMediaType ) && (
+								<img
+									src={ lgImageURL }
+									alt={ lgImageAlt }
+									className={ `wp-image-${ lgImageID }` }
+								/>
+							) }
+							{ 'video' === lgImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ lgImageURL }
+								/>
+							) }
+						</div>
+					) }
+					{ mdImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--md'
+							) }
+							style={ bgimageStyles }
+						>
+							{ ( 'image' === mdImageMediaType ||
+								undefined === mdImageMediaType ) && (
+								<img
+									src={ mdImageURL }
+									alt={ mdImageAlt }
+									className={ `wp-image-${ mdImageID }` }
+								/>
+							) }
+							{ 'video' === lgImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ mdImageURL }
+								/>
+							) }
+						</div>
+					) }
+					{ smImageURL && (
+						<div
+							className={ classnames(
+								bgimageClasses,
+								'smb-section-with-bgimage__bgimage--sm'
+							) }
+							style={ bgimageStyles }
+						>
+							{ ( 'image' === smImageMediaType ||
+								undefined === smImageMediaType ) && (
+								<img
+									src={ smImageURL }
+									alt={ smImageAlt }
+									className={ `wp-image-${ smImageID }` }
+								/>
+							) }
+							{ 'video' === lgImageMediaType && (
+								<video
+									playsinline
+									loop
+									autoPlay
+									muted
+									src={ smImageURL }
+								/>
+							) }
+						</div>
+					) }
+					<div className={ containerClasses }>
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( subtitle ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__subtitle"
+									value={ subtitle }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+
+						{ ! RichText.isEmpty( title ) &&
+							! RichText.isEmpty( lede ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName="div"
+									className="smb-section__lede"
+									value={ lede }
+								/>
+							) }
+
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</Wrapper>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+			maskColor2: {
+				type: 'string',
+			},
+			maskColorAngle: {
+				type: 'number',
+				default: 0,
+			},
+		},
+
+		migrate( attributes ) {
+			const lgImageID = attributes.imageID;
+			const lgImageURL = attributes.imageURL;
+			const lgImageAlt = attributes.imageAlt;
+			return { ...attributes, lgImageID, lgImageURL, lgImageAlt };
+		},
+
+		save( { attributes, className } ) {
+			const {
+				wrapperTagName,
+				titleTagName,
+				title,
+				imageID,
+				imageURL,
+				imageAlt,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskColor2,
+				maskColorAngle,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const Wrapper = wrapperTagName;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {};
+			if ( maskColor ) {
+				maskStyles.backgroundColor = maskColor;
+				if ( maskColor2 ) {
+					maskStyles.backgroundImage = `linear-gradient(${ maskColorAngle }deg, ${ maskColor } 0%, ${ maskColor2 } 100%)`;
+				}
+			}
+
+			const bgimageStyles = {
+				opacity: maskOpacity,
+			};
+
+			return (
+				<Wrapper className={ classes } style={ sectionStyles }>
+					<div
+						className="smb-section-with-bgimage__mask"
+						style={ maskStyles }
+					/>
+					{ imageURL && (
+						<div
+							className={ bgimageClasses }
+							style={ bgimageStyles }
+						>
+							<img
+								src={ imageURL }
+								alt={ imageAlt }
+								className={ `wp-image-${ imageID }` }
+							/>
+						</div>
+					) }
+					<div className={ containerClasses }>
+						{ ! RichText.isEmpty( title ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</Wrapper>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				titleTagName,
+				title,
+				imageID,
+				imageURL,
+				imageAlt,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				isSlim,
+			} = attributes;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! isSlim,
+			} );
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {
+				backgroundColor: maskColor || undefined,
+			};
+
+			const bgimageStyles = {
+				opacity: maskOpacity,
+			};
+
+			return (
+				<div className={ classes } style={ sectionStyles }>
+					<div
+						className="smb-section-with-bgimage__mask"
+						style={ maskStyles }
+					/>
+					<div className={ bgimageClasses } style={ bgimageStyles }>
+						<img
+							src={ imageURL }
+							alt={ imageAlt }
+							className={ `wp-image-${ imageID }` }
+						/>
+					</div>
+					<div className={ containerClasses }>
+						{ ! RichText.isEmpty( title ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</div>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		migrate( attributes ) {
+			const isSlim = !! attributes.contentsWidth;
+			return { ...attributes, isSlim };
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes, className } ) {
+			const {
+				titleTagName,
+				title,
+				imageID,
+				imageURL,
+				imageAlt,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskOpacity,
+				textColor,
+				parallax,
+				contentsWidth,
+			} = attributes;
+
+			const classes = classnames(
+				'smb-section',
+				'smb-section-with-bgimage',
+				`smb-section-with-bgimage--${ contentsAlignment }`,
+				`smb-section-with-bgimage--${ height }`,
+				className,
+				{
+					'js-bg-parallax': !! parallax,
+				}
+			);
+
+			const bgimageClasses = classnames(
+				'smb-section-with-bgimage__bgimage',
+				{
+					'js-bg-parallax__bgimage': !! parallax,
+				}
+			);
+
+			const containerClasses = classnames( 'c-container', {
+				'u-slim-width': !! contentsWidth,
+			} );
+
+			const sectionStyles = {
+				color: textColor || undefined,
+			};
+
+			const maskStyles = {
+				backgroundColor: maskColor || undefined,
+			};
+
+			const bgimageStyles = {
+				opacity: maskOpacity,
+			};
+
+			return (
+				<div className={ classes } style={ sectionStyles }>
+					<div
+						className="smb-section-with-bgimage__mask"
+						style={ maskStyles }
+					/>
+					<div className={ bgimageClasses } style={ bgimageStyles }>
+						<img
+							src={ imageURL }
+							alt={ imageAlt }
+							className={ `wp-image-${ imageID }` }
+						/>
+					</div>
+					<div className={ containerClasses }>
+						{ ! RichText.isEmpty( title ) &&
+							'none' !== titleTagName && (
+								<RichText.Content
+									tagName={ titleTagName }
+									className="smb-section__title"
+									value={ title }
+								/>
+							) }
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</div>
+			);
+		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes } ) {
+			const {
+				title,
+				imageID,
+				imageURL,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskOpacity,
+				textColor,
+				parallax,
+			} = attributes;
+
+			return (
+				<div
+					className={ classnames(
+						`smb-section smb-section-with-bgimage smb-section-with-bgimage--${ contentsAlignment } smb-section-with-bgimage--${ height }`,
+						{ 'js-bg-parallax': !! parallax }
+					) }
+					style={ { color: textColor } }
+				>
+					<div
+						className="smb-section-with-bgimage__mask"
+						style={ { backgroundColor: maskColor } }
+					/>
+					<div
+						className={ classnames(
+							'smb-section-with-bgimage__bgimage',
+							{ 'js-bg-parallax__bgimage': !! parallax }
+						) }
+						style={ { opacity: maskOpacity } }
+					>
+						<img
+							src={ imageURL }
+							alt=""
+							className={ `wp-image-${ imageID }` }
+						/>
+					</div>
+					<div className="c-container">
+						{ ! RichText.isEmpty( title ) && (
+							<h2 className="smb-section__title">
+								<RichText.Content value={ title } />
+							</h2>
+						) }
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</div>
+			);
+		},
+	},
+	{
+		attributes: {
+			...omit( blockAttributes, [ 'textColor', 'parallax' ] ),
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes } ) {
+			const {
+				title,
+				imageID,
+				imageURL,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskOpacity,
+			} = attributes;
+
+			return (
+				<div
+					className={ `smb-section smb-section-with-bgimage smb-section-with-bgimage--${ contentsAlignment } smb-section-with-bgimage--${ height }` }
+				>
+					<div
+						className="smb-section-with-bgimage__mask"
+						style={ { backgroundColor: maskColor } }
+					/>
+					<div
+						className="smb-section-with-bgimage__bgimage"
+						style={ { opacity: maskOpacity } }
+					>
+						<img
+							src={ imageURL }
+							alt=""
+							className={ `wp-image-${ imageID }` }
+						/>
+					</div>
+					<div className="c-container">
+						{ ! RichText.isEmpty( title ) && (
+							<h2 className="smb-section__title">
+								<RichText.Content value={ title } />
+							</h2>
+						) }
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</div>
+			);
+		},
+	},
+	{
+		attributes: {
+			...omit( blockAttributes, [ 'textColor', 'parallax' ] ),
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes } ) {
+			const {
+				title,
+				imageURL,
+				height,
+				contentsAlignment,
+				maskColor,
+				maskOpacity,
+			} = attributes;
+
+			return (
+				<div
+					className={ `smb-section smb-section-with-bgimage smb-section-with-bgimage--${ contentsAlignment } smb-section-with-bgimage--${ height }` }
+				>
+					<div
+						className="smb-section-with-bgimage__mask"
+						style={ { backgroundColor: maskColor } }
+					/>
+					<div
+						className="smb-section-with-bgimage__bgimage"
+						style={ { opacity: maskOpacity } }
+					>
+						<img src={ imageURL } alt="" />
+					</div>
+					<div className="c-container">
+						{ ! RichText.isEmpty( title ) && (
+							<h2 className="smb-section__title">
+								<RichText.Content value={ title } />
+							</h2>
+						) }
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</div>
+			);
+		},
+	},
+	{
+		attributes: {
+			...omit( blockAttributes, [
+				'maskColor',
+				'maskOpacity',
+				'textColor',
+				'parallax',
+			] ),
+		},
+
+		supports: {
+			align: [ 'wide', 'full' ],
+		},
+
+		save( { attributes } ) {
+			const { title, imageURL, height, contentsAlignment } = attributes;
+
+			return (
+				<div
+					className={ `smb-section smb-section-with-bgimage smb-section-with-bgimage--${ contentsAlignment } smb-section-with-bgimage--${ height }` }
+				>
+					<div className="smb-section-with-bgimage__bgimage">
+						{ imageURL && <img src={ imageURL } alt="" /> }
+					</div>
+					<div className="c-container">
+						{ ! RichText.isEmpty( title ) && (
+							<h2 className="smb-section__title">
+								<RichText.Content value={ title } />
+							</h2>
+						) }
+						<div className="smb-section__body">
+							<InnerBlocks.Content />
+						</div>
+					</div>
+				</div>
+			);
+		},
+	},
+];

@@ -1,0 +1,19 @@
+@charset "utf-8";
+
+// mixin
+@import "./mixin/**/*.scss";
+@import "./common/**/*.scss";
+@import "../gutenberg/**/_common.scss";
+@import "../gutenberg/**/_front.scss";
+
+svg:not([fill]) {
+	fill: currentColor;
+}
+
+[class*="ark-keep-mt"] {
+
+	> * {
+		margin-top: var(--ark-mt--inner, 2rem);
+		margin-bottom: 0;
+	}
+}

@@ -1,0 +1,111 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "23.0.1",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/box",
+	"title": "Box",
+	"description": "It is a box.",
+	"category": "smb",
+	"attributes": {
+		"backgroundColor": {
+			"type": "string"
+		},
+		"backgroundGradientColor": {
+			"type": "string"
+		},
+		"borderColor": {
+			"type": "string"
+		},
+		"borderStyle": {
+			"type": "string"
+		},
+		"textColor": {
+			"type": "string"
+		},
+		"borderWidth": {
+			"type": "string",
+			"default": 1
+		},
+		"borderRadius": {
+			"type": "string"
+		},
+		"opacity": {
+			"type": "number",
+			"default": 1
+		},
+		"boxShadow": {
+			"type": "object",
+			"default": {
+				"color": "",
+				"opacity": 0.1,
+				"horizontal": 0,
+				"vertical": 0,
+				"blur": 10,
+				"spread": 0,
+				"position": ""
+			}
+		},
+		"linkText": {
+			"type": "string",
+			"source": "html",
+			"selector": "a",
+			"role": "content"
+		},
+		"href": {
+			"type": "string",
+			"source": "attribute",
+			"selector": "a",
+			"attribute": "href"
+		},
+		"rel": {
+			"type": "string",
+			"source": "attribute",
+			"selector": "a",
+			"attribute": "rel"
+		},
+		"linkTarget": {
+			"type": "string",
+			"source": "attribute",
+			"selector": "a",
+			"attribute": "target"
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		},
+		"snowmonkeyeditor": {
+			"blockPresets": {
+				"ignore": true
+			}
+		}
+	},
+	"example": {
+		"innerBlocks": [
+			{
+				"name": "core/paragraph",
+				"attributes": {
+					"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam"
+				}
+			}
+		]
+	},
+	"style": "file:./style-index.css",
+	"editorScript": "file:./index.js",
+	"viewScript": "file:./view.js"
+}

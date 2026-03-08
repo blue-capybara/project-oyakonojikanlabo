@@ -1,0 +1,10 @@
+:root :where(.wp-block-code.is-style-sme-block-code-nowrap) {
+	white-space: pre !important;
+	overflow: auto;
+
+	:where(code) {
+		white-space: inherit !important;
+		display: table !important;
+		width: 100%;
+	}
+}

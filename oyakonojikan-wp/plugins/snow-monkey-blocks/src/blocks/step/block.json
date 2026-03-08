@@ -1,0 +1,56 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/step",
+	"title": "Steps",
+	"description": "Express the steps in an easy-to-understand manner.",
+	"category": "smb",
+	"attributes": {
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"spacing": {
+			"margin": true
+		}
+	},
+	"example": {
+		"innerBlocks": [
+			{
+				"name": "snow-monkey-blocks/step--item",
+				"attributes": {
+					"title": "Lorem ipsum dolor sit amet"
+				},
+				"innerBlocks": [
+					{
+						"name": "core/paragraph",
+						"attributes": {
+							"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam"
+						}
+					}
+				]
+			},
+			{
+				"name": "snow-monkey-blocks/step--item",
+				"attributes": {
+					"title": "consectetur adipiscing elit"
+				},
+				"innerBlocks": [
+					{
+						"name": "core/paragraph",
+						"attributes": {
+							"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam"
+						}
+					}
+				]
+			}
+		]
+	},
+	"style": "file:./style-index.css",
+	"editorScript": "file:./index.js"
+}

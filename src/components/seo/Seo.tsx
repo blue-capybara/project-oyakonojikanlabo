@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { buildCanonicalUrl } from '../../utils/seo';
 
 type OgType = 'website' | 'article';
 
@@ -11,6 +12,7 @@ export interface SeoProps {
   ogImage?: string;
   ogType?: OgType;
   noindex?: boolean;
+  canonical?: string;
 }
 
 const stripHtml = (value?: string) => {
@@ -21,8 +23,8 @@ const stripHtml = (value?: string) => {
 /**
  * SEOメタタグをまとめて出力する共通コンポーネント。
  * - react-helmet-async と併用する想定（ルートに HelmetProvider が必要）。
- * - OGP / description / noindex をまとめて制御する。
- * - 将来的に canonical や構造化データを追加しやすい構成。
+ * - OGP / description / canonical / noindex をまとめて制御する。
+ * - canonical は末尾スラッシュや tracking query を正規化して出力する。
  */
 const Seo: React.FC<SeoProps> = ({
   title,
@@ -32,18 +34,27 @@ const Seo: React.FC<SeoProps> = ({
   ogImage,
   ogType = 'website',
   noindex,
+  canonical,
 }) => {
   const sanitizedDescription = useMemo(() => stripHtml(description), [description]);
   const computedTitle = title ? `${title}｜親子の時間研究所` : '親子の時間研究所';
   const computedOgTitle = ogTitle ?? title ?? '親子の時間研究所';
   const computedOgDescription = ogDescription ?? sanitizedDescription;
-  const ogUrl = typeof window !== 'undefined' ? window.location.href : undefined;
+  const canonicalUrl = useMemo(() => {
+    if (noindex) return undefined;
+    if (canonical) return buildCanonicalUrl(canonical);
+    if (typeof window === 'undefined') return undefined;
+    return buildCanonicalUrl(window.location.href);
+  }, [canonical, noindex]);
+
+  const ogUrl = canonicalUrl ?? (typeof window !== 'undefined' ? window.location.href : undefined);
 
   return (
     <Helmet>
       <title>{computedTitle}</title>
       {sanitizedDescription && <meta name="description" content={sanitizedDescription} />}
       {noindex && <meta name="robots" content="noindex,nofollow" />}
+      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
       <meta property="og:type" content={ogType} />
       <meta property="og:title" content={computedOgTitle} />

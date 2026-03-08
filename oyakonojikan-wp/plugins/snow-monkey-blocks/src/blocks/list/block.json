@@ -1,0 +1,55 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/list",
+	"title": "Icon list",
+	"description": "Icons are displayed only on the actual screen.",
+	"category": "smb",
+	"attributes": {
+		"icon": {
+			"type": "string",
+			"default": "angle-right"
+		},
+		"iconColor": {
+			"type": "string"
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"spacing": {
+			"margin": true
+		}
+	},
+	"example": {
+		"innerBlocks": [
+			{
+				"name": "core/list-item",
+				"attributes": {
+					"content": "Lorem ipsum dolor sit amet"
+				}
+			},
+			{
+				"name": "core/list-item",
+				"attributes": {
+					"content": "consectetur adipiscing elit"
+				}
+			},
+			{
+				"name": "core/list-item",
+				"attributes": {
+					"content": "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
+				}
+			}
+		]
+	},
+	"style": "file:./style-index.css",
+	"editorStyle": "file:./index.css",
+	"editorScript": "file:./index.js",
+	"viewScript": "file:./script.js"
+}

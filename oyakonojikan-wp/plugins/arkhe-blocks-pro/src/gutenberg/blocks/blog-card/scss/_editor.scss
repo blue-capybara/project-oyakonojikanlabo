@@ -1,0 +1,11 @@
+@import "../../../../scss/mixin/media";
+
+// 関連記事
+.ark-block-blogCard__preview .ark-block-blogCard {
+	pointer-events: none;
+}
+
+.ark-block-blogCard__preview.-none {
+	padding: 1.5em;
+	text-align: center;
+}

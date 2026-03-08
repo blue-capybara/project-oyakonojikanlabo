@@ -1,0 +1,1 @@
+.w_b_shake{animation:shake .1s infinite}@keyframes shake{0%,66%{transform:translate(0) rotate(0deg)}33%{transform:translate(2px,2px) rotate(-2deg)}99%{transform:translate(-2px,-2px) rotate(2deg)}}

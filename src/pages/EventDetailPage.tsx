@@ -43,6 +43,7 @@ interface ArtistRelatedBook {
   title?: string;
   publisher?: string;
   releaseDate?: string;
+  releaseDateText?: string;
   isbn?: string;
   coverImage?: ArtistMedia;
 }
@@ -224,6 +225,7 @@ interface ArtistNode {
       title?: string | null;
       publisher?: string | null;
       releaseDate?: string | null;
+      releaseDateText?: string | null;
       isbn?: string | null;
       coverImage?: {
         node?: {
@@ -393,6 +395,7 @@ const GET_ARTIST_DETAIL = gql`
           title
           publisher
           releaseDate
+          releaseDateText
           isbn
           coverImage {
             node {
@@ -725,10 +728,39 @@ const renderMultilineText = (text: string) =>
     </React.Fragment>
   ));
 
-const formatIsoDate = (value?: string) => {
+const formatBookReleaseDate = (value?: string) => {
   if (!value) return undefined;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return undefined;
+  const normalized = value.trim();
+  if (!normalized) return undefined;
+
+  const yearOnly = normalized.match(/^(\d{4})$/);
+  if (yearOnly) {
+    return `${yearOnly[1]}年`;
+  }
+
+  const yearMonth = normalized.match(/^(\d{4})-(\d{2})$/);
+  if (yearMonth) {
+    const year = yearMonth[1];
+    const month = Number.parseInt(yearMonth[2], 10);
+    if (month >= 1 && month <= 12) {
+      return `${year}年${month}月`;
+    }
+    return normalized;
+  }
+
+  const yearMonthDay = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (yearMonthDay) {
+    const year = yearMonthDay[1];
+    const month = Number.parseInt(yearMonthDay[2], 10);
+    const day = Number.parseInt(yearMonthDay[3], 10);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${year}年${month}月${day}日`;
+    }
+    return normalized;
+  }
+
+  const date = new Date(normalized);
+  if (Number.isNaN(date.getTime())) return normalized;
   return date.toLocaleDateString('ja-JP', {
     year: 'numeric',
     month: 'long',
@@ -1038,6 +1070,7 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
       const title = book.title?.trim();
       const publisher = book.publisher?.trim();
       const releaseDate = book.releaseDate?.trim();
+      const releaseDateText = book.releaseDateText?.trim();
       const isbn = book.isbn?.trim();
       const coverImage = book.coverImage?.node?.sourceUrl
         ? {
@@ -1046,11 +1079,12 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
           }
         : undefined;
 
-      if (!title && !publisher && !releaseDate && !isbn && !coverImage) return null;
+      if (!title && !publisher && !releaseDate && !releaseDateText && !isbn && !coverImage) return null;
       return {
         title: title || undefined,
         publisher: publisher || undefined,
         releaseDate: releaseDate || undefined,
+        releaseDateText: releaseDateText || undefined,
         isbn: isbn || undefined,
         coverImage,
       } as ArtistRelatedBook;
@@ -2365,34 +2399,38 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
                 <div className="mt-6">
                   <h4 className="text-lg font-bold text-gray-900">関連書籍</h4>
                   <ul className="mt-3 space-y-3">
-                    {profile.relatedBooks.map((book, index) => (
-                      <li
-                        key={`${book.title ?? book.isbn ?? index}`}
-                        className="rounded-xl border border-gray-100 bg-white/70 p-4"
-                      >
-                        <div className="flex gap-3">
-                          {book.coverImage ? (
-                            <div className="h-20 w-16 overflow-hidden rounded-lg bg-gray-100 shadow-sm">
-                              <img
-                                src={book.coverImage.url}
-                                alt={book.coverImage.alt ?? `${book.title ?? '関連書籍'}の表紙`}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          ) : null}
-                          <div className="flex-1">
-                            {book.title && <p className="font-semibold text-gray-900">{book.title}</p>}
-                            <div className="mt-1 space-y-1 text-sm text-gray-600">
-                              {book.publisher && <p>出版社: {book.publisher}</p>}
-                              {book.releaseDate && (
-                                <p>発売日: {formatIsoDate(book.releaseDate) ?? book.releaseDate}</p>
-                              )}
-                              {book.isbn && <p>ISBN: {book.isbn}</p>}
+                    {profile.relatedBooks.map((book, index) => {
+                      const releaseDateLabel = formatBookReleaseDate(
+                        book.releaseDateText ?? book.releaseDate,
+                      );
+
+                      return (
+                        <li
+                          key={`${book.title ?? book.isbn ?? index}`}
+                          className="rounded-xl border border-gray-100 bg-white/70 p-4"
+                        >
+                          <div className="flex gap-3">
+                            {book.coverImage ? (
+                              <div className="h-20 w-16 overflow-hidden rounded-lg bg-gray-100 shadow-sm">
+                                <img
+                                  src={book.coverImage.url}
+                                  alt={book.coverImage.alt ?? `${book.title ?? '関連書籍'}の表紙`}
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            ) : null}
+                            <div className="flex-1">
+                              {book.title && <p className="font-semibold text-gray-900">{book.title}</p>}
+                              <div className="mt-1 space-y-1 text-sm text-gray-600">
+                                {book.publisher && <p>出版社: {book.publisher}</p>}
+                                {releaseDateLabel && <p>発売日: {releaseDateLabel}</p>}
+                                {book.isbn && <p>ISBN: {book.isbn}</p>}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'rea
 import { GA4_B_LINKER_DOMAINS, initGa4B } from './analytics/ga4b';
 import { useGa4BPageView } from './analytics/useGa4BPageView';
 import Seo from './components/seo/Seo';
+import NormalizeUrl from './components/seo/NormalizeUrl';
 import ScrollToTop from './components/ScrollToTop';
 import GaPageView from './components/GaPageView';
 import HomePage from './pages/HomePage';
@@ -56,6 +57,7 @@ function App() {
   return (
     <Router>
       {globalNoindex && <Seo noindex />}
+      <NormalizeUrl />
       <ScrollToTop />
       <GaPageView />
       <Ga4BPageView domains={GA4_B_LINKER_DOMAINS} />
@@ -76,7 +78,7 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             {/* PICO専用の問い合わせ窓口（通知先の分岐は send-mail 側で行う想定） */}
             <Route path="/contact-pico" element={<ContactPicoPage />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/notationbased" element={<NotationBasedPage />} />
             <Route path="/contact-us" element={<Navigate to="/contact" replace />} />

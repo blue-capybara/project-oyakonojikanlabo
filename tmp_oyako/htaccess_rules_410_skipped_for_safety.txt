@@ -1,0 +1,9 @@
+以下の行は .htaccess 構文エラー回避のため除外
+467: RewriteRule ^コストダウン！テープ式・パンツ式　おむつの使/?$ - [G,L]
+539: RewriteRule ^実は重要！あかちゃんのスキンケア　後編/?$ - [G,L]
+829: RewriteRule ^色と生き物の図鑑～学研　色分け　いきもの　ず/?$ - [G,L]
+927: RewriteRule ^アンパンマンのドキドキアンパンチ！　－順番/?$ - [G,L]
+1491: RewriteRule ^本物のｄ５１に乗ろう　ｓｌみなかみ編　おすす/?$ - [G,L]
+1507: RewriteRule ^長男の赤ちゃん返り劇　－私の反省点ー/?$ - [G,L]
+2235: RewriteRule ^picture\-book\-sup…\-good\-way\-to\-use/\ ‎/?$ - [G,L]
+2285: RewriteRule ^recommended\-pict…n\-nursery\-school/\ ‎/?$ - [G,L]

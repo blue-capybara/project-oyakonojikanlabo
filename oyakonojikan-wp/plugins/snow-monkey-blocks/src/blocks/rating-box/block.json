@@ -1,0 +1,66 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/rating-box",
+	"title": "Rating box",
+	"description": "Evaluate with bars.",
+	"category": "smb",
+	"attributes": {
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"style": true,
+				"width": true
+			}
+		}
+	},
+	"example": {
+		"innerBlocks": [
+			{
+				"name": "snow-monkey-blocks/rating-box-item",
+				"attributes": {
+					"title": "Lorem ipsum dolor sit amet",
+					"rating": 7
+				}
+			},
+			{
+				"name": "snow-monkey-blocks/rating-box-item",
+				"attributes": {
+					"title": "consectetur adipiscing elit",
+					"rating": 6
+				}
+			},
+			{
+				"name": "snow-monkey-blocks/rating-box-item",
+				"attributes": {
+					"title": "sed do eiusmod tempor",
+					"rating": 8
+				}
+			}
+		]
+	},
+	"style": "file:./style-index.css",
+	"editorScript": "file:./index.js"
+}

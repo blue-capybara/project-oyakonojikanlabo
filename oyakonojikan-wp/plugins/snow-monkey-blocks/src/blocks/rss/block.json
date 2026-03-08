@@ -1,0 +1,70 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/rss",
+	"title": "RSS",
+	"description": "Display entries from any RSS or Atom feed.",
+	"category": "smb",
+	"attributes": {
+		"feedURL": {
+			"type": "string",
+			"default": ""
+		},
+		"postsPerPage": {
+			"type": "number",
+			"default": 6
+		},
+		"layout": {
+			"type": "string",
+			"default": "rich-media"
+		},
+		"gap": {
+			"type": "string",
+			"default": ""
+		},
+		"smCols": {
+			"type": "number",
+			"default": 0
+		},
+		"noPostsText": {
+			"type": "string",
+			"default": ""
+		},
+		"itemTitleTagName": {
+			"type": "string",
+			"default": "h3"
+		},
+		"arrows": {
+			"type": "boolean",
+			"default": false
+		},
+		"dots": {
+			"type": "boolean",
+			"default": true
+		},
+		"interval": {
+			"type": "number",
+			"default": 0
+		},
+		"autoplayButton": {
+			"type": "boolean",
+			"default": false
+		},
+		"anchor": {
+			"type": "string",
+			"default": ""
+		},
+		"clientId": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"anchor": true,
+		"spacing": {
+			"margin": true
+		}
+	},
+	"editorScript": "file:./index.js"
+}

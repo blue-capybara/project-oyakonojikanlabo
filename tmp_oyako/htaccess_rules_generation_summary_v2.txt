@@ -1,0 +1,9 @@
+SC unique targets: 1664
+Known valid kept: 23
+Exact 301 rules: 1
+Exact 410 rules: 1153
+Valid sitemap URLs: 139
+Valid tags fetched: 64
+Core file: /Users/ns/projects/app/project-oyakonojikanlabo/tmp_oyako/htaccess_rules_301_410_core_from_sc_v2.conf
+Exact 410 file: /Users/ns/projects/app/project-oyakonojikanlabo/tmp_oyako/htaccess_rules_410_exact_from_sc_v2.conf
+Integrated file: /Users/ns/projects/app/project-oyakonojikanlabo/tmp_oyako/htaccess_integrated_from_sc_v2_proxy_uri.conf

@@ -1,0 +1,8 @@
+{
+	"smeStartDateTime": {
+		"type": "string"
+	},
+	"smeEndDateTime": {
+		"type": "string"
+	}
+}

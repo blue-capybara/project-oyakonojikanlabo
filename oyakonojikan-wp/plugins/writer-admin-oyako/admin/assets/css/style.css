@@ -1,0 +1,41 @@
+#wa .wp-list-table .column-wa_invoice_post_count {
+  width: 60px;
+}
+
+#wa .wp-list-table .column-wa_invoice_amount {
+  width: 15%;
+}
+
+#wa .wp-list-table .column-wa_invoice_user {
+  width: 15%;
+}
+
+#wa .wp-list-table .column-wa_invoice_status {
+  width: 15%;
+}
+
+#wa .wa-invoice-footer {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #e1e1e1;
+  background: #fff;
+}
+
+#wa .wa-invoice-footer:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+#wa .wa-invoice-action {
+  float: left;
+}
+
+#wa .wa-invoice-total {
+  float: right;
+}
+
+#wa .wa-invoice-total__amount {
+  font-size: 20px;
+  line-height: 1.5;
+}

@@ -1,0 +1,75 @@
+@charset "utf-8";
+
+.add-mwform-btn {
+	display: none !important;
+}
+
+.mw-wp-form-generator-form-option {
+	background: #fff;
+	border: #ddd solid 1px;
+	border-radius: 5px;
+	margin: 10px 0;
+	padding: 10px;
+}
+
+.mw-wp-form-generator-form-option .repeatable-box-content {
+	border-top: #ddd solid 1px;
+	margin: 10px 0 0;
+	padding: 10px 0 0;
+	display: none;
+}
+.mw-wp-form-generator-form-option .repeatable-box-content p {
+	position: relative;
+	padding-left: 110px;
+	overflow: hidden;
+	*zoom: 1;
+}
+.mw-wp-form-generator-form-option .repeatable-box-content p strong {
+	display: block;
+	width: 100px;
+	position: relative;
+	left: -110px;
+	margin-right: -110px;
+	top: 0;
+	float: left;
+}
+.mw-wp-form-generator-form-option .repeatable-box-content p input[type="text"],
+.mw-wp-form-generator-form-option .repeatable-box-content p textarea {
+	border-spacing: 0;
+	margin: 0;
+	width: 100%;
+}
+.mw-wp-form-generator-form-option .repeatable-box-content p textarea {
+	height: 7em;
+}
+.mw-wp-form-generator-form-option .repeatable-box-content p .mwf_note {
+	display: block;
+}
+
+.mw-wp-form-generator-form-option .open-btn {
+	cursor: move;
+	overflow: hidden;
+	*zoom: 1;
+}
+.mw-wp-form-generator-form-option .open-btn span {
+	font-weight: bold;
+}
+.mw-wp-form-generator-form-option .open-btn b {
+	cursor: pointer;
+	display: block;
+	float: right;
+	margin: 0 0 0 10px;
+}
+
+.mw-wp-form-generator-form-option .remove-btn {
+	float: left;
+	margin: 0 5px 0 0;
+}
+.mw-wp-form-generator-form-option .remove-btn b {
+	cursor: pointer;
+	display: block;
+}
+
+.mw-wp-form-generator-hidden-options {
+	display: none;
+}

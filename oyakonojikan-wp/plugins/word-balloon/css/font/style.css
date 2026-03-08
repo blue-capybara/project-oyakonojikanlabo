@@ -1,0 +1,206 @@
+@font-face {
+  font-family: 'WordBalloon';
+  src:
+    url('WordBalloon.ttf?qf9yy2') format('truetype'),
+    url('WordBalloon.woff?qf9yy2') format('woff'),
+    url('WordBalloon.svg?qf9yy2#WordBalloon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="wb-"], [class*=" wb-"] {
+  
+  font-family: 'WordBalloon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.wb-star-o:before {
+  content: "\f008";
+}
+.wb-user:before {
+  content: "\f009";
+}
+.wb-check:before {
+  content: "\f00e";
+}
+.wb-close:before {
+  content: "\f00f";
+}
+.wb-remove:before {
+  content: "\f00f";
+}
+.wb-times:before {
+  content: "\f00f";
+}
+.wb-cog:before {
+  content: "\f014";
+}
+.wb-gear:before {
+  content: "\f014";
+}
+.wb-refresh:before {
+  content: "\f022";
+}
+.wb-lock:before {
+  content: "\f024";
+}
+.wb-volume-up:before {
+  content: "\f029";
+}
+.wb-image:before {
+  content: "\f03f";
+}
+.wb-photo:before {
+  content: "\f03f";
+}
+.wb-picture-o:before {
+  content: "\f03f";
+}
+.wb-pencil:before {
+  content: "\f042";
+}
+.wb-map-marker:before {
+  content: "\f043";
+}
+.wb-crosshairs:before {
+  content: "\f05c";
+}
+.wb-arrow-left:before {
+  content: "\f062";
+}
+.wb-arrow-right:before {
+  content: "\f063";
+}
+.wb-expand:before {
+  content: "\f066";
+}
+.wb-eye:before {
+  content: "\f06e";
+}
+.wb-comment:before {
+  content: "\f076";
+}
+.wb-key:before {
+  content: "\f087";
+}
+.wb-cogs:before {
+  content: "\f088";
+}
+.wb-gears:before {
+  content: "\f088";
+}
+.wb-comments:before {
+  content: "\f089";
+}
+.wb-sign-out:before {
+  content: "\f08b";
+}
+.wb-external-link:before {
+  content: "\f08f";
+}
+.wb-sign-in:before {
+  content: "\f090";
+}
+.wb-square-o:before {
+  content: "\f097";
+}
+.wb-unlock:before {
+  content: "\f09d";
+}
+.wb-filter:before {
+  content: "\f0b1";
+}
+.wb-arrows-alt:before {
+  content: "\f0b3";
+}
+.wb-copy:before {
+  content: "\f0c6";
+}
+.wb-files-o:before {
+  content: "\f0c6";
+}
+.wb-magic:before {
+  content: "\f0d1";
+}
+.wb-rotate-left:before {
+  content: "\f0e3";
+}
+.wb-undo:before {
+  content: "\f0e3";
+}
+.wb-dashboard:before {
+  content: "\f0e4";
+}
+.wb-tachometer:before {
+  content: "\f0e4";
+}
+.wb-comment-o:before {
+  content: "\f0e6";
+}
+.wb-bolt:before {
+  content: "\f0e7";
+}
+.wb-flash:before {
+  content: "\f0e7";
+}
+.wb-lightbulb-o:before {
+  content: "\f0ed";
+}
+.wb-exchange:before {
+  content: "\f0ee";
+}
+.wb-angle-up:before {
+  content: "\f108";
+}
+.wb-angle-down:before {
+  content: "\f109";
+}
+.wb-mobile:before {
+  content: "\f10b";
+}
+.wb-mobile-phone:before {
+  content: "\f10b";
+}
+.wb-circle:before {
+  content: "\f112";
+}
+.wb-smile-o:before {
+  content: "\f119";
+}
+.wb-history:before {
+  content: "\f1db";
+}
+.wb-paint-brush:before {
+  content: "\f1fd";
+}
+.wb-user-plus:before {
+  content: "\f236";
+}
+.wb-user-times:before {
+  content: "\f237";
+}
+.wb-commenting:before {
+  content: "\f27c";
+}
+.wb-commenting-o:before {
+  content: "\f27d";
+}
+.wb-address-card-o:before {
+  content: "\f2bd";
+}
+.wb-vcard-o:before {
+  content: "\f2bd";
+}
+.wb-user-o:before {
+  content: "\f2c1";
+}

@@ -1,0 +1,24 @@
+// 5.3~ は figure.wp-block-gallery > ul.blocks-gallery-grid
+// 5.9~ は .wp-block-gallery > .wp-block-image
+.wp-block-gallery {
+	--wp--style--gallery-gap-default: 1em;
+
+	.blocks-gallery-grid {
+		width: 100%;
+		padding: 0;
+		list-style: none;
+	}
+
+	figure {
+		margin: 0;
+	}
+
+}
+
+.gallery-caption,
+.blocks-gallery-caption {
+	width: 100%;
+	font-size: .8rem;
+	text-align: center;
+	opacity: var(--ark-opacity--thin);
+}

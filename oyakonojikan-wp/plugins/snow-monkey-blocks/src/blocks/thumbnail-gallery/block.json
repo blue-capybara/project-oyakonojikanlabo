@@ -1,0 +1,41 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/thumbnail-gallery",
+	"title": "Thumbnail gallery (Deprecated)",
+	"description": "You can display a slide show with thumbnails. This block is being retained for backwards compatibility and is not recommended for use. Its use may slow down the page display.",
+	"category": "smb-deprecated",
+	"attributes": {
+		"arrows": {
+			"type": "boolean",
+			"default": false
+		},
+		"speed": {
+			"type": "number",
+			"default": 300
+		},
+		"autoplay": {
+			"type": "boolean",
+			"default": false
+		},
+		"autoplaySpeed": {
+			"type": "number",
+			"default": 0
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true
+		}
+	},
+	"style": [ "file:./style-index.css", "slick-carousel-theme" ],
+	"editorScript": "file:./index.js",
+	"viewScript": [ "slick-carousel", "file:./script.js" ]
+}

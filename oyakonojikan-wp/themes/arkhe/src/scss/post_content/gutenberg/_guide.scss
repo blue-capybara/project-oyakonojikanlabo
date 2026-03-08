@@ -1,0 +1,49 @@
+// 本文エリア
+.block-editor-writing-flow {
+
+	// ガイド線を表示する
+	[data-type="core/group"]:not(.has-background),
+	[data-type="core/columns"]:not(.has-background),
+	[data-type="core/column"],
+	[data-type="core/buttons"] {
+
+		&:hover::after,
+		&.has-child-selected::after {
+			border: dashed 1px $color_guide;
+		}
+	}
+
+	[data-type="core/media-text"] {
+
+		&:hover,
+		&.has-child-selected {
+
+			// コンテンツ側にもガイドをつける
+			.wp-block-media-text__content {
+				border-top: dashed 1px $color_guide;
+				border-bottom: dashed 1px $color_guide;
+			}
+		}
+	}
+
+	[data-type="core/buttons"],
+	[data-type="core/group"],
+	[data-type="core/columns"],
+	[data-type="core/column"] {
+
+		// 6.1から after の存在が限定的になったので自分で指定する。
+		&::after {
+			position: absolute;
+			inset: var(--ark-guide-offset, -4px);
+			border-radius: 2px;
+			content: "";
+			pointer-events: none;
+		}
+	}
+
+}
+
+.wp-block .wp-block,
+[data-align="full"] {
+	--ark-guide-offset: 0;
+}

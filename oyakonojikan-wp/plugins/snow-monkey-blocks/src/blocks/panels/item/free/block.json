@@ -1,0 +1,34 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/panels-item-free",
+	"title": "Panel (Free input)",
+	"description": "It is a child block of the panels block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/panels" ],
+	"attributes": {
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"background": true,
+			"gradients": true,
+			"text": true,
+			"link": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		}
+	},
+	"editorScript": "file:./index.js"
+}

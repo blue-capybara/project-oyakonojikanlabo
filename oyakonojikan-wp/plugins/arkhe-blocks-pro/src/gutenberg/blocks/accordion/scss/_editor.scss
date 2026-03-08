@@ -1,0 +1,26 @@
+// @import "./index.scss";
+[data-type="arkhe-blocks/accordion"] {
+	// &.ark-block-accordion {}
+
+	.ark-block-accordion__title {
+		cursor: inherit;
+	}
+}
+
+.components-button-group.arkb-btns--acc {
+	display: flex;
+
+	.components-button {
+		display: flex;
+		gap: 4px;
+	}
+
+	// 開いた時
+	.is-opened > .ark-block-accordion__icon {
+		transform: rotate(180deg);
+
+		&::after {
+			opacity: 0;
+		}
+	}
+}

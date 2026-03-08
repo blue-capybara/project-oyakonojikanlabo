@@ -1,0 +1,108 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "23.0.1",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/panels-item",
+	"title": "Panel (Vertical layout)",
+	"description": "It is a child block of the panels block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/panels" ],
+	"attributes": {
+		"titleTagName": {
+			"type": "string",
+			"default": "div"
+		},
+		"title": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-panels__item__title",
+			"default": ""
+		},
+		"summary": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-panels__item__content",
+			"default": ""
+		},
+		"displayLink": {
+			"type": "boolean",
+			"default": false
+		},
+		"linkLabel": {
+			"type": "string",
+			"source": "text",
+			"selector": ".smb-panels__item__link",
+			"role": "content"
+		},
+		"linkURL": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__action > a",
+			"attribute": "href"
+		},
+		"rel": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__action > a",
+			"attribute": "rel"
+		},
+		"linkTarget": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__action > a",
+			"attribute": "target"
+		},
+		"displayImage": {
+			"type": "boolean",
+			"default": false
+		},
+		"imageID": {
+			"type": "number",
+			"default": 0
+		},
+		"imageURL": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__figure > img",
+			"attribute": "src",
+			"default": ""
+		},
+		"imageAlt": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__figure > img",
+			"attribute": "alt",
+			"default": ""
+		},
+		"imageWidth": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__figure > img",
+			"attribute": "width",
+			"default": ""
+		},
+		"imageHeight": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__figure > img",
+			"attribute": "height",
+			"default": ""
+		},
+		"imageSizeSlug": {
+			"type": "string",
+			"default": "full"
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"background": true,
+			"gradients": true,
+			"text": true,
+			"link": true
+		}
+	},
+	"editorScript": "file:./index.js",
+	"viewScript": "file:/view.js"
+}

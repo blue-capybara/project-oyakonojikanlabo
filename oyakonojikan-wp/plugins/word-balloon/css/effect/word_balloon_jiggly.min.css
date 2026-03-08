@@ -1,0 +1,1 @@
+.w_b_jiggly{-webkit-animation:w_b_jiggly 1s infinite alternate;animation:w_b_jiggly 1s infinite alternate}@keyframes w_b_jiggly{0%{transform:skew(0deg,0deg)}5%{transform:skew(1deg,1deg)}10%{transform:skew(-1deg,-1deg)}15%{transform:skew(1deg,1deg)}20%{transform:skew(-1deg,-1deg)}25%{transform:skew(1deg,1deg)}30%{transform:skew(-1deg,-1deg)}35%{transform:skew(0deg,0deg)}}

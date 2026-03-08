@@ -1,0 +1,50 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/directory-structure-item-file",
+	"title": "File",
+	"description": "Display a file item",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/directory-structure" ],
+	"attributes": {
+		"name": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-directory-structure__item__name",
+			"default": ""
+		},
+		"iconVendor": {
+			"type": "string",
+			"default": "fas"
+		},
+		"iconClass": {
+			"type": "string",
+			"default": "file"
+		},
+		"iconColor": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"background": false,
+			"link": true,
+			"text": true
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalFontFamily": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalFontStyle": true,
+			"__experimentalFontWeight": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalTextTransform": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		}
+	},
+	"editorScript": "file:./index.js"
+}

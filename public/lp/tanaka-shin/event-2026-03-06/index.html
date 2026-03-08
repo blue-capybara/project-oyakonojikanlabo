@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>準備中 | 親子の時間研究所</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      background: linear-gradient(180deg, #fffdf7 0%, #fff7ea 100%);
+      color: #2e2a22;
+    }
+
+    .container {
+      width: min(640px, 100%);
+      background: #ffffff;
+      border: 1px solid #f0dfc1;
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(24px, 4vw, 32px);
+      line-height: 1.4;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    .open-date {
+      margin-top: 8px;
+      font-weight: 700;
+      color: #8e5a00;
+    }
+
+    .home-link {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      background: #ff7a00;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .home-link:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>ただいま準備中です</h1>
+    <p>イベントページを公開準備しております。</p>
+    <p class="open-date">オープンは 2026/3/5〜3/6 予定です。</p>
+    <button class="home-link" id="back-button" type="button">前のページに戻る</button>
+  </main>
+  <script>
+    (function () {
+      const backButton = document.getElementById("back-button");
+      if (!backButton) return;
+
+      backButton.addEventListener("click", function () {
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+        window.location.href = "/";
+      });
+    })();
+  </script>
+</body>
+</html>

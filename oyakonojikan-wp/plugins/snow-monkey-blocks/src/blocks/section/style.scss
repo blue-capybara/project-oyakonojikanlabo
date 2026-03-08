@@ -1,0 +1,445 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-section {
+	--smb-section--color: currentColor;
+	--smb-section--min-height: 0px;
+	--smb-section--padding: var(--_padding3);
+	--smb-section--subtitle-color: inherit;
+	--smb-section--contents-wrapper-width: auto;
+	--smb-section--background-color: transparent;
+	--smb-section--background-image: initial;
+	--smb-section--background-transform: initial;
+	--smb-section--background-top: 0;
+	--smb-section--background-right: 0;
+	--smb-section--background-bottom: 0;
+	--smb-section--background-left: 0;
+	--smb-section--background-texture-image: initial;
+	--smb-section--background-texture-opacity: 1;
+	--smb-section--fixed-background-color: transparent;
+	--smb-section--fixed-background-image: initial;
+	--smb-section--fixed-background-texture-image: initial;
+	--smb-section--fixed-background-texture-opacity: 1;
+	--smb-section--dividers-top: 0%;
+	--smb-section--dividers-bottom: 0%;
+	--smb-section--top-divider-level: 0px;
+	--smb-section--bottom-divider-level: 0px;
+	--smb-section--background-text-color: inherit;
+	--smb-section--background-text-opacity: 0.2;
+	--smb-section--background-text-font-size: inherit;
+	--smb-section--background-text-line-height: inherit;
+	--smb-section--background-text-top: initial;
+	--smb-section--background-text-right: initial;
+	--smb-section--background-text-bottom: initial;
+	--smb-section--background-text-left: initial;
+
+	position: relative;
+	display: flex;
+	align-items: center;
+	color: var(--smb-section--color);
+	min-height: var(--smb-section--min-height);
+	padding: var(--smb-section--padding) 0;
+
+	&__fixed-background,
+	&__background-text {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+	}
+
+	&__background,
+	&__fixed-background {
+		&__texture {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			mix-blend-mode: multiply;
+		}
+	}
+
+	&__background {
+		position: absolute;
+		top: var(--smb-section--background-top);
+		right: var(--smb-section--background-right);
+		bottom: var(--smb-section--background-bottom);
+		left: var(--smb-section--background-left);
+		background-color: var(--smb-section--background-color);
+		background-image: var(--smb-section--background-image);
+		transform: var(--smb-section--background-transform);
+	}
+
+	&__background__texture {
+		background-image: var(--smb-section--background-texture-image);
+		opacity: var(--smb-section--background-texture-opacity);
+	}
+
+	&__fixed-background {
+		background-color: var(--smb-section--fixed-background-color);
+		background-image: var(--smb-section--fixed-background-image);
+		padding-top: var(--smb-section--top-divider-level);
+		padding-bottom: var(--smb-section--bottom-divider-level);
+	}
+
+	&__fixed-background__texture {
+		background-image: var(--smb-section--fixed-background-texture-image);
+		opacity: var(--smb-section--fixed-background-texture-opacity);
+	}
+
+	&__background-text {
+		overflow: hidden;
+		position: relative;
+		height: 100%;
+
+		&__text {
+			position: absolute;
+			font-weight: bold;
+			max-width: 100%;
+			color: var(--smb-section--background-text-color);
+			opacity: var(--smb-section--background-text-opacity);
+			font-size: var(--smb-section--background-text-font-size);
+			line-height: var(--smb-section--background-text-line-height);
+			top: var(--smb-section--background-text-top);
+			right: var(--smb-section--background-text-right);
+			bottom: var(--smb-section--background-text-bottom);
+			left: var(--smb-section--background-text-left);
+		}
+	}
+
+	&__dividers {
+		position: absolute;
+		top: var(--smb-section--dividers-top);
+		right: 0;
+		bottom: var(--smb-section--dividers-bottom);
+		left: 0;
+		overflow: hidden;
+	}
+
+	&__divider {
+		position: absolute;
+		right: -1px;
+		left: -1px;
+		line-height: 1;
+		font-size: 0;
+
+		svg {
+			position: absolute;
+			right: 0;
+			left: 0;
+			height: auto;
+			width: 100%;
+			max-height: 100px;
+		}
+
+		&--top {
+			top: -1px;
+
+			svg {
+				top: 0;
+				transform: rotateZ(180deg);
+			}
+		}
+
+		&--bottom {
+			bottom: -1px;
+
+			svg {
+				bottom: 0;
+			}
+		}
+
+		&--triangle {
+			svg {
+				margin: 0 auto;
+				max-width: 200px;
+			}
+		}
+	}
+
+	&__inner {
+		flex: 1 1 auto;
+		position: relative;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		max-width: 100%;
+
+		> .c-container {
+			position: relative;
+
+			&.alignfull,
+			&.alignwide {
+				flex-grow: 1;
+			}
+
+			&.alignwide {
+				max-width: var(--wp--style--global--wide-size);
+			}
+		}
+
+		&[class*="is-content-justification-"] {
+			> .c-container {
+				display: flex;
+
+				> .smb-section__contents-wrapper {
+					margin-right: 0;
+					margin-left: 0;
+				}
+			}
+		}
+
+		&.is-content-justification-left {
+			> .c-container {
+				justify-content: flex-start;
+			}
+		}
+
+		&.is-content-justification-center {
+			> .c-container {
+				justify-content: center;
+			}
+		}
+
+		&.is-content-justification-right {
+			> .c-container {
+				justify-content: flex-end;
+			}
+		}
+	}
+
+	&__contents-wrapper {
+		margin-right: auto;
+		margin-left: auto;
+		width: auto;
+		max-width: min(100%, var(--smb-section--contents-wrapper-width));
+
+		> * + * {
+			margin-top: var(--_margin2);
+		}
+
+		&--left,
+		&--center,
+		&--right {
+			> .smb-section__header,
+			> .smb-section__header .c-container {
+				text-align: inherit;
+			}
+		}
+
+		&--left,
+		&--right {
+			> .smb-section__header .smb-section__lede-wrapper {
+				display: block;
+			}
+		}
+
+		&--left {
+			text-align: left;
+		}
+
+		&--center {
+			text-align: center;
+		}
+
+		&--right {
+			text-align: right;
+		}
+	}
+
+	// @deprecated
+	&__subtitle,
+	&__title {
+		text-align: center;
+	}
+
+	&__header {
+		text-align: center;
+
+		> *,
+		> .c-container > * {
+			text-align: inherit;
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+
+		> * + *,
+		> .c-container > * + * {
+			margin-top: var(--_margin-2);
+		}
+
+		> * + .smb-section__lede-wrapper,
+		> * + .smb-section__lede {
+			margin-top: var(--_margin1);
+		}
+	}
+
+	&__subtitle {
+		color: var(--smb-section--subtitle-color);
+		@include core.set-font-size-level(-2);
+		font-weight: bold;
+	}
+
+	&__title {
+		@include core.set-fluid-font-size-level(4);
+	}
+
+	&__lede-wrapper {
+		display: flex;
+		justify-content: center;
+	}
+
+	&__lede {
+		@include core.set-font-size-level(-1);
+	}
+
+	&__body {
+		max-width: 100%;
+	}
+
+	[data-is-text-align="left"] {
+		text-align: left;
+	}
+
+	// @deprecated
+	&--left,
+	&--right {
+		> .smb-section__inner {
+			> .c-container {
+				> .smb-section__lede-wrapper {
+					display: block;
+				}
+			}
+		}
+	}
+
+	// @deprecated
+	&--left {
+		> .smb-section__inner {
+			> .c-container {
+				> .smb-section__subtitle,
+				> .smb-section__title,
+				> .smb-section__lede-wrapper > .smb-section__lede,
+				> .smb-section__body {
+					text-align: left;
+				}
+			}
+		}
+	}
+
+	// @deprecated
+	&--center {
+		> .smb-section__inner {
+			> .c-container {
+				> .smb-section__subtitle,
+				> .smb-section__title,
+				> .smb-section__body {
+					text-align: center;
+				}
+			}
+		}
+	}
+
+	// @deprecated
+	&--right {
+		> .smb-section__inner {
+			> .c-container {
+				> .smb-section__subtitle,
+				> .smb-section__title,
+				> .smb-section__lede-wrapper > .smb-section__lede,
+				> .smb-section__body {
+					text-align: right;
+				}
+			}
+		}
+	}
+
+	&--wide {
+		--smb-section--min-height: 75vh;
+	}
+
+	&--full {
+		--smb-section--min-height: 100vh;
+	}
+
+	&--top-divider-no-overlay {
+		> .smb-section__inner {
+			padding-top: max(var(--smb-section--top-divider-level), calc(var(--smb-section--top-divider-level) * -1));
+		}
+	}
+
+	&--bottom-divider-no-overlay {
+		> .smb-section__inner {
+			padding-bottom: max(var(--smb-section--bottom-divider-level), calc(var(--smb-section--bottom-divider-level) * -1));
+		}
+	}
+
+	// @deprecated
+	&.is-content-justification-left,
+	&.is-content-justification-center,
+	&.is-content-justification-right {
+		> .smb-section__inner {
+			> .c-container {
+				display: flex;
+				flex-wrap: wrap;
+
+				> .smb-section__subtitle,
+				> .smb-section__title,
+				> .smb-section__lede-wrapper,
+				> .smb-section__body {
+					flex: 1 1 100%;
+				}
+
+				> .smb-section__contents-wrapper {
+					margin-right: 0;
+					margin-left: 0;
+				}
+			}
+		}
+	}
+
+	// @deprecated
+	&.is-content-justification-left {
+		> .smb-section__inner {
+			> .c-container {
+				justify-content: flex-start;
+			}
+		}
+	}
+
+	// @deprecated
+	&.is-content-justification-center {
+		> .smb-section__inner {
+			> .c-container {
+				justify-content: center;
+			}
+		}
+	}
+
+	// @deprecated
+	&.is-content-justification-right {
+		> .smb-section__inner {
+			> .c-container {
+				justify-content: flex-end;
+			}
+		}
+	}
+
+	&.is-items-alignment-top {
+		align-items: flex-start;
+	}
+
+	&.is-items-alignment-center {
+		align-items: center;
+	}
+
+	&.is-items-alignment-bottom {
+		align-items: flex-end;
+	}
+}
+
+:where(.smb-section__body.is-layout-constrained > *) {
+	--wp--style--global--content-size: 100%;
+	--wp--style--global--wide-size: 100%;
+}

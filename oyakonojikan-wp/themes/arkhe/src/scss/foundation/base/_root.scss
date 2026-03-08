@@ -1,0 +1,106 @@
+@charset "UTF-8";
+
+:root {
+
+	// マージン量
+	--ark-mt: 2rem;
+	--ark-mt--s: 1rem;
+	--ark-mt--h: 2.5em; // 見出しタグ用
+
+	// フォント関連
+	--ark-font_family: "Helvetica Neue", "Arial", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
+	--ark-font_size: min(16px, 4vw);
+	--ark-line_height: 1.8; // コンテンツエリアで使用
+	--ark-letter_spacing: .025em;
+
+	// l-containerのサイドのpadding量
+	--ark-padding--container: min(48px, 4vw);
+
+	// カラー変数 (設定には紐づいていないもの)
+	--ark-color--border: rgba(200, 200, 200, .5);
+	--ark-color--border--table: #ededed;
+	--ark-color--gray--hover: rgba(150, 150, 150, .05);
+
+	// 薄いカラーで表示する部分の opacity
+	--ark-opacity--thin: .75;
+
+	//ヘッダーの高さ
+	--ark-header_height: 0px; // 実際の数値は JSでセット
+	--ark-header_height--fixed: 0px; // 実際の数値は JSでセット
+
+	// 管理バーの高さ
+	--ark-adminbar_height: 0px;
+
+	// スクロールバーの横幅
+	--ark-scrollbar_width: 0px;
+
+	// 画面高さ
+	--ark-100vh: 100vh;
+
+	// フォントサイズリスト
+	--ark-fz--xs: .75em;
+	--ark-fz--s: .9em;
+	--ark-fz--n: 1rem; // ルートサイズに戻す用
+	--ark-fz--m: 1.1em;
+	--ark-fz--l: 1.25em;
+	--ark-fz--xl: 1.5em;
+	--ark-fz--xxl: 2em;
+	--ark-fz--huge: 3em;
+
+	// サブメニュー展開ボタンのサイズ
+	--ark-submenu_btn_size: 1.75rem;
+}
+
+html {
+	font-size: var(--ark-font_size);
+	letter-spacing: var(--ark-letter_spacing);
+}
+
+// --ark-adminbar_heightで変わるものはbodyで指定
+body {
+	// 固定コンテンツを考慮したオフセット値
+	--ark-offset--y: calc(var(--ark-adminbar_height) + var(--ark-header_height--fixed));
+
+	// 全高コンテンツ用
+	--ark-height--full: calc(var(--ark-100vh, 100vh) - var(--ark-offset--y));
+}
+
+body.admin-bar {
+	--ark-adminbar_height: var(--wp-admin--admin-bar--height, 32px);
+
+	@media screen and (max-width: 782px) {
+		--ark-adminbar_height: var(--wp-admin--admin-bar--height, 46px);
+	}
+}
+
+.l-main__body > .c-postContent > :first-child {
+	@supports (height: 100svh) {
+		--ark-100vh: 100svh; /* stylelint-disable-line */
+	}
+}
+
+// ヘッダーオーバーレイの時、最初のコンテンツは値を固定
+.l-header[data-overlay="1"] + .l-content .l-main__body > .c-postContent > :first-child {
+	--ark-height--full: calc(var(--ark-100vh, 100vh) - var(--ark-adminbar_height));
+}
+
+// ヘッダーオーバーレイじゃない時、最初のコンテンツは値を固定
+.l-header:not([data-overlay]) + .l-content .l-main__body > .c-postContent > :first-child {
+	--ark-height--full: calc(var(--ark-100vh, 100vh) - var(--ark-adminbar_height) - var(--ark-header_height));
+}
+
+
+// 途中で名前変更したものの後方互換 (カスタマイズで利用されやすいものや、ブロックプラグイン等で利用していた変数)
+body { /* stylelint-disable-line */
+	--ark-color_main: var(--ark-color--main);
+	--ark-color_text: var(--ark-color--text);
+	--ark-color_link: var(--ark-color--link);
+	--ark-color_bg: var(--ark-color--bg);
+	--ark-color_gray: var(--ark-color--gray);
+	--ark-hover_gray: var(--ark-color--gray--hover);
+	--ark-color_border: var(--ark-color--border);
+	--ark-pad--container: var(--ark-padding--container);
+	--ark-container_width: var(--ark-width--container);
+	--ark-article_width: var(--ark-width--article);
+	--ark-slim_width: var(--ark-width--article--slim);
+}

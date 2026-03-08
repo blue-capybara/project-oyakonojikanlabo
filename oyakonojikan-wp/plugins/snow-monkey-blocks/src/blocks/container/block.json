@@ -1,0 +1,50 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/container",
+	"title": "Container",
+	"description": "Container blocks keep content within a certain width.",
+	"category": "smb",
+	"attributes": {
+		"contentsMaxWidth": {
+			"type": "string"
+		},
+		"isSlim": {
+			"type": "boolean",
+			"default": false
+		},
+		"removeGutters": {
+			"type": "boolean",
+			"default": false
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		}
+	},
+	"example": {
+		"innerBlocks": [
+			{
+				"name": "core/paragraph",
+				"attributes": {
+					"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam"
+				}
+			}
+		]
+	},
+	"style": "file:./style-index.css",
+	"editorScript": "file:./index.js"
+}

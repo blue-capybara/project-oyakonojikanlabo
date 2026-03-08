@@ -1,0 +1,28 @@
+// FIxボタン系
+.p-fixBtnWrap {
+	position: fixed;
+	right: 3%;
+	bottom: 6%;
+	z-index: 10;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	text-align: center;
+	visibility: hidden;
+	opacity: 0;
+	transition: opacity .5s, visibility .5s;
+
+	[data-scrolled="true"] & {
+		visibility: visible;
+		opacity: 1;
+	}
+
+	@include sp {
+		// #fix_bottom_menuと同じ値
+		padding-bottom: calc(env(safe-area-inset-bottom) * .5);
+
+		// #fix_bottom_menu + & {
+		//     bottom: 64px;
+		// }
+	}
+}

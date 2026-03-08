@@ -1,0 +1,175 @@
+/*
+ * メニューリスト系
+ * ( ウィジェット系、グローバルナビ・ドロワーメニュー）
+ */
+/* stylelint-disable at-rule-empty-line-before */
+
+// .children,
+// .sub-menu,
+// .submenu-container {
+// 	@extend %reset_list;
+// }
+
+:root {
+	--ark-menulist_border: solid 1px var(--ark-color--border);
+}
+
+li:last-child {
+	--ark-menulist_border: none;
+}
+
+// 開閉式メニューはできるだけこれで統一
+.has-child--acc {
+	--ark-nav-padding--R: calc(var(--ark-submenu_btn_size) + 16px);
+
+	.children,
+	.sub-menu {
+		@extend %acc_sub_menu;
+		@extend %menu_list__children;
+	}
+}
+
+// -------- グローバルナビ --------
+// memo: %menu_list は使わない。
+
+
+// -------- ドロワーメニュー --------
+.c-drawerNav {
+	@extend %menu_list;
+
+	.menu-item {
+		@extend %menu_list__li;
+	}
+}
+
+.c-drawerNav__a {
+	@extend %menu_list__a;
+	@extend %menu_list__a_hover;
+}
+
+
+// -------- ul, ol 系のウィジェット --------
+
+// -- アーカイブ（ブロック） --
+.wp-block-archives-list {
+	@extend %menu_list;
+
+	li {
+		@extend %menu_list__li;
+	}
+
+	a {
+		@extend %menu_list__a;
+		@extend %menu_list__a_hover;
+	}
+}
+
+// -- カテゴリー（従来・ブロック） --
+.wp-block-categories-list,
+.widget_categories > ul {
+	@extend %menu_list;
+}
+
+.wp-block-categories-list,
+.widget_categories {
+
+	li {
+		@extend %menu_list__li;
+	}
+
+	a {
+		@extend %menu_list__a;
+		@extend %menu_list__a_hover;
+	}
+}
+
+// エディター用（フックが通らず .has-child--acc ないので）
+.wp-block-categories-list .children {
+	@extend %menu_list__children;
+}
+
+// -- ナビゲーション（従来のみ） --
+// memo: 構造は .widget_nav_menu > div > ul.menu になってる
+.widget_nav_menu {
+
+	.menu {
+		@extend %menu_list;
+	}
+
+	.menu-item {
+		@extend %menu_list__li;
+	}
+
+	a {
+		@extend %menu_list__a;
+		@extend %menu_list__a_hover;
+	}
+}
+
+
+// -- 固定ページリスト（ブロック） --
+.wp-block-page-list {
+	@extend %menu_list;
+
+	.submenu-container {
+		@extend %menu_list__children;
+	}
+}
+
+.wp-block-pages-list__item {
+	@extend %menu_list__li;
+}
+
+.wp-block-pages-list__item__link {
+	@extend %menu_list__a;
+	@extend %menu_list__a_hover;
+}
+
+
+// -- 最近の投稿（従来） --
+.widget_recent_entries__list {
+	@extend %menu_list;
+}
+
+.widget_recent_entries__li {
+	@extend %menu_list__li;
+}
+
+.widget_recent_entries__a {
+	@extend %menu_list__a;
+	@extend %menu_list__a_hover;
+}
+
+// -- 最近の投稿（ブロック） --
+.wp-block-latest-posts:not(.is-grid) {
+	@extend %menu_list;
+
+	li {
+		@extend %menu_list__li;
+		padding: var(--ark-padding--nav, .75rem .5rem);
+	}
+}
+
+// -- 最新のコメント（ブロック） --
+.wp-block-latest-comments {
+	@extend %menu_list;
+}
+
+// li
+.wp-block-latest-comments__comment {
+	@extend %menu_list__li;
+	padding: var(--ark-padding--nav, .75rem .5rem);
+}
+
+
+// 旧「最近のコメント」, 「アーカイブ」, 「固定ページ一覧」→ 何もしない
+// .widget_recent_comments > ul
+// .widget_archive > ul
+// .widget_pages > ul
+
+// RSS → 何もしない
+// .wp-block-rss,
+// .widget_rss > ul {}
+
+// メタ情報 → 何もしない
+// .widget_meta{}

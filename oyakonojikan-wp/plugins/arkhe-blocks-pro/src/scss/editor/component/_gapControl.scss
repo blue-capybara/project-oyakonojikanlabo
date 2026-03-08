@@ -1,0 +1,24 @@
+// .arkb-gapControl {}
+
+.arkb-gapControl__row {
+
+	+.arkb-gapControl__row {
+		margin-top: 8px;
+	}
+
+	>.__label {
+		min-width: 4em;
+		margin-right: auto;
+		display: flex;
+		align-items: center;
+
+		svg {
+			margin-right: .25em;
+		}
+	}
+
+	>.components-flex-block {
+		flex: 0 1 auto;
+	}
+
+}

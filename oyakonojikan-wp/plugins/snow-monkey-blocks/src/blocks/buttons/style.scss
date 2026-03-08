@@ -1,0 +1,43 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-buttons {
+	--smb-buttons--gap: var(--_margin1);
+
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--smb-buttons--gap);
+
+	&.has-text-align-left,
+	&.is-content-justification-left {
+		justify-content: flex-start;
+	}
+
+	&.has-text-align-center,
+	&.is-content-justification-center {
+		justify-content: center;
+	}
+
+	&.has-text-align-right,
+	&.is-content-justification-right {
+		justify-content: flex-end;
+	}
+
+	&.is-content-justification-space-between {
+		justify-content: space-between;
+	}
+
+	> .smb-btn-wrapper {
+		flex: 0 1 auto;
+		margin: 0;
+	}
+
+	> .smb-btn-wrapper--more-wider {
+		@include core.media-max(sm) {
+			flex: 1 1 auto;
+		}
+	}
+
+	> .smb-btn-wrapper--full {
+		flex: 1 1 auto;
+	}
+}

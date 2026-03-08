@@ -1,0 +1,71 @@
+.wp-block-quote {
+	--ark-mt--inner: .5em;
+
+	&.has-text-align-center {
+		border-left: none;
+	}
+
+	&.has-text-align-right {
+		border-right: solid 2px var(--ark-color--border);
+		border-left: none;
+	}
+
+	// スタイル：「大」
+	&.is-style-large {
+
+		position: relative;
+		background: var(--ark-color--gray);
+		border: none;
+
+		// wp60からコアのスタイルが強くなってる
+		&.is-style-large {
+			margin: var(--ark-mt) auto 0;// コアのスタイルでマージンが指定されているのを上書き
+			padding: 2.5rem 3rem;
+
+			p {
+				font-size: 1.25rem;
+			}
+
+			cite {
+				font-size: 1rem;
+			}
+		}
+
+
+		&::before,
+		&::after {
+			position: absolute;
+			z-index: 0;
+			display: inline-block;
+			color: #000;
+			font-size: 5rem;
+			font-family: Arial, sans-serif;
+			line-height: 1;
+			opacity: .1;
+			content: "\00201c";
+		}
+
+		&::before {
+			top: .25rem;
+			left: .5rem;
+		}
+
+		&::after {
+			right: .5rem;
+			bottom: .25rem;
+			transform: rotate(180deg);
+		}
+
+	}
+
+	// スタイル：「プレーン」
+	&.is-style-plain {
+		padding: 0;
+		border: none;
+	}
+
+	&.has-background {
+		padding: 1.5rem 1.75rem;
+	}
+
+}

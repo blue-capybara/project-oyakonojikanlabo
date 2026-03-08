@@ -1,0 +1,254 @@
+@import "../../../scss/mixin/media";
+
+// memo: 構造 → .ark-block-tab > .arkb-tabList,.arkb-tabBody
+.ark-block-tab {
+	--arkb-tab-width: unset;
+	--arkb-tab-min-width: unset;
+	--arkb-tab-list-wrap: nowrap;
+
+	position: relative;
+
+	.arkb-scrollHint {
+		display: none;
+	}
+
+	&[data-has-tab-link] {
+
+		.arkb-tabList__button {
+			transition: none;
+		}
+	}
+}
+
+.arkb-tabList {
+	position: relative;
+	display: flex;
+	flex-wrap: var(--arkb-tab-list-wrap);
+	justify-content: center;
+	margin: 0;
+	list-style: none !important;
+
+	// 詳細度高める
+	.ark-block-tab > & {
+		padding: 0;
+	}
+
+	&[data-justify="left"] {
+		justify-content: flex-start;
+	}
+
+	&[data-justify="right"] {
+		justify-content: flex-end;
+	}
+
+	.arkb-tabList__item {
+		flex-basis: var(--arkb-tab-width);
+		min-width: var(--arkb-tab-min-width);
+		margin: 0; // .c-postContent ul li のmarginを打ち消す
+		text-align: center;
+	}
+}
+
+
+.arkb-tabList__button {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	padding: 1em;
+	color: inherit;
+	font-size: 13px;
+	line-height: 1;
+	background: none;
+	border: none;
+	border-bottom: solid 2px transparent;
+	transition: background-color .25s, color .25s;
+
+	@include tab {
+		font-size: 14px;
+	}
+
+	&:hover {
+		outline: none; //マウス操作ではアウトライン非表示
+	}
+
+	&[aria-selected="true"] {
+		border-bottom-color: currentColor;
+	}
+}
+
+
+@keyframes ArkbFloatHorizontal {
+
+	0% {
+		transform: translate3d(4px, 0, 0);
+	}
+
+	50% {
+		transform: translate3d(-4px, 0, 0);
+	}
+
+	100% {
+		transform: translate3d(4px, 0, 0);
+	}
+}
+
+@include sp {
+
+	[data-tab-w-sp="fix"] {
+		--arkb-tab-width: 50%;
+		--arkb-tab-list-wrap: wrap;
+	}
+
+	[data-tab-w-sp="equal"] {
+		--arkb-tab-width: 50%;
+	}
+
+	[data-tab-w-sp="auto"] {
+		--arkb-tab-width: auto;
+		--arkb-tab-min-width: 5em;
+		--arkb-tab-list-wrap: wrap;
+	}
+
+	.-scrollable-sp {
+
+		.arkb-scrollHint {
+			display: block;
+		}
+
+		.arkb-tabList {
+			z-index: 1;
+			flex-wrap: nowrap !important;
+			justify-content: flex-start;
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			scroll-behavior: smooth;
+		}
+
+		.arkb-tabList__item {
+			flex-shrink: 0;
+		}
+
+		[data-tab-w-sp="equal"] {
+			--arkb-tab-width: auto;
+			--arkb-tab-min-width: 30%;
+		}
+	}
+}
+
+@include pc {
+
+	.arkb-tabList {
+
+		&:not(:hover) {
+
+			&::-webkit-scrollbar,
+			&::-webkit-scrollbar-thumb {
+				visibility: hidden;
+				opacity: 0;
+			}
+		}
+
+		&::-webkit-scrollbar {
+			position: absolute;
+			height: 10px;
+			background-color: rgba(200, 200, 200, .1);
+			// box-shadow: inset 0 0 2px 0 rgba(0, 0, 0, .15);
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(200, 200, 200, 1);
+			background-clip: padding-box;
+			border: solid 2px transparent;
+			// border-bottom-width: 4px;
+			border-radius: 8px;
+		}
+	}
+
+	[data-tab-w-pc="fix"] {
+		--arkb-tab-width: 25%;
+		--arkb-tab-list-wrap: wrap;
+	}
+
+	[data-tab-w-pc="equal"] {
+		--arkb-tab-width: 50%;
+	}
+
+	[data-tab-w-pc="auto"] {
+		--arkb-tab-width: auto;
+		--arkb-tab-min-width: 5em;
+		--arkb-tab-list-wrap: wrap;
+
+		// .arkb-tabList__button {
+		// 	padding-right: 1.25em;
+		// 	padding-left: 1.25em;
+		// }
+	}
+
+
+	.-scrollable-pc {
+
+		.arkb-scrollHint {
+			display: block;
+		}
+
+		.arkb-tabList {
+			z-index: 1;
+			flex-wrap: nowrap !important;
+			justify-content: flex-start;
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			scroll-behavior: smooth;
+			// transform: rotateX(180deg); // スクロールバーの位置を上にする
+		}
+
+		.arkb-tabList__item {
+			flex-shrink: 0;
+			// transform: rotateX(180deg); // スクロールバーの位置を上にする
+		}
+
+		[data-tab-w-pc="equal"] {
+			--arkb-tab-width: auto;
+			--arkb-tab-min-width: 20%;
+		}
+	}
+}
+
+
+.arkb-tabBody {
+	position: relative;
+	padding: 1.5em;
+}
+
+.arkb-tabBody__content {
+	position: relative;
+	width: 100%;
+
+	&[aria-hidden="true"] {
+		display: none;
+	}
+}
+
+
+// -----------------------------------------
+// スタイル
+// -----------------------------------------
+.ark-block-tab.is-style-box {
+
+	// & > .arkb-tabBody{}
+
+	> .arkb-tabList {
+
+		.arkb-tabList__button {
+			background-color: var(--ark-color--gray, #f7f7f7);
+			border-bottom: none;
+		}
+
+		.arkb-tabList__button[aria-selected="true"] {
+			color: #fff;
+			background-color: var(--ark-color--text, #000);
+		}
+	}
+
+}

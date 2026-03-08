@@ -1,0 +1,1 @@
+.w_b_rotate_left{animation:w_b_rotate_left 4s linear infinite}@keyframes w_b_rotate_left{0%{transform:rotate(0deg) translateX(10%) rotate(0deg)}100%{transform:rotate(-360deg) translateX(10%) rotate(360deg)}}

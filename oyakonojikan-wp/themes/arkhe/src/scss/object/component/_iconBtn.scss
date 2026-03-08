@@ -1,0 +1,65 @@
+// ヘッダー内で使われるハンバーガーメニューボタンやサーチアイコン
+.c-iconBtn {
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	color: inherit;
+	text-decoration: none;
+	background: none;
+	border: none;
+	cursor: pointer;
+
+	.-menuBtn {
+		z-index: 1;
+	}
+}
+
+.c-iconBtn__icon {
+	position: relative;
+	display: block;
+	width: 24px;
+	height: 24px;
+	font-size: 24px;
+	line-height: 1;
+
+	svg {
+		display: block;
+		width: 100% !important; // fa に負けないように
+		height: 100% !important;
+	}
+
+	.__open,
+	.__close {
+		transform-origin: 50% 50%;
+		transition: .25s;
+	}
+
+	.__close {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 1;
+		transform: rotate(180deg);
+		opacity: 0;
+	}
+
+	[data-drawer="opened"] & {
+
+		.__close {
+			transform: rotate(0);
+			opacity: 1;
+		}
+
+		.__open {
+			transform: rotate(-180deg);
+			opacity: 0;
+		}
+	}
+}
+
+.c-iconBtn__label {
+	display: block;
+	width: 100%;
+	font-size: 10px;
+	transform: scale(.9);
+}

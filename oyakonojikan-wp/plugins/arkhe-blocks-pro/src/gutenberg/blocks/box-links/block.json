@@ -1,0 +1,34 @@
+{
+    "apiVersion": 2,
+    "name": "arkhe-blocks/box-links",
+    "title": "Box links",
+    "category": "arkhe-blocks",
+    "keywords": [
+        "arkhe",
+        "box-links"
+    ],
+    "supports": {
+        "anchor": true,
+        "className": false,
+        "align": [
+            "wide"
+        ]
+    },
+    "attributes": {
+        "columnCount": {
+            "type": "object"
+        },
+        "gap": {
+            "type": "object"
+        },
+        "gapTab": {
+            "type": "object"
+        },
+        "gapMB": {
+            "type": "object"
+        }
+    },
+    "editorScript": "file:./index.js",
+    "style": "arkhe-blocks-box-links-style",
+    "textdomain": "arkhe-blocks"
+}

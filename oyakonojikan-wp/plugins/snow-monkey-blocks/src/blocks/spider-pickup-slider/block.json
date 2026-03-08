@@ -1,0 +1,56 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/spider-pickup-slider",
+	"title": "Pickup slider",
+	"description": "Display posts with pickup tags as a slider.",
+	"category": "smb",
+	"attributes": {
+		"random": {
+			"type": "boolean",
+			"default": false
+		},
+		"postsPerPage": {
+			"type": "number",
+			"default": 0
+		},
+		"dots": {
+			"type": "boolean",
+			"default": false
+		},
+		"dotsToThumbnail": {
+			"type": "boolean",
+			"default": false
+		},
+		"arrows": {
+			"type": "boolean",
+			"default": true
+		},
+		"fade": {
+			"type": "boolean",
+			"default": false
+		},
+		"interval": {
+			"type": "number",
+			"default": 0
+		},
+		"autoplayButton": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"supports": {
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true
+		}
+	},
+	"style": [
+		"file:./style-index.css",
+		"snow-monkey-blocks-spider-slider-style"
+	],
+	"editorScript": "file:./index.js",
+	"viewScript": [ "spider", "file:./script.js" ]
+}

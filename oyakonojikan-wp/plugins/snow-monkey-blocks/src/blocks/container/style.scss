@@ -1,0 +1,17 @@
+.smb-container {
+	&__body {
+		margin-right: auto;
+		margin-left: auto;
+		max-width: 100%;
+	}
+
+	&--no-gutters {
+		padding-right: 0 !important;
+		padding-left: 0 !important;
+	}
+}
+
+:where(.smb-container__body.is-layout-constrained > *) {
+	--wp--style--global--content-size: 100%;
+	--wp--style--global--wide-size: 100%;
+}

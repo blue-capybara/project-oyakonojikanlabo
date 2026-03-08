@@ -1,0 +1,6 @@
+Search Console URLs total(unique): 1664
+Known valid kept (sitemap/static/tag): 22
+Exact 301 rules: 1
+Exact 410 rules: 1154
+Core pattern rules file: /Users/ns/projects/app/project-oyakonojikanlabo/tmp_oyako/htaccess_rules_301_410_core_from_sc.conf
+Exact 410 file: /Users/ns/projects/app/project-oyakonojikanlabo/tmp_oyako/htaccess_rules_410_exact_from_sc.conf

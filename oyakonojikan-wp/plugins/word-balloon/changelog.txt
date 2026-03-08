@@ -1,0 +1,921 @@
+= 4.18.5 =
+* Released: February 8, 2022
+* fixed: Minor fix.
+
+= 4.18.4 =
+* Released: December 7, 2021
+* fixed: for iOS.
+
+= 4.18.3 =
+* Released: October 26, 2021
+* fixed: BlockEditor.
+* fixed: Minor fix.
+
+= 4.18.2 =
+* Released: August 3, 2021
+* add Dutch json file for BlockEditor.
+* Dutch translation thanks to Pieterjan Deneys and Peter Smits.
+
+= 4.18.1 =
+* Released: July 11, 2021
+* Support WordPress5.8.
+* fixed: Minor fix.
+
+= 4.18.0 =
+* Released: May 1, 2021
+* Support Word Balloon PRO 4.18.x
+* Unsupport Word Balloon PRO 4.17.x or lower
+* add Thought 3 balloon.
+* add Hand icon.
+* add Sigh icon.
+* add Fade out top right effect.
+* add Fade out top left effect.
+* add Fade out bottom right effect.
+* add Fade out bottom left effect.
+
+= 4.17.0 =
+* Released: February 27, 2021
+* Support WordPress5.7
+* Support Word Balloon PRO 4.17.x
+* Unsupport Word Balloon PRO 4.16.x or lower
+
+= 4.16.1 =
+* Released: February 22, 2021
+* fixed: Minor fix.
+
+= 4.16.0 =
+* Released: January 23, 2021
+* add Geek balloon.
+* add Alpha color.
+* Support Word Balloon PRO 4.15.x
+* Unsupport Word Balloon PRO 4.14.x or lower
+
+= 4.15.3 =
+* Released: January 13, 2021
+* fixed: Minor fix.
+
+= 4.15.2 =
+* Released: January 7, 2021
+* fixed: Minor fix.
+
+= 4.15.1 =
+* Released: December 16, 2020
+* fixed: Minor fix.
+
+= 4.15.0 =
+* Released: December 11, 2020
+* fixed: UI.
+* fixed: Minor fix.
+* Support Word Balloon PRO 4.15.x
+* Unsupport Word Balloon PRO 4.14.x or lower
+
+= 4.14.3 =
+* Released: November 25, 2020
+* fixed: Sound of status.
+
+= 4.14.2 =
+* Released: November 11, 2020
+* fixed: Minor fix.
+
+= 4.14.1 =
+* Released: November 11, 2020
+* fixed: Minor fix.
+
+= 4.14.0 =
+* Released: November 9, 2020
+* add Slash balloon.
+* add Slash over center balloon.
+* add Slash under center balloon.
+* Support Word Balloon PRO 4.14.x
+* Unsupport Word Balloon PRO 4.13.x or lower
+
+= 4.13.1 =
+* Released: October 22, 2020
+* fixed: Minor fix.
+
+= 4.13.0 =
+* Released: October 19, 2020
+* add ZZZ icon.
+* add Huff icon.
+* add Inner blocks mode option.
+* fixed: Bummer icon.
+* fixed: Heart icon.
+* fixed: Realize icon.
+* Support Word Balloon PRO 4.13.x
+* Unsupport Word Balloon PRO 4.12.x or lower
+
+= 4.12.0 =
+* Released: September 14, 2020
+* Support Word Balloon PRO 4.12.x
+* Unsupport Word Balloon PRO 4.11.x or lower
+
+= 4.11.0 =
+* Released: August 9, 2020
+* Support Word Balloon PRO 4.11.x
+* Unsupport Word Balloon PRO 4.10.x or lower
+
+= 4.10.4 =
+* Released: July 13, 2020
+* fixed: Minor fix.
+
+= 4.10.3 =
+* Released: July 13, 2020
+* fixed: Minor fix.
+
+= 4.10.2 =
+* Released: July 11, 2020
+* fixed: Minor fix.
+
+= 4.10.1 =
+* Released: July 11, 2020
+* Support InnerBlocks.
+* fixed: Minor fix.
+
+= 4.10.0 =
+* Released: July 4, 2020
+* add Realize icon.
+* add Jump Jump effect.
+* Support Word Balloon PRO 4.10.x
+* Unsupport Word Balloon PRO 4.9.x or lower
+
+= 4.9.6 =
+* Released: June 15, 2020
+* fixed: Minor fix.
+
+= 4.9.5 =
+* Released: June 7, 2020
+* fixed: Minor fix.
+
+= 4.9.4 =
+* Released: June 5, 2020
+* fixed: Minor fix.
+
+= 4.9.3 =
+* Released: June 3, 2020
+* fixed: Minor fix.
+
+= 4.9.2 =
+* Released: May 27, 2020
+* fixed: Minor fix.
+
+= 4.9.1 =
+* Released: May 26, 2020
+* fixed: Minor fix.
+
+= 4.9.0 =
+* Released: May 24, 2020
+* add Free Hand under balloon.
+* add Tail border balloon.
+* add Twin Tails balloon.
+* Support Word Balloon PRO 4.9.x
+
+= 4.8.17 =
+* Released: May 20, 2020
+* fixed: Minor fix.
+
+= 4.8.16 =
+* Released: April 25, 2020
+* fixed: Minor fix.
+
+= 4.8.15 =
+* Released: April 22, 2020
+* fixed: Minor fix.
+
+= 4.8.14 =
+* Released: April 16, 2020
+* fixed: Minor fix.
+
+= 4.8.13 =
+* Released: April 12, 2020
+* fixed: Minor fix.
+
+= 4.8.12 =
+* Released: April 10, 2020
+* fixed: Minor fix.
+
+= 4.8.11 =
+* Released: April 10, 2020
+* fixed: Minor fix.
+
+= 4.8.10 =
+* Released: April 9, 2020
+* fixed: Minor fix.
+
+= 4.8.9 =
+* Released: April 8, 2020
+* fixed: Minor fix.
+
+= 4.8.8 =
+* Released: April 7, 2020
+* fixed: Minor fix.
+
+= 4.8.7 =
+* Released: March 25, 2020
+* fixed: Minor fix.
+
+= 4.8.6 =
+* Released: March 21, 2020
+* fixed: Minor fix.
+
+= 4.8.5 =
+* Released: March 18, 2020
+* fixed: Minor fix.
+
+= 4.8.4 =
+* Released: March 11, 2020
+* fixed: Minor fix.
+
+= 4.8.3 =
+* Released: March 11, 2020
+* fixed: Svg balloon with status box.
+
+= 4.8.2 =
+* Released: March 8, 2020
+* fixed: Minor fix.
+
+= 4.8.1 =
+* Released: January 27, 2020
+* fixed: Minor fix.
+
+= 4.8.0 =
+* Released: January 26, 2020
+* Support Word Balloon PRO 4.8.x
+* fixed: UI.
+
+= 4.7.4 =
+* Released: January 7, 2020
+* fixed: icon.
+
+= 4.7.3 =
+* Released: January 5, 2020
+* fixed: Minor fix.
+
+= 4.7.2 =
+* Released: January 5, 2020
+* fixed: Minor fix.
+
+= 4.7.1 =
+* Released: January 1, 2020
+* fixed: Free Hand over balloon.
+
+= 4.7.0 =
+* Released: December 31, 2019
+* Support Word Balloon PRO 4.7.x
+* add Free Hand over balloon.
+* fixed some balloon.
+
+= 4.6.1 =
+* Released: December 9, 2019
+* fixed margin.
+
+= 4.6.0 =
+* Released: November 29, 2019
+* Support Word Balloon PRO 4.6.x
+* add Option of permissions.
+
+= 4.5.3 =
+* Released: November 18, 2019
+* fixed for Edge.
+
+= 4.5.2 =
+* Released: November 18, 2019
+* fixed for IE11.
+
+= 4.5.1 =
+* Released: November 17, 2019
+* fixed bug.
+
+= 4.5.0 =
+* Released: November 17, 2019
+* Support Word Balloon PRO 4.5.x
+* fixed icon.
+
+= 4.4.2 =
+* Released: November 16, 2019
+* fixed current user level.
+
+= 4.4.1 =
+* Released: November 11, 2019
+* fixed bug.
+
+= 4.4.0 =
+* Released: November 11, 2019
+* Support Word Balloon PRO 4.4.x
+* add Option of Word Balloon button.
+* fixed bug.
+
+= 4.3.6 =
+* Released: October 31, 2019
+* fixed Block editor.
+
+= 4.3.5 =
+* Released: October 20, 2019
+* fixed bug.
+
+= 4.3.4 =
+* Released: October 18, 2019
+* fixed bug.
+
+= 4.3.3 =
+* Released: October 10, 2019
+* fixed effect.
+* add Glazy icon.
+* add Gasp icon.
+
+= 4.3.2 =
+* Released: October 10, 2019
+* fixed for WordPress 5.3.
+
+= 4.3.1 =
+* Released: October 8, 2019
+* fixed bug.
+
+= 4.3.0 =
+* Released: October 8, 2019
+* Support Word Balloon PRO 4.3.x
+* fixed DOM.
+
+= 4.2.4 =
+* Released: October 1, 2019
+* fixed avatar of portrait.
+
+= 4.2.3 =
+* Released: September 20, 2019
+* add class.
+
+= 4.2.2 =
+* Released: September 20, 2019
+* add class.
+
+= 4.2.1 =
+* Released: September 20, 2019
+* fixed effect conflict with direction.
+
+= 4.2.0 =
+* Released: September 19, 2019
+* Support Word Balloon PRO 4.2.x
+* add Speech over center balloon.
+* add Speech under center balloon.
+* add Sparkly icon.
+* add Rotate right effect.
+* add Rotate left effect.
+
+= 4.1.2 =
+* Released: September 16, 2019
+* fixed menu icon.
+
+= 4.1.1 =
+* Released: September 16, 2019
+* fixed menu icon.
+
+= 4.1.0 =
+* Released: September 15, 2019
+* Support Word Balloon PRO 4.1.x
+* add hide balloon.
+
+= 4.0.5 =
+* Released: September 5, 2019
+* fixed Count of characters.
+
+= 4.0.4 =
+* Released: September 4, 2019
+* fixed padding & margin.
+
+= 4.0.3 =
+* Released: September 3, 2019
+* fixed html tag on text.
+* fixed restore bug.
+
+= 4.0.2 =
+* Released: September 3, 2019
+* fixed restore bug.
+
+= 4.0.1 =
+* Released: September 2, 2019
+* fixed restore bug.
+
+= 4.0.0 =
+* Released: September 2, 2019
+* Support Word Balloon PRO 4.0.x
+
+= 3.0.1 =
+* Released: August 21, 2019
+* fixed bug.
+
+= 3.0.0 =
+* Released: August 20, 2019
+* Support Word Balloon PRO 3.0.x
+* fixed UI.
+* add Vertical writing.
+
+= 2.6.2 =
+* Released: August 11, 2019
+* fixed block editor.
+
+= 2.6.1 =
+* Released: August 8, 2019
+* add keep db option when uninstall.
+
+= 2.6.0 =
+* Released: August 1, 2019
+* fixed padding.
+* Support Word Balloon PRO 2.6.x
+
+= 2.5.7 =
+* Released: July 29, 2019
+* fixed Restore function.
+
+= 2.5.6 =
+* Released: July 28, 2019
+* fixed Load script.
+
+= 2.5.5 =
+* Released: July 28, 2019
+* fixed Load script.
+
+= 2.5.4 =
+* Released: July 28, 2019
+* fixed blank avatar.
+* add Jiggly Effect.
+* add Shake 2 Effect.
+
+= 2.5.3 =
+* Released: July 20, 2019
+* fixed 8bit balloon.
+* fixed 8bit II balloon.
+* fixed free hand balloon.
+* fixed gradient color edit.
+
+= 2.5.2 =
+* Released: July 11, 2019
+* fixed bug.
+
+= 2.5.1 =
+* Released: July 11, 2019
+* fixed bug.
+
+= 2.5.0 =
+* Released: July 11, 2019
+* add Talk over balloon.
+* add Talk under balloon.
+* add Think 2 balloon.
+* Support for Word Balloon PRO 2.5.x
+
+= 2.4.3 =
+* Released: July 5, 2019
+* fixed bug.
+
+= 2.4.2 =
+* Released: July 5, 2019
+* fixed for iOS & IE11.
+
+= 2.4.1 =
+* Released: July 4, 2019
+* fixed bug.
+
+= 2.4.0 =
+* Released: July 3, 2019
+* add Copy function.
+* add Set quote function.
+* Support for Word Balloon PRO 2.4.x
+
+= 2.3.4 =
+* Released: June 29, 2019
+* add avatar side of name position .
+* fixed Block Editor.
+
+= 2.3.3 =
+* Released: June 27, 2019
+* fixed post page.
+
+= 2.3.2 =
+* Released: June 27, 2019
+* fixed blank image.
+
+= 2.3.1 =
+* Released: June 22, 2019
+* fixed Block Editor.
+
+= 2.3.0 =
+* Released: June 22, 2019
+* Support for Word Balloon PRO 2.3.x
+* fixed lower & upper balloon's name position.
+* fixed script.
+
+= 2.2.1 =
+* Released: June 8, 2019
+* fixed bug.
+
+= 2.2.0 =
+* Released: June 3, 2019
+* Support for Word Balloon PRO 2.2.0
+
+= 2.1.1 =
+* Released: May 21, 2019
+* fixed bug.
+
+= 2.1.0 =
+* Released: May 21, 2019
+* fixed quote align.
+* fixed for IE11.
+* add Scream balloon.
+
+= 2.0.9 =
+* Released: May 9, 2019
+* fixed quote align.
+
+= 2.0.8 =
+* Released: May 9, 2019
+* fixed quote align.
+* Support inside another shortcode.
+
+= 2.0.7 =
+* Released: May 2, 2019
+* fixed quote align.
+
+= 2.0.6 =
+* Released: April 30, 2019
+* add 5 icon position.
+* add icon star,star side by side,heart side by side.
+* fixed 8bit balloon.
+* fixed some balloon.
+
+= 2.0.5 =
+* Released: April 25, 2019
+* add 8bit II balloon.
+* add Tail thought balloon.
+* fixed 8bit balloon.
+* fixed Block Editor.
+
+= 2.0.4 =
+* Released: April 20, 2019
+* add 8bit balloon.
+* fixed AMP css size.
+
+= 2.0.3 =
+* Released: April 17, 2019
+* Support Many themes & plugin AMP page.(need Word Balloon PRO and over 2.0.2)
+
+= 2.0.2 =
+* Released: April 16, 2019
+* fixed mystery men bug
+
+= 2.0.1 =
+* Released: April 14, 2019
+* fixed translations.
+
+= 2.0.0 =
+* Released: April 14, 2019
+* Support Block Editor.
+* fixed avatar shadow.
+* fixed Free hand balloon bug.
+* fixed Bump balloon bug.
+* fixed for WordPress 3.9.3
+* fixed Color picker.
+
+= 1.1.4 =
+* Released: April 9, 2019
+* fixed bug.
+
+= 1.1.3 =
+* Released: April 8, 2019
+* fixed bug.
+
+= 1.1.2 =
+* Released: April 7, 2019
+* add Pointy balloon.
+* add registration an avatar(up to three).
+* fixed Restore button.
+
+= 1.1.1 =
+* Released: April 7, 2019
+* add Restore button.
+
+= 1.1.0 =
+* Released: April 5, 2019
+* add Restore function.
+
+= 1.0.7 =
+* Released: March 31, 2019
+* Support Function of favorite for Word Balloon PRO.
+
+= 1.0.6 =
+* Released: March 25, 2019
+* fixed announcement.
+
+= 1.0.5 =
+* Released: March 23, 2019
+* fixed border-image balloon for Edge.
+
+= 1.0.4 =
+* Released: March 22, 2019
+* fixed Free Hand balloon.
+
+= 1.0.3 =
+* Released: March 22, 2019
+* add Free Hand balloon.
+
+= 1.0.2 =
+* Released: March 18, 2019
+* fixed bug.
+
+= 1.0.1 =
+* Released: March 18, 2019
+* fixed bug.
+
+= 1.0.0 =
+* Released: March 17, 2019
+* change separate Word Balloon PRO from Word Balloon.
+
+= 0.6.6 =
+* Released: March 6, 2019
+* fixed bug.
+
+= 0.6.5 =
+* Released: March 5, 2019
+* add Boing of fade in animation.
+* add Fade out up, Fade out down, rubber effect.
+
+= 0.6.4 =
+* Released: March 3, 2019
+* fixed for IE11.
+
+= 0.6.3 =
+* Released: March 2, 2019
+* fixed Dialog box.
+
+= 0.6.2 =
+* Released: March 1, 2019
+* add Balloon side by side.
+* fixed Heart balloon.
+
+= 0.6.1 =
+* Released: February 28, 2019
+* fixed bug.
+
+= 0.6.0 =
+* Released: February 28, 2019
+* add custom shadow of avatar and balloon.
+* add custom border of avatar.
+
+= 0.5.9 =
+* Released: February 24, 2019
+* add fade in effect.
+
+= 0.5.8 =
+* Released: February 20, 2019
+* fixed for IE11.
+* fixed Function of update to edit page.
+* add Wriggle balloon.
+
+= 0.5.7 =
+* Released: February 19, 2019
+* fixed border.
+
+= 0.5.6 =
+* Released: February 19, 2019
+* add Bump Gradation , Round Gradation , Heart balloon.
+* add Function of filters.
+* add Function of full width balloon.
+* add Custom size icon.
+* add 3% , 12% , 20% of border radius.
+
+= 0.5.5 =
+* Released: February 16, 2019
+* add RPG III , Speech thick balloon.
+* add Centering function of Word Balloon BOX.
+* add Text alignment.
+
+= 0.5.4 =
+* Released: February 12, 2019
+* add RPG I , RPG II balloon.
+
+= 0.5.3 =
+* Released: February 10, 2019
+* add Switch enable for balloon , icon , effect , sound.
+
+= 0.5.2 =
+* Released: February 9, 2019
+* add Animate when balloon is displayed in the screen.
+* add Sound function.
+* add Roll effect.
+
+= 0.5.1 =
+* Released: February 6, 2019
+* fixed effect.
+
+= 0.5.0 =
+* Released: February 5, 2019
+* add bummer, exclamation, exclamations, quaver, sweat, sweats icon
+* add clockwise, anticlockwise, flash effect.
+* fixed for AMP.
+
+= 0.4.9 =
+* Released: February 4, 2019
+* add SOi balloon.
+
+= 0.4.8 =
+* Released: February 2, 2019
+* add upper & lower balloon.
+* change load css system.
+
+= 0.4.7 =
+* Released: February 1, 2019
+* fixed for IE11.
+
+= 0.4.6 =
+* Released: February 1, 2019
+* add bump balloon.
+
+= 0.4.5 =
+* Released: January 31, 2019
+* fixed bug.
+
+= 0.4.4 =
+* Released: January 31, 2019
+* add font size customize.
+* add tail balloon.
+* fixed small bug.
+
+= 0.4.3 =
+* Released: January 30, 2019
+* add customize size of avatar.
+* add anger icon.
+* add left right effect.
+
+= 0.4.2 =
+* Released: January 29, 2019
+* fixed Wallpaper.
+
+= 0.4.1 =
+* Released: January 28, 2019
+* add Status customize.
+
+= 0.4.0 =
+* Released: January 28, 2019
+* fixed bug.
+
+= 0.3.9 =
+* Released: January 27, 2019
+* fixed name bug.
+* add customize color of name.
+
+= 0.3.8 =
+* Released: January 27, 2019
+* fixed Wallpaper.
+
+= 0.3.7 =
+* Released: January 27, 2019
+* add Wallpaper.
+
+= 0.3.6 =
+* Released: January 26, 2019
+* fixed bug.
+
+= 0.3.5 =
+* Released: January 25, 2019
+* fixed small bug.
+
+= 0.3.4 =
+* Released: January 24, 2019
+* fixed small bug.
+
+= 0.3.3 =
+* Released: January 24, 2019
+* fixed small bug.
+
+= 0.3.2 =
+* Released: January 23, 2019
+* add effect shake.
+* add customize color of all balloon.
+
+= 0.3.1 =
+* Released: January 21, 2019
+* add can choice avatar on the post form.
+* add effect pulse.
+* add icon heart.
+
+= 0.3.0 =
+* Released: January 21, 2019
+* add flip customize.
+* fixed for IE11.
+
+= 0.2.9 =
+* Released: January 20, 2019
+* fixed icon customize.
+
+= 0.2.8 =
+* Released: January 20, 2019
+* fixed icon customize.
+
+= 0.2.7 =
+* Released: January 20, 2019
+* fixed menu.
+
+= 0.2.6 =
+* Released: January 20, 2019
+* fixed bug.
+
+= 0.2.5 =
+* Released: January 20, 2019
+* add icon.
+
+= 0.2.4 =
+* Released: January 19, 2019
+* add effect.
+* add skin.
+
+= 0.2.3 =
+* Released: January 17, 2019
+* add on border around avatar customize.
+* add on shadow around avatar customize.
+
+= 0.2.2 =
+* Released: January 14, 2019
+* add shadow customize.
+
+= 0.2.1 =
+* Released: January 12, 2019
+* fixed post area.
+
+= 0.2.0 =
+* Released: January 8, 2019
+* fixed shortcode.
+
+= 0.1.9 =
+* Released: January 4, 2019
+* change post to shortcode.
+
+= 0.1.8 =
+* Released: December 18, 2018
+* fixed textdomain.
+
+= 0.1.7 =
+* Released: August 30, 2018
+* Support Gutenberg 3.6.2.
+
+= 0.1.6 =
+* Released: August 20, 2018
+* add change text color.
+
+= 0.1.5 =
+* Released: August 12, 2018
+* fixed for IE11.Color Balloon with change color is not support IE11.without change color is OK.
+
+= 0.1.4 =
+* Released: August 11, 2018
+* fixed tinyMce.
+* add Color Balloon.
+
+= 0.1.3 =
+* Released: August 8, 2018
+* Support Gutenberg classic.
+
+= 0.1.2 =
+* Released: August 3, 2018
+* fixed core.
+
+= 0.1.1 =
+* Released: August 2, 2018
+* fixed core and CSS.
+
+= 0.1.0 =
+* Released: July 29, 2018
+* fixed core and CSS.
+
+= 0.0.9 =
+* Released: June 4, 2018
+* fixed core and CSS.
+
+= 0.0.8 =
+* Released: June 3, 2018
+* fixed core and CSS.
+
+= 0.0.7 =
+* Released: June 1, 2018
+* fixed core and CSS.
+
+= 0.0.6 =
+* Released: April 12, 2018
+* fixed core and CSS.
+
+= 0.0.5 =
+* Released: April 8, 2018
+* CSS fixed.
+
+= 0.0.4 =
+* Released: March 31, 2018
+* CSS fixed.Change float to flex.
+
+= 0.0.3 =
+* Released: March 20, 2018
+* split the CSS files.also JS files.
+* fixed message box.
+
+= 0.0.2 =
+* Released: March 17, 2018
+* add Edit mode.
+
+= 0.0.1 =
+* Released: March 12, 2018
+* New release.

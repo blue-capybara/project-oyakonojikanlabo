@@ -1,0 +1,151 @@
+@use 'sass:math';
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-pricing-table {
+	--smb-pricing-table--border-color: var(--_lighter-color-gray);
+	--smb-pricing-table--item-width: 30%;
+
+	border: 1px solid var(--smb-pricing-table--border-color);
+
+	@include core.media-min(md) {
+		overflow: auto;
+
+		&::-webkit-scrollbar {
+			height: 5px;
+		}
+
+		&::-webkit-scrollbar-track{
+			background: #f1f1f1;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: #bcbcbc;
+		}
+	}
+
+	// @deprecated Fallback
+	&:not([data-has-items]) {
+		@include core.media-min(md) {
+			white-space: nowrap;
+		}
+	}
+
+	&:where([data-has-items]) .c-row {
+		@include core.media-min(md) {
+			--_item-width: var(--smb-pricing-table--item-width);
+		}
+	}
+
+	&:where([data-has-items="1"]) .c-row {
+		@include core.media-min(md) {
+			--smb-pricing-table--item-width: 100%;
+		}
+	}
+
+	&:where([data-has-items="2"]) .c-row {
+		@include core.media-min(md) {
+			--smb-pricing-table--item-width: 50%;
+		}
+	}
+
+	&:where([data-has-items="3"]) .c-row {
+		@include core.media-min(md) {
+			--smb-pricing-table--item-width: 33.3333%;
+		}
+	}
+
+	$columnSize: (
+		25: '1-4',
+		33: '1-3',
+		50: '1-2',
+		100: '1-1',
+	);
+
+	@each $key, $value in $columnSize {
+		&--col-size-#{ $value } {
+			@include core.media-min(md) {
+				white-space: normal;
+
+				.c-row {
+					--smb-pricing-table--item-width: #{ 1% * $key };
+				}
+
+				$max-items: math.div(100, $key);
+				// max-items より has-items が少ないときは border を追加
+				@for $i from 1 through math.floor($max-items - 1) {
+					&[data-has-items="#{ $i }"] {
+						.c-row__col:last-child {
+							@include core.media-min(lg) {
+								border-right: 1px solid var(--smb-pricing-table--border-color);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.c-row {
+		&__col {
+			padding: 0;
+
+			&:not(:first-child) {
+				border-top: 1px solid var(--smb-pricing-table--border-color);
+
+				@include core.media-min(lg) {
+					border-top: none;
+					border-left: 1px solid var(--smb-pricing-table--border-color);
+				}
+			}
+		}
+	}
+
+	&__item {
+		padding: var(--_padding1);
+
+		&__figure {
+			margin-bottom: var(--_margin-1);
+			text-align: center;
+		}
+
+		&__title {
+			font-weight: bold;
+			text-align: center;
+		}
+
+		&__price {
+			@include core.set-fluid-font-size-level(3);
+			font-weight: bold;
+			text-align: center;
+		}
+
+		&__lede {
+			@include core.set-font-size-level(-1);
+			text-align: center;
+		}
+
+		ul {
+			@include core.list-unstyled();
+			text-align: center;
+		}
+
+		> ul {
+			margin-top: var(--_margin-1);
+			border-top: 1px solid var(--smb-pricing-table--border-color);
+
+			> li {
+				border-bottom: 1px solid var(--smb-pricing-table--border-color);
+				padding: var(--_padding-1) 0;
+
+				ul {
+					font-size: .9em;
+				}
+			}
+		}
+
+		&__action {
+			margin-top: var(--_margin1);
+			text-align: center;
+		}
+	}
+}

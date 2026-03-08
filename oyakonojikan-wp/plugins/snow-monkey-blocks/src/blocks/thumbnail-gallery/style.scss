@@ -1,0 +1,75 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-thumbnail-gallery > .smb-thumbnail-gallery__canvas.slick-initialized {
+	margin-bottom: 0;
+}
+
+.smb-thumbnail-gallery {
+	--smb-thumbnail-gallery--dots-gap: var(--_margin-1);
+
+	&__canvas {
+		visibility: hidden;
+
+		&.slick-initialized {
+			visibility: visible;
+		}
+
+		.slick-dots {
+			position: static;
+			width: auto;
+			margin-top: var(--_margin-1);
+			@include core.row();
+			margin-bottom: calc(-1 * var(--smb-thumbnail-gallery--dots-gap));
+			margin-right: calc(-1 * var(--smb-thumbnail-gallery--dots-gap) * .5);
+			margin-left: calc(-1 * var(--smb-thumbnail-gallery--dots-gap) * .5);
+
+			> li {
+				margin: 0;
+				height: auto;
+				width: auto;
+				flex: 0 0 25%;
+				max-width: 25%;
+				margin-bottom: var(---smb-thumbnail-gallery--dots-gap);
+				padding-right: calc(var(--smb-thumbnail-gallery--dots-gap) * .5);
+				padding-left: calc(var(--smb-thumbnail-gallery--dots-gap) * .5);
+			}
+		}
+	}
+
+	&__item {
+		&__figure {
+			> img {
+				width: 100%;
+			}
+		}
+
+		&__caption {
+			margin-top: var(--_margin-1);
+			display: flex;
+			justify-content: center;
+			flex-direction: row;
+			@include core.set-font-size-level(-1);
+		}
+	}
+
+	// backward compatibility
+	&__nav {
+		display: none !important;
+	}
+
+	.slick-next {
+		right: 10px;
+		z-index: 1;
+	}
+
+	.slick-prev {
+		left: 10px;
+		z-index: 1;
+	}
+
+	.slick-dots {
+		position: static;
+		bottom: 0;
+		line-height: 1;
+	}
+}

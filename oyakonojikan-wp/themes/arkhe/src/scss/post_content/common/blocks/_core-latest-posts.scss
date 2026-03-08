@@ -1,0 +1,38 @@
+//「最新の投稿」
+.wp-block-latest-posts {
+
+	// サムネイル画像を左寄せ・右寄せなどにしたときにfloatが使われる
+	> li::after {
+		display: block;
+		clear: both;
+		height: 0;
+		content: "";
+	}
+
+	// リスト型
+	// &:not(.is-grid) {}
+
+	// グリッド型
+	// &.is-grid{}
+}
+
+// サムネイル
+.wp-block-latest-posts__featured-image {
+
+	// エディター側にはクラスついていない
+	> img {
+		display: block;
+		width: 100%;
+	}
+
+	&.alignleft,
+	&.alignright {
+		max-width: 40%;
+	}
+}
+
+// レガシーの日付部分
+.recent_entries_date {
+	display: block;
+	margin-top: 2px;
+}

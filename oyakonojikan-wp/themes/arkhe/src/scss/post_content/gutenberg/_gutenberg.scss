@@ -1,0 +1,138 @@
+// リンクカラー
+
+
+// 全体の幅
+.wp-block {
+	// max-width: 900px;
+	max-width: var(--ark-block_width, 900px);
+	--ark-width--article: var(--ark-block_width);
+
+	&[data-align="wide"] {
+		max-width: calc(var(--ark-block_width, 900px) + var(--ark-alignwide_ex_width, 100px) * 2);
+	}
+}
+
+// エディターでのみ .editor-styles-wrapper p に対して line-height が当てられているのを打ち消す
+.wp-block.wp-block p {
+	line-height: inherit;
+}
+
+:where(.wp-block) a,
+:where(.mce-content-body) a {
+	color: var(--ark-color--link);
+}
+
+// ブロッククラッシュ時の表示
+// .block-editor-warning {
+//     max-width: var(--ark-block_width, 900px);
+//     margin-right: auto;
+//     margin-left: auto;
+// }
+
+.wp-block-cover__inner-container,
+.wp-block-group__inner-container,
+.wp-block-media-text__content,
+.wp-block-column {
+
+	> .wp-block {
+		max-width: 100%;
+	}
+}
+
+:where(.editor-styles-wrapper) * {
+	box-sizing: border-box;
+}
+
+// フォント系
+.wp-block-widget-area,
+.block-editor .editor-styles-wrapper,
+.blocks-widgets-container .editor-styles-wrapper,
+body.editor-styles-wrapper {
+
+	color: var(--ark-color--text);
+	font-size: var(--ark-font_size, 16px);
+	font-family: var(--ark-font_family);
+	line-height: var(--ark-line_height, 1.8);
+	background-color: var(--ark-color--bg);
+}
+
+
+// 本文エリア
+.block-editor-writing-flow {
+
+	// 5.7 ~ エディターの縦幅の最小値がなくなっている
+	padding-bottom: 40px;
+
+	// タイトル
+	.editor-post-title textarea.editor-post-title__input, // ~5.8
+	h1.editor-post-title.editor-post-title__input { // 5.9
+		font-size: 2rem;
+	}
+}
+
+// 5.8でタイトル下の余白がなくなったが5.9で復活。ただしデバイスプレビューには効いてないので明示的に書き続ける
+.editor-styles-wrapper .edit-post-visual-editor__post-title-wrapper {
+	margin-bottom: 2em;
+}
+
+//aligncenterにclearが付くようになったので、それに合わせる
+[data-align="center"] {
+	clear: both;
+}
+
+
+// ブロックの「Move To」モードで出てくる ::before のバーが崩れないように、CSS強める
+#wpbody .is-block-moving-mode {
+
+	.wp-block.is-selected {
+
+		&::before {
+			position: absolute;
+			top: -14px;
+			right: 0;
+			bottom: auto;
+			left: 0;
+			z-index: 0;
+			display: inline;
+			margin: 0;
+			padding: 0;
+			border: none;
+			border-top: 4px solid var(--wp-admin-theme-color);
+			border-radius: 2px;
+			transform: none;
+			content: "";
+		}
+	}
+}
+
+// ウィジェットブロックエディター
+.wp-block-widget-area__inner-blocks {
+
+	> .block-editor-block-list__layout > .block-list-appender {
+		position: relative;
+	}
+}
+
+
+//6.3でurl無い時にリンクコントロールがバグるのを防ぐ
+.block-editor-link-control__search-item-details {
+	word-break: break-all;
+	// overflow-wrap: anywhere;
+}
+
+//6.3でトップツールバーが長いと他のエリアに被ってしまうのを防ぐ
+.branch-6-3 {
+
+	.block-editor-block-contextual-toolbar.is-fixed {
+		overflow-x: auto;
+	}
+
+	// 783px ~ 960px の間ではバグる。変えるるべき。
+	@media (min-width: 783px) {
+
+		:where(.block-editor-block-contextual-toolbar.is-fixed) {
+			max-width: calc(100% - (240px + 280px)); // margin-left+サイドバー幅;
+		}
+	}
+
+}

@@ -1,0 +1,195 @@
+//== color
+$blue: #46d0e3;
+$d-blue: #0f6976;
+$bk: #545B63;
+// HEADER
+header {
+	display: block;
+
+	@include mq(xs) {
+		padding-top: 14.146341463vw;
+	}
+}
+
+.logos {
+	object {
+		display: block;
+	}
+
+	.logo {
+		&__1 {
+			margin: 42px auto 20px;
+			width: 23.422619047619048vw;
+			max-width: 393.5px;
+
+			@include mq(xs) {
+				margin: 0 auto;
+				width: 57.758620689vw;
+			}
+		}
+
+		&__2 {
+			margin: 0 auto;
+			width: 224.0659px;
+
+			@include mq(xs) {
+				width: 27.325109756vw;
+				margin-top: 4.024390243vw;
+			}
+		}
+		&__3{
+			margin: 0;
+			width: 100%;
+		}
+	}
+}
+
+
+// TOGGLE
+
+.openbtn1 {
+	position: relative;
+	background: #fff;
+	cursor: pointer;
+	width: 50px;
+	height: 50px;
+	border-radius: 5px;
+	position: absolute;
+	top: 0;
+	right: 0;
+	@include mq(pc){
+		display: none;
+	}
+}
+
+.openbtn1 span {
+	display: inline-block;
+	transition: all .4s;
+	position: absolute;
+	left: 14px;
+	height: 3px;
+	border-radius: 2px;
+	background: $bk;
+	width: 45%;
+}
+
+.openbtn1 span:nth-of-type(1) {
+	top: 15px;
+}
+
+.openbtn1 span:nth-of-type(2) {
+	top: 23px;
+}
+
+.openbtn1 span:nth-of-type(3) {
+	top: 31px;
+}
+
+.openbtn1.active{
+	z-index: 9999;
+}
+.openbtn1.active span:nth-of-type(1) {
+	top: 18px;
+	left: 18px;
+	transform: translateY(6px) rotate(-45deg);
+	width: 30%;
+}
+
+.openbtn1.active span:nth-of-type(2) {
+	opacity: 0;
+}
+
+.openbtn1.active span:nth-of-type(3) {
+	top: 30px;
+	left: 18px;
+	transform: translateY(-6px) rotate(45deg);
+	width: 30%;
+}
+
+.btn-block {
+	width: 200px;
+	padding: 30px;
+}
+
+@include mq(sp){
+	#g-nav {
+		position: fixed;
+		z-index: -1;
+		opacity: 0;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100vh;
+		background: #fff;
+		transition: all 0.3s;
+	}
+
+	#g-nav.panelactive {
+		opacity: 1;
+		z-index: 999;
+	}
+
+	#g-nav.panelactive #g-nav-list {
+		position: fixed;
+		z-index: 999;
+		width: 100%;
+		height: 100vh;
+		overflow: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	#g-nav ul {
+		display: none;
+		position: absolute;
+		z-index: 999;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		&.sub-menu{
+			position: relative;
+			transform: translate(calc(-50% - 0.8em), 0);
+			.fa{
+				margin-left: 0;
+				transform: translate(0, 1px);
+			}
+		}
+	}
+
+	#g-nav.panelactive ul {
+		display: block;
+		&.gnavi__sns{
+			display: flex;
+		}
+	}
+
+	/*リストのレイアウト設定*/
+
+	#g-nav .gnavi__inner li {
+		list-style: none;
+		text-align: left;
+	}
+
+	#g-nav .gnavi__inner li a {
+		color: $bk;
+		text-decoration: none;
+		padding: 10px;
+		display: block;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		font-weight: bold;
+		white-space: nowrap;
+	}
+
+}
+#g-nav ul {
+	&.sub-menu{
+		position: relative;
+		.fa{
+			margin-left: 0.5em;
+			transform: translate(0, 2px);
+		}
+	}
+	.widget_search{
+		margin-top: 40px;
+	}
+}

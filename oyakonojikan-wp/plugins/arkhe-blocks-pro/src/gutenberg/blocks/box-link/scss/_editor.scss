@@ -1,0 +1,36 @@
+
+[data-type="arkhe-blocks/box-link"] {
+
+	&[data-has-icon="false"] {
+
+		.arkb-boxLink__more {
+			opacity: .2;
+		}
+	}
+
+	&.has-warning {
+		width: calc(var(--arkb-fb_pc) - var(--arkb-clmn-mrgn--x) * 2);
+		margin: 0 var(--arkb-clmn-mrgn--x) var(--arkb-clmn-mrgn--bttm) !important;
+	}
+}
+
+.arkb-btns--boxLayout {
+	display: flex;
+
+	.components-button.has-icon {
+		padding: 8px;
+
+		svg {
+			width: 32px;
+			height: 32px;
+			margin-right: 4px;
+		}
+
+		span {
+			padding-right: 2px;
+		}
+	}
+}
+
+// a.arkb-boxLink__inner a{
+// }

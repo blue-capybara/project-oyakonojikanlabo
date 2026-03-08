@@ -1,0 +1,71 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/alert",
+	"title": "Alert",
+	"description": "It is a block that warns visitors.",
+	"category": "smb",
+	"attributes": {
+		"title": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-alert__title strong",
+			"default": ""
+		},
+		"modifier": {
+			"type": "string",
+			"default": ""
+		},
+		"icon": {
+			"type": "string",
+			"default": "circle-exclamation"
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		},
+		"snowmonkeyeditor": {
+			"blockPresets": {
+				"ignore": [ "title" ]
+			}
+		}
+	},
+	"example": {
+		"attributes": {
+			"title": "Lorem ipsum dolor sit amet"
+		},
+		"innerBlocks": [
+			{
+				"name": "core/paragraph",
+				"attributes": {
+					"content": "Lorem ipsum dolor sit amet"
+				}
+			},
+			{
+				"name": "core/paragraph",
+				"attributes": {
+					"content": "consectetur adipiscing elit"
+				}
+			}
+		]
+	},
+	"style": "file:./style-index.css",
+	"editorScript": "file:./index.js"
+}

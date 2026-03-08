@@ -1,0 +1,32 @@
+@charset "UTF-8";
+
+// mixin
+@import "foundation/mixin/media";
+
+// setting
+@import "foundation/setting/variable";
+@import "foundation/setting/placeholder";
+
+// icon
+@import "foundation/icon/ark-svg";
+
+// base
+@import "foundation/base/reset";
+@import "foundation/base/root";
+@import "foundation/base/body";
+
+// html要素
+@import "foundation/base/elements";
+
+
+//各パーツ
+@import "layout/*.scss";
+@import "layout/header/*.scss";
+@import "layout/footer/*.scss";
+@import "object/**/*.scss";
+
+// post_content
+@import "post_content/front";
+@import "post_content/common/utility/**/*.scss";
+@import "post_content/common/blocks/**/*.scss";
+

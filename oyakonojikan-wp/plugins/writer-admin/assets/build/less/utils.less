@@ -1,0 +1,50 @@
+.make-padding-margin(@class, @px) {
+  .loop-padding-margin(10, @class, @px);
+
+  .m-t-@{class}-0 {
+    margin-top: 0;
+  }
+  .m-b-@{class}-0 {
+    margin-bottom: 0;
+  }
+  .p-t-@{class}-0 {
+    padding-top: 0;
+  }
+  .p-b-@{class}-0 {
+    padding-bottom: 0;
+  }
+}
+
+.loop-padding-margin(@index, @class, @px) when (@index >= 0) {
+  .calc-padding-margin(@index, @class, @px);
+  .loop-padding-margin((@index - 1), @class, @px);
+}
+
+.calc-padding-margin(@index, @class, @px) when (@index > 0) {
+  .m-t-@{class}-@{index} {
+    margin-top: (@px * (@index / 2)) + 0px;
+  }
+  .m-b-@{class}-@{index} {
+    margin-bottom: (@px * (@index / 2)) + 0px;
+  }
+  .p-t-@{class}-@{index} {
+    padding-top: (@px * (@index / 2)) + 0px;
+  }
+  .p-b-@{class}-@{index} {
+    padding-bottom: (@px * (@index / 2)) + 0px;
+  }
+}
+
+.make-padding-margin(xs, 10px);
+
+@media (min-width: @screen-sm-min) {
+  .make-padding-margin(sm, 10px);
+}
+
+@media (min-width: @screen-md-min) {
+  .make-padding-margin(md, 10px);
+}
+
+@media (min-width: @screen-lg-min) {
+  .make-padding-margin(lg, 10px);
+}

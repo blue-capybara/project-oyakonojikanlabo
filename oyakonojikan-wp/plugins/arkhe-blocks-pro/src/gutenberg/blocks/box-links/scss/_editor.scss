@@ -1,0 +1,38 @@
+[data-type="arkhe-blocks/box-links"] {
+
+	> .block-list-appender {
+		position: relative;
+		width: 100%;
+	}
+
+
+	>.wp-block {
+		margin-top: 0;
+	}
+
+	.arkb-boxLink__bg.components-placeholder {
+		position: absolute;
+		z-index: 10;
+	}
+
+	.components-placeholder.arkb-boxLink__bg {
+
+		&::after {
+			content: none;
+		}
+
+		~ .arkb-boxLink__body,
+		~ .arkb-boxLink__figure {
+			background: #555;
+		}
+	}
+
+	&:not(.is-selected):not(.has-child-selected) .is-empty-true,
+	&:not(.is-selected):not(.has-child-selected) .is-inactive {
+		display: none;
+	}
+
+	.is-inactive > span {
+		pointer-events: none;
+	}
+}

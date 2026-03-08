@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/pricing-table",
+	"title": "Pricing table",
+	"description": "Let's present the rate plan in an easy-to-understand manner.",
+	"category": "smb",
+	"attributes": {
+		"columnSize": {
+			"type": "string"
+		},
+		"childrenCount": {
+			"type": "number",
+			"default": 0
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"spacing": {
+			"margin": true
+		}
+	},
+	"style": [ "file:./style-index.css", "snow-monkey-blocks-btn-style" ],
+	"editorScript": "file:./index.js"
+}

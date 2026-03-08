@@ -1,0 +1,59 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/evaluation-star",
+	"title": "Evaluation star",
+	"description": "Evaluate with star icons",
+	"category": "smb",
+	"attributes": {
+		"evaluationValue": {
+			"type": "number",
+			"default": 3
+		},
+		"iconColor": {
+			"type": "string"
+		},
+		"isDisplayNumeric": {
+			"type": "boolean",
+			"default": true
+		},
+		"numericAlign": {
+			"type": "string",
+			"default": "left"
+		},
+		"numericColor": {
+			"type": "string"
+		},
+		"title": {
+			"type": "string"
+		},
+		"titleAlign": {
+			"type": "string",
+			"default": "left"
+		}
+	},
+	"supports": {
+		"html": false,
+		"spacing": {
+			"margin": true
+		},
+		"typography": {
+			"fontSize": true
+		},
+		"snowmonkeyeditor": {
+			"blockPresets": {
+				"ignore": [ "evaluationValue", "title" ]
+			}
+		}
+	},
+	"example": {
+		"attributes": {
+			"evaluationValue": 3,
+			"isDisplayNumeric": true
+		}
+	},
+	"style": "file:./style-index.css",
+	"editorScript": "file:./index.js"
+}

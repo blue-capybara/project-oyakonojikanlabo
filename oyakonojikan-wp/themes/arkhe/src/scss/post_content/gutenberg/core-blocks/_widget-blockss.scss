@@ -1,0 +1,177 @@
+
+// リンククリック不可に。
+.wp-block-latest-comments,
+.wp-block-latest-posts,
+.wp-block-categories,
+.wp-block-archives,
+.wp-block-tag-cloud {
+
+	a {
+		pointer-events: none;
+	}
+}
+
+// 二重クラスのせいでバグってるとこ打ち消す
+[data-type="core/latest-comments"] {
+
+	&.wp-block-latest-comments {
+
+		border: none;
+	}
+
+	.wp-block-latest-comments {
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+
+	.wp-block-latest-comments__comment-excerpt p {
+		margin: .5em 0 0;
+	}
+}
+
+// リスト系
+[data-type="core/rss"] .wp-block-rss,
+[data-type="core/archives"] .wp-block-archives-list,
+[data-type="core/categories"] .wp-block-categories__list {
+	margin: 0 !important;
+	padding: 0 !important;
+	list-style: none;
+}
+
+.wp-block-archives-list,
+.wp-block-categories__list {
+	border-top: solid 1px var(--ark-color--border);
+}
+
+
+// RSSブロック調整
+[data-type="core/rss"] {
+	padding: 0 !important;
+}
+
+/*
+ * カテゴリーブロック調整
+ * エディター上でだけ wp_list_categories フックが通っていない。
+ */
+// 子メニューを薄くする（本当はアコーディオン）
+.wp-block-categories__list .wp-block-categories__list {
+	font-size: .9rem;
+	border-top: none;
+	opacity: .5;
+
+	a {
+		padding-left: 1.75rem;
+
+		a {
+			padding-left: 2.5rem;
+		}
+	}
+}
+
+// 投稿数を右端に（本当は a の中） for ~6.0
+ul.wp-block-categories__list {
+
+	li {
+		position: relative;
+	}
+
+	.wp-block-categories__post-count {
+		position: absolute;
+		top: .75rem;
+		right: .5em;
+		transform: scale(.9);
+		opacity: .8;
+		// transform: translateY(-50%);
+	}
+}
+
+// 投稿数を右端に（本当は a の中） for 6.1
+.wp-block.wp-block-categories-list {
+
+	li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+
+		a {
+			flex: 1;
+		}
+	}
+
+	.children {
+		flex-basis: 100%;
+		height: auto;
+		visibility: visible;
+		opacity: 1;
+	}
+}
+
+[data-type="core/archives"],
+[data-type="core/categories"] {
+	/* stylelint-disable function-url-quotes */
+	select {
+		display: block;
+		width: 100%;
+		max-width: 400px;
+		height: auto;
+		padding: 4px 24px 4px 12px;
+		color: #333;
+		line-height: 32px;
+		background-color: #fff !important;
+		background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.984 9.984h10.031l-5.016 5.016z"></path></svg>') !important;
+		background-repeat: no-repeat !important;
+		background-position: right center !important;
+		background-size: 24px 24px !important;
+		border: solid 1px var(--ark-color--border);
+		border-radius: 2px;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+
+		&::-ms-expand {
+			display: none;
+		}
+	}
+}
+
+
+// 検索
+// .wp-block-search {}
+
+
+// カレンダー
+[data-type="core/calendar"].wp-block-calendar {
+	border: none;
+}
+
+
+// ソーシャルリンク
+.wp-block-social-links {
+	// wp5.9 からはgapが使われるようになったのでそれに合わせる。
+	gap: .5em;
+
+	.wp-block-social-link {
+		margin: 0 !important;
+	}
+
+	// memo: 5.9からはコア側で 0 にしてくれているの不要だが後方互換のために残す
+	&.is-style-logos-only .wp-block-social-link button {
+		padding: 0;
+	}
+
+	.block-list-appender {
+		margin-top: 0 !important;
+	}
+
+
+}
+
+:where([data-align="full"],[data-align="wide"]) > .wp-block-calendar {
+	max-width: unset;
+}
+
+:where([data-align="wide"]) > .wp-block-calendar .wp-block-calendar.alignwide {
+	left: 0;
+	// 内部でレンダリングされた　.wp-block-calendar　があるのでそっちは広がらないようにする
+	width: 100%;
+}

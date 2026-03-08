@@ -1,0 +1,103 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+// The style of the global style link (0.1.0) needs to be adjusted in the level of detail as it will be loaded later.
+.smb-btn:not(:root) {
+	color: var(--smb-btn--color);
+	text-decoration: none;
+}
+
+.smb-btn {
+	--smb-btn--background-color: var(--wp--preset--color--black);
+	--smb-btn--background-image: initial;
+	--smb-btn--border: none;
+	--smb-btn--border-radius: var(--_global--border-radius);
+	--smb-btn--color: var(--wp--preset--color--white);
+	--smb-btn--padding: var(--_padding-1);
+	--smb-btn--padding-vertical: calc(var(--smb-btn--padding) * .5);
+	--smb-btn--padding-horizontal: var(--smb-btn--padding);
+	--smb-btn--style--ghost--border-color: var(--smb-btn--background-color, currentColor);
+	--smb-btn--style--ghost--color: currentColor;
+	--smb-btn--style--text--color: currentColor;
+
+	margin: 0;
+	display: inline-flex;
+	justify-content: center;
+	background-color: var(--smb-btn--background-color);
+	background-image: var(--smb-btn--background-image);
+	border: var(--smb-btn--border);
+	border-radius: var(--smb-btn--border-radius);
+	padding: var(--smb-btn--padding-vertical) var(--smb-btn--padding-horizontal);
+	max-width: 100%;
+	cursor: pointer;
+	white-space: nowrap;
+	@include core.transition(all);
+
+	@include core.hover() {
+		filter: brightness(90%);
+	}
+
+	&__label {
+		color: currentColor;
+		white-space: inherit !important;
+	}
+
+	&--little-wider {
+		--smb-btn--padding-horizontal: var(--_padding2);
+	}
+
+	&--wider {
+		--smb-btn--padding-horizontal: var(--_padding3);
+	}
+
+	&--more-wider {
+		width: 100%;
+
+		@include core.media-min(md) {
+			--smb-btn--padding-horizontal: var(--_padding4);
+
+			width: auto;
+			display: inline-block;
+		}
+	}
+
+	&--full {
+		width: 100%;
+	}
+
+	&--wrap {
+		white-space: normal;
+	}
+}
+
+.smb-btn-wrapper.is-style-ghost {
+	.smb-btn {
+		--smb-btn--color: var(--smb-btn--style--ghost--color);
+
+		border: 1px solid var(--smb-btn--style--ghost--border-color);
+		background-color: transparent;
+	}
+}
+
+// @deprecated
+.smb-btn-wrapper.is-style-ghost {
+	.smb-btn[style*="background-color\:"] {
+		background-color: transparent !important;
+	}
+}
+
+.smb-btn-wrapper.is-style-text {
+	.smb-btn {
+		--smb-btn--background-color: transparent;
+		--smb-btn--color: var(--smb-btn--style--text--color);
+
+		border: none;
+	}
+}
+
+.smb-btn-wrapper.aligncenter {
+	text-align: center;
+}
+
+.aligncenter .smb-btn-wrapper {
+	text-align: center;
+}

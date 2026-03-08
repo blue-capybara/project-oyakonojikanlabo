@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/accordion-item",
+	"title": "Panel",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/accordion" ],
+	"attributes": {
+		"title": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-accordion__item__title__label",
+			"default": ""
+		},
+		"initialState": {
+			"type": "boolean",
+			"default": false
+		},
+		"titleBackgroundColor": {
+			"type": "string"
+		},
+		"titleColor": {
+			"type": "string"
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"className": true,
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		},
+		"spacing": {
+			"__experimentalSkipSerialization": true,
+			"margin": false,
+			"padding": true
+		}
+	},
+	"selectors": {
+		"spacing": {
+			"padding": ".smb-accordion__item__body"
+		}
+	},
+	"editorScript": "file:./index.js"
+}

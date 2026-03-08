@@ -1,0 +1,136 @@
+
+//ヘッダー透過設定時、かつトップページでしか読み込まれない
+@import "../foundation/mixin/media";
+@import "../foundation/setting/variable";
+
+
+.c-infoBar {
+	display: none;
+}
+
+// .l-header[data-overlay="1"]
+.l-header {
+	left: 0;
+	transition: background-color .25s;
+
+	@include pc {
+
+		&[data-pcfix="1"] {
+			position: fixed;
+		}
+
+		&[data-pcfix="0"] {
+			position: absolute;
+			top: 0;
+			transition-duration: 0s;
+		}
+	}
+
+	@include sp {
+
+		&[data-spfix="1"] {
+			position: fixed;
+		}
+
+		&[data-spfix="0"] {
+			position: absolute;
+			top: 0;
+			transition-duration: 0s;
+		}
+	}
+
+	.c-headLogo {
+		position: relative;
+	}
+	// 初期状態で、普通のロゴは非表示
+	.c-headLogo__img {
+		transition: opacity .25s;
+	}
+
+	.c-headLogo__img.-common {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 1;
+		opacity: 0;
+	}
+}
+
+@include pc {
+
+	.l-header[data-pcfix="0"],
+	[data-scrolled="false"] .l-header[data-pcfix="1"] {
+		--ark-color--header_txt: var(--ark-color--header_txt--overlay, #fff);
+		--ark-color--header_bg: transparent;
+	}
+
+	// 固定設定ありの時だけ、スクロールされたときに通常時の見た目に戻す
+	[data-scrolled="true"] {
+
+		[data-pcfix="1"] {
+
+			.c-headLogo__img.-top {
+				opacity: 0;
+			}
+
+			.c-headLogo__img.-common {
+				opacity: 1;
+			}
+		}
+	}
+}
+
+@include sp {
+
+	.l-header[data-spfix="0"],
+	[data-scrolled="false"] .l-header[data-spfix="1"] {
+		--ark-color--header_txt: var(--ark-color--header_txt--overlay, #fff);
+		--ark-color--header_bg: transparent;
+	}
+
+	// 固定設定ありの時だけ、スクロールされたときに通常時の見た目に戻す
+	[data-scrolled="true"] {
+
+		[data-spfix="1"] {
+
+			.c-headLogo__img.-top {
+				opacity: 0;
+			}
+
+			.c-headLogo__img.-common {
+				opacity: 1;
+			}
+
+		}
+	}
+}
+
+
+.l-headerUnder {
+	transition: background-color .25s;
+}
+
+.l-headerUnder:not([data-fix]),
+[data-scrolled="false"] .l-headerUnder[data-fix] {
+	--the-color--txt: var(--ark-color--header_txt--overlay, #fff);
+	--the-color--bg: transparent;
+}
+
+// ナビが fix しない場合 & ナビだけ fix の場合の初期状態
+.l-headerUnder:not([data-fix]),
+[data-pcfix="0"] + .l-headerUnder[data-fix] {
+	position: absolute;
+	top: var(--ark-header_height);
+}
+
+// ナビだけ fix で、スクロールされた状態
+[data-scrolled="true"] [data-pcfix="0"] + .l-headerUnder[data-fix] {
+	position: fixed;
+	top: var(--ark-adminbar_height);
+}
+
+// ヘッダーもナビも fix の場合
+[data-pcfix="1"] + .l-headerUnder[data-fix] {
+	position: fixed;
+	top: calc(var(--ark-header_height) + var(--ark-adminbar_height));
+}

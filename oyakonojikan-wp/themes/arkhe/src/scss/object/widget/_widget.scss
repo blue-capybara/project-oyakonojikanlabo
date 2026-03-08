@@ -1,0 +1,54 @@
+// ウィジェット基本
+.c-widget + .c-widget {
+	margin-top: 2.5rem;
+}
+
+// .c-widget h2.widget-title, // ウィジェットグループ用 → フックで書き換え
+h2.widgettitle, // レガシーウィジェットのプレビュー用iframe用
+.c-widget > .wp-block-group > .wp-block-group__inner-container > h2, // 初期配置ウィジェット, グループ > レガシーウィジェット用
+.c-widget__title {
+
+	@extend %widgetTitle;
+}
+
+
+//ウィジェットで挿入したリンク
+.textwidget {
+
+	a {
+		transition: opacity .25s;
+	}
+
+	a:hover {
+		text-decoration: underline;
+		opacity: .75;
+	}
+}
+
+// -------- category, tag --------
+.widget_categories,
+.wp-block-categories {
+
+	label {
+		display: none;
+	}
+}
+
+//投稿カウント数
+// .cat-post-count,
+.tag-link-count.tag-link-count,
+.c-postCount {
+	position: relative;
+	display: inline-block;
+	margin-left: .25em;
+	color: inherit;
+	font-size: .9em;
+	font-family: arial;
+	opacity: var(--ark-opacity--thin);
+}
+
+// -------- rss --------
+.wp-block-rss .wp-block-rss__item {
+	margin: 0;
+	padding: .25em 0;
+}

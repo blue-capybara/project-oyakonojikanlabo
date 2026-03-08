@@ -1,0 +1,44 @@
+.smb-evaluation-star {
+	--smb-evaluation-star--gap: var(--_margin-2);
+	--smb-evaluation-star--icon-color: #f9bb2d;
+	--smb-evaluation-star--numeric-color: currentColor;
+
+	display: flex;
+	align-items: center;
+	gap: var(--smb-evaluation-star--gap);
+
+	&__title {
+	}
+
+	&--title-right {
+		.smb-evaluation-star__title {
+			order: 1;
+		}
+	}
+
+	&__body {
+		display: inline-flex;
+		gap: var(--smb-evaluation-star--gap);
+	}
+
+	&__numeric {
+		color: var(--smb-evaluation-star--numeric-color);
+		font-weight: bold;
+
+		&--right {
+			order: 1;
+		}
+	}
+
+	&__icon {
+		display: inline-block;
+		color: var(--smb-evaluation-star--icon-color);
+	}
+
+	.svg-inline--fa {
+		display: var(--fa-display, inline-block);
+		height: 1em;
+		overflow: visible;
+		vertical-align: -0.125em;
+	}
+}

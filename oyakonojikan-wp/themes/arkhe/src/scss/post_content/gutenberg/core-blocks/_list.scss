@@ -1,0 +1,14 @@
+// リスト
+
+[data-type="core/list"] {
+
+	// memo: 6.1からそれぞれブロック化されたのでフロントと同じものを指定。（.wp-blockに対するマージンに負けないように）
+	li.wp-block {
+		margin: .2em 0;
+	}
+
+	[data-type="core/list"] {
+		box-sizing: border-box;
+		white-space: normal;
+	}
+}

@@ -1,0 +1,33 @@
+@use 'sass:color';
+
+@use '../../css/core/variable/variable' as *;
+
+:root :where(.wp-block-list.is-style-sme-list-times) {
+	list-style: none;
+	padding-left: 1.5em;
+
+	:where(li) {
+		position: relative;
+
+		&::before,
+		&::after {
+			content: '';
+			position: absolute;
+			left: calc(-1.5em + 5px);
+			top: calc(var(--_half-leading) * 1rem + 6px);
+			width: 10px;
+			height: 0;
+			border-style: solid;
+			border-color: color.adjust(color.adjust($alert-color, $lightness: -55%), $hue: -30deg);
+			border-width: 0 0 2px;
+		}
+
+		&::before {
+			transform: rotate(45deg);
+		}
+
+		&::after {
+			transform: rotate(-45deg);
+		}
+	}
+}

@@ -1,0 +1,127 @@
+@use 'sass:map';
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-spider-pickup-slider {
+	--smb-spider-pickup-slider--background-color: var(--wp--preset--color--black);
+	--smb-spider-pickup-slider--mask-color: rgba(0, 0, 0, .15);
+
+	.spider__canvas {
+		min-height: clamp(210px, 56.25vw, 650px);
+	}
+
+	.spider__slide {
+		position: relative;
+		overflow: hidden;
+		background-color: var(--smb-spider-pickup-slider--background-color);
+
+		&::after {
+			content: '';
+			display: block;
+			position: absolute;
+			inset: 0;
+			background-color: var(--smb-spider-pickup-slider--mask-color);
+		}
+
+		.spider__figure {
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			object-fit: cover;
+			object-position: 50% 50%;
+		}
+	}
+
+	.spider__dots {
+		margin: var(--_margin-1) 0 0;
+
+		.spider__dot {
+			margin: 0;
+		}
+	}
+
+	.spider__dots[data-thumbnails="true"] {
+		--smb-spider-pickup-slider--dots-gap: var(--_margin-1);
+		--spider--dots-gap: var(--smb-spider-pickup-slider--dots-gap);
+
+		flex-wrap: wrap;
+		justify-content: flex-start;
+
+		.spider__dot {
+			flex: 0 0 auto;
+			width: calc((100% - var(--smb-spider-pickup-slider--dots-gap) * 3) / 4);
+
+			&[data-has-thumbnail="false"] {
+				position: relative;
+
+				&::before {
+					content: '';
+					position: absolute;
+					inset: 0;
+					background-color: var(--_lighter-color-gray);
+				}
+			}
+		}
+	}
+
+	&__item {
+		z-index: 1;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: var(--_padding1);
+		color: var(--wp--preset--color--white);
+
+		@include core.media-min(md) {
+			max-width: map.get(core.$sizes, md);
+		}
+
+		@include core.media-min(lg) {
+			max-width: map.get(core.$sizes, lg);
+		}
+
+		> * + * {
+			margin-top: var(--_margin1);
+		}
+
+		&__title {
+			font-weight: bold;
+			@include core.set-fluid-font-size-level(4);
+
+			a {
+				color: inherit;
+				text-decoration: none;
+
+				&::before {
+					content: '';
+					position: absolute;
+					inset: 0;
+					z-index: 1;
+				}
+			}
+		}
+
+		&__meta {
+			color: var(--wp--preset--color--white);
+			@include core.set-font-size-level(-1);
+
+			img {
+				display: inline-block !important;
+			}
+		}
+	}
+}
+
+.smb-section + .smb-spider-pickup-slider.alignfull {
+	margin-top: 0;
+}
+
+.alignwide,
+.alignfull {
+	&.smb-spider-pickup-slider {
+		&__item {
+			padding-right: var(--_container-margin, var(--_padding1));
+			padding-left: var(--_container-margin, var(--_padding1));
+		}
+	}
+}

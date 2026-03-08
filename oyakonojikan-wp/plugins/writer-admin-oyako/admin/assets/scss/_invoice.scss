@@ -1,0 +1,38 @@
+.wp-list-table {
+	.column-wa_invoice_post_count {
+		width: 60px;
+	}
+
+	.column-wa_invoice_amount {
+		width: 15%;
+	}
+
+	.column-wa_invoice_user {
+		width: 15%;
+	}
+
+	.column-wa_invoice_status {
+		width: 15%;
+	}
+}
+
+.wa-invoice-footer {
+	@include clearfix;
+	margin-top: 15px;
+	padding: 15px;
+	border: 1px solid $border-color;
+	background: #fff;
+}
+
+.wa-invoice-action {
+	float: left;
+}
+
+.wa-invoice-total {
+	float: right;
+}
+
+.wa-invoice-total__amount {
+	font-size: 20px;
+	line-height: 1.5;
+}

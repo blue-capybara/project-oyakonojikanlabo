@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/items-item-free",
+	"title": "Item (Free input)",
+	"description": "It is a child block of the items block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/items" ],
+	"attributes": {
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"__experimentalSkipSerialization": true,
+			"background": true,
+			"text": true,
+			"link": true
+		},
+		"spacing": {
+			"__experimentalSkipSerialization": true,
+			"padding": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		}
+	},
+	"editorScript": "file:./index.js"
+}

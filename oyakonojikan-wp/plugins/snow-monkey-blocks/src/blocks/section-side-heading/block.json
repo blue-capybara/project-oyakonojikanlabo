@@ -1,0 +1,209 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/section-side-heading",
+	"title": "Section (Side heading)",
+	"description": "Contents can be separated by appropriate margins.",
+	"category": "smb-section",
+	"attributes": {
+		"textColor": {
+			"type": "string"
+		},
+		"headingPosition": {
+			"type": "string",
+			"default": "left"
+		},
+		"headingColumnSize": {
+			"type": "string",
+			"default": 33
+		},
+		"contentColumnSize": {
+			"type": "string",
+			"default": ""
+		},
+		"contentJustification": {
+			"type": "string"
+		},
+		"itemsAlignment": {
+			"type": "string"
+		},
+		"gap": {
+			"type": "string",
+			"default": ""
+		},
+
+		"title": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-section__title",
+			"default": ""
+		},
+		"subtitle": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-section__subtitle",
+			"default": ""
+		},
+		"lede": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-section__lede",
+			"default": ""
+		},
+
+		"wrapperTagName": {
+			"type": "string",
+			"default": "div"
+		},
+		"titleTagName": {
+			"type": "string",
+			"default": "h2"
+		},
+		"height": {
+			"type": "string",
+			"default": "fit"
+		},
+		"disableCustomHeight": {
+			"type": "boolean",
+			"default": true
+		},
+		"containerAlign": {
+			"type": "string"
+		},
+		"contentsMaxWidth": {
+			"type": "string"
+		},
+		"isSlim": {
+			"type": "boolean",
+			"default": false
+		},
+
+		"backgroundColor": {
+			"type": "string"
+		},
+		"backgroundGradientColor": {
+			"type": "string"
+		},
+		"backgroundHorizontalPosition": {
+			"type": "number",
+			"default": 0
+		},
+		"backgroundVerticalPosition": {
+			"type": "number",
+			"default": 0
+		},
+		"isBackgroundNoOver": {
+			"type": "boolean",
+			"default": false
+		},
+		"backgroundTexture": {
+			"type": "string"
+		},
+		"backgroundTextureOpacity": {
+			"type": "number",
+			"default": 1
+		},
+		"backgroundTextureUrl": {
+			"type": "string"
+		},
+		"fixedBackgroundColor": {
+			"type": "string"
+		},
+		"fixedBackgroundGradientColor": {
+			"type": "string"
+		},
+		"fixedBackgroundTexture": {
+			"type": "string"
+		},
+		"fixedBackgroundTextureOpacity": {
+			"type": "number",
+			"default": 1
+		},
+		"fixedBackgroundTextureUrl": {
+			"type": "string"
+		},
+		"topDividerType": {
+			"type": "string",
+			"default": "tilt"
+		},
+		"topDividerLevel": {
+			"type": "number",
+			"default": 0
+		},
+		"topDividerColor": {
+			"type": "string",
+			"default": "#fff"
+		},
+		"topDividerVerticalPosition": {
+			"type": "number",
+			"default": 0
+		},
+		"topDividerOverlay": {
+			"type": "boolean",
+			"default": true
+		},
+		"bottomDividerType": {
+			"type": "string",
+			"default": "tilt"
+		},
+		"bottomDividerLevel": {
+			"type": "number",
+			"default": 0
+		},
+		"bottomDividerColor": {
+			"type": "string",
+			"default": "#fff"
+		},
+		"bottomDividerOverlay": {
+			"type": "boolean",
+			"default": true
+		},
+		"bottomDividerVerticalPosition": {
+			"type": "number",
+			"default": 0
+		},
+
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"align": [ "wide", "full" ],
+		"anchor": true,
+		"spacing": {
+			"margin": true,
+			"padding": [ "top", "bottom" ]
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		},
+		"snowmonkeyeditor": {
+			"blockPresets": {
+				"ignore": [ "title", "subtitle", "lede" ]
+			}
+		}
+	},
+	"example": {
+		"attributes": {
+			"title": "Lorem"
+		},
+		"innerBlocks": [
+			{
+				"name": "core/paragraph",
+				"attributes": {
+					"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam"
+				}
+			}
+		]
+	},
+	"style": [ "file:./style-index.css", "snow-monkey-blocks-section-style" ],
+	"editorScript": "file:./index.js"
+}

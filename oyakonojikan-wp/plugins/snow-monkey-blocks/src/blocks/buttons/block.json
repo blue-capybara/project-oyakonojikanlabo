@@ -1,0 +1,52 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/buttons",
+	"title": "Buttons",
+	"description": "Prompt visitors to take action with a group of button-style links.",
+	"category": "smb",
+	"attributes": {
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"anchor": true,
+		"align": [ "left", "right" ],
+		"alignWide": false,
+		"spacing": {
+			"margin": true,
+			"blockGap": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "flex"
+			}
+		}
+	},
+	"example": {
+		"innerBlocks": [
+			{
+				"name": "snow-monkey-blocks/btn",
+				"attributes": {
+					"content": "button",
+					"url": "https://2inc.org"
+				}
+			},
+			{
+				"name": "snow-monkey-blocks/btn",
+				"attributes": {
+					"content": "button",
+					"url": "https://2inc.org"
+				}
+			}
+		]
+	},
+	"style": "file:./style-index.css",
+	"editorScript": "file:./index.js"
+}

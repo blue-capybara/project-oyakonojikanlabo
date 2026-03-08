@@ -1,0 +1,189 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/hero-header",
+	"title": "Hero header",
+	"description": "Text can be displayed over large images and videos.",
+	"category": "smb",
+	"attributes": {
+		"mediaId": {
+			"type": "number",
+			"default": 0
+		},
+		"mediaUrl": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-hero-header__figure img, .smb-hero-header__figure video",
+			"attribute": "src",
+			"default": ""
+		},
+		"mediaAlt": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-hero-header__figure img",
+			"attribute": "alt",
+			"default": ""
+		},
+		"mediaWidth": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-hero-header__figure img, .smb-hero-header__figure video",
+			"attribute": "width",
+			"default": ""
+		},
+		"mediaHeight": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-hero-header__figure img, .smb-hero-header__figure video",
+			"attribute": "height",
+			"default": ""
+		},
+		"mediaSizeSlug": {
+			"type": "string",
+			"default": "full"
+		},
+		"mediaType": {
+			"type": "string"
+		},
+		"focalPoint": {
+			"type": "object"
+		},
+		"columns": {
+			"type": "string",
+			"default": "12"
+		},
+		"rows": {
+			"type": "string",
+			"default": "12"
+		},
+		"maxWidth": {
+			"type": "string",
+			"default": ""
+		},
+		"figureGridColumnStart": {
+			"type": "string",
+			"default": "1"
+		},
+		"figureGridColumnEnd": {
+			"type": "string",
+			"default": "-1"
+		},
+		"figureGridRowStart": {
+			"type": "string",
+			"default": "1"
+		},
+		"figureGridRowEnd": {
+			"type": "string",
+			"default": "-1"
+		},
+		"fit": {
+			"type": "boolean",
+			"default": false
+		},
+		"figureAspectRatio": {
+			"type": "string",
+			"default": "16 / 9"
+		},
+		"maskColor": {
+			"type": "string"
+		},
+		"maskGradientColor": {
+			"type": "string"
+		},
+		"maskOpacity": {
+			"type": "number",
+			"default": 1
+		},
+		"bodyAlignSelf": {
+			"type": "string",
+			"default": "auto"
+		},
+		"bodyJustifySelf": {
+			"type": "string",
+			"default": "auto"
+		},
+		"bodyGridColumnStart": {
+			"type": "string",
+			"default": "1"
+		},
+		"bodyGridColumnEnd": {
+			"type": "string",
+			"default": "-1"
+		},
+		"bodyGridRowStart": {
+			"type": "string",
+			"default": "1"
+		},
+		"bodyGridRowEnd": {
+			"type": "string",
+			"default": "-1"
+		},
+		"bodyMaxWidth": {
+			"type": "string",
+			"default": ""
+		},
+		"bodyPadding": {
+			"type": "object",
+			"default": {}
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "full", "wide" ],
+		"color": {
+			"background": true,
+			"text": true,
+			"link": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"style": true,
+				"width": true
+			}
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"dimensions": {
+			"minHeight": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		}
+	},
+	"style": "file:./style-index.css",
+	"editorStyle": "file:./index.css",
+	"editorScript": "file:./index.js"
+}

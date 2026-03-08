@@ -1,0 +1,104 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "21.0.6",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/balloon",
+	"title": "Balloon",
+	"description": "It is a block that can express a conversation.",
+	"category": "smb",
+	"attributes": {
+		"showAvatar": {
+			"type": "boolean",
+			"default": true
+		},
+		"avatarID": {
+			"type": "number",
+			"default": 0
+		},
+		"avatarURL": {
+			"type": "string",
+			"source": "attribute",
+			"selector": "img",
+			"attribute": "src",
+			"default": "https://0.gravatar.com/avatar/00000000000000000000000000000000?s=128&d=mp&r=g"
+		},
+		"avatarAlt": {
+			"type": "string",
+			"source": "attribute",
+			"selector": "img",
+			"attribute": "alt",
+			"default": ""
+		},
+		"avatarBorderColor": {
+			"type": "string"
+		},
+		"avatarBorderStyle": {
+			"type": "string"
+		},
+		"avatarBorderWidth": {
+			"type": "string"
+		},
+		"backgroundColor": {
+			"type": "string"
+		},
+		"borderColor": {
+			"type": "string"
+		},
+		"borderStyle": {
+			"type": "string"
+		},
+		"borderWidth": {
+			"type": "string"
+		},
+		"textColor": {
+			"type": "string"
+		},
+		"balloonName": {
+			"type": "string",
+			"default": ""
+		},
+		"modifier": {
+			"type": "string",
+			"default": ""
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"spacing": {
+			"margin": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		},
+		"snowmonkeyeditor": {
+			"blockPresets": {
+				"ignore": [ "balloonBody" ]
+			}
+		}
+	},
+	"example": {
+		"attributes": {
+			"balloonName": "Lorem"
+		},
+		"innerBlocks": [
+			{
+				"name": "core/paragraph",
+				"attributes": {
+					"content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam"
+				}
+			}
+		]
+	},
+	"style": "file:./style-index.css",
+	"editorScript": "file:./index.js"
+}

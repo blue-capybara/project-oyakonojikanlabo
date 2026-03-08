@@ -1,0 +1,77 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-accordion {
+	--smb-accordion--gap: var(--_margin-1);
+	--smb-accordion--title-background-color: var(--_lighter-color-gray);
+	--smb-accordion--title-color: inherit;
+	--smb-accordion--body-padding: var(--_padding1);
+
+	> * + * {
+		margin-top: var(--smb-accordion--gap);
+	}
+
+	&__item {
+		--smb-accordion-item--background-color: var(--smb-accordion--title-background-color);
+		--smb-accordion-item--color: var(--smb-accordion--title-color);
+		--smb-accordion-item--padding: var(--smb-accordion--body-padding);
+
+		position: relative;
+
+		&__title {
+			display: flex;
+			align-items: center;
+			background-color: var(--smb-accordion-item--background-color);
+			color: var(--smb-accordion-item--color);
+			padding: calc(var(--_padding-1) * .5) var(--_padding-1);
+
+			&__label {
+				flex: 1 1 auto;
+			}
+
+			&__icon {
+				margin-left: var(--_margin-1);
+				@include core.transition(transform);
+				flex: 0 0 auto;
+			}
+		}
+
+		&__control {
+			position: absolute !important;
+			inset: 0 !important;
+			z-index: 1 !important;
+			appearance: none !important;
+			display: block !important;
+			cursor: pointer !important;
+			height: 100% !important;
+			width: 100% !important;
+			opacity: 0 !important;
+			outline: none !important;
+
+			&:focus-visible {
+				opacity: 1!important;
+				outline: 1px solid !important;
+			}
+		}
+
+		&__body {
+			position: relative;
+			z-index: 2;
+			display: none;
+			padding: var(--smb-accordion--body-padding);
+		}
+	}
+
+	.smb-accordion__item__control:checked + .smb-accordion__item__body,
+	.smb-accordion__item__control:checked + .smb-accordion__item__title + .smb-accordion__item__body {
+		display: block;
+	}
+
+	.smb-accordion__item__control:checked + .smb-accordion__item__title > .smb-accordion__item__title__icon {
+		transform: rotate(180deg);
+	}
+}
+
+:where(.smb-accordion__item__body.is-layout-constrained > *) {
+	--wp--style--global--content-size: 100%;
+	--wp--style--global--wide-size: 100%;
+}

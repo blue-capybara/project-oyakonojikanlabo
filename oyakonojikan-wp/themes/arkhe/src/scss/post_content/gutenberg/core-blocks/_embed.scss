@@ -1,0 +1,15 @@
+// 埋め込みブロック系
+[data-align="full"] {
+
+	.wp-embed-aspect-16-9 {
+		max-width: 100%;
+	}
+}
+
+// 5.6から、.wp-block-embed-{hoge}クラスがエディターから消えた。
+.wp-block-embed .components-sandbox[title*="twitter"] {
+	display: block;
+	max-width: 500px;
+	margin-right: auto;
+	margin-left: auto;
+}

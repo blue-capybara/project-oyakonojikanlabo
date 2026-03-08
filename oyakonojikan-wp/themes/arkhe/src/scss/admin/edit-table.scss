@@ -1,0 +1,36 @@
+@charset "UTF-8";
+
+// mixin
+@import "../foundation/mixin/media";
+
+// setting
+@import "../foundation/setting/variable";
+
+// utility
+// @import "object/utility/**";
+
+
+// 投稿一覧の「クラシックエディター」などの文字を小さく薄く表示
+table.wp-list-table .post-state {
+	color: #666;
+	font-size: 11px;
+}
+
+// Macの 新OSで見るとチェックボックスが青くつぶれるのを阻止
+// input[type=radio],
+//.customize-control input[type=checkbox]
+// input[type="checkbox"] {
+//     -webkit-appearance: none !important;
+// }
+
+
+@media (min-width: 783px) and (max-width: 1500px) {
+	// タイトルがぎゅっと縮まるのを防ぐ
+	.wp-list-table th.column-author,
+	.wp-list-table th.column-categories,
+	.wp-list-table th.column-comments,
+	.wp-list-table th.column-date,
+	.wp-list-table th.column-tags {
+		width: auto;
+	}
+}

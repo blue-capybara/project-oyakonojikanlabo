@@ -1,0 +1,1 @@
+.w_b_rubber{animation:rubber 3s ease infinite}@keyframes rubber{0%{transform:scale(1,1)}20%{transform:scale(1.85,0.65)}25%{transform:scale(0.65,1.35)}30%{transform:scale(1.15,0.85)}36%{transform:scale(0.95,1.05)}42%{transform:scale(1.05,0.95)}46%{transform:scale(0.98,1.02)}50%{transform:scale(1,1)}}

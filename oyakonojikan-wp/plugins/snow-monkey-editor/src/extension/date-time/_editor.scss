@@ -1,0 +1,23 @@
+.sme-date-time-picker {
+	&__action {
+		margin-top: 8px;
+		display: flex;
+		justify-content: space-between;
+
+		.components-button {
+			flex: 0 0 auto;
+		}
+	}
+
+	.components-datetime {
+		.components-datetime__date-help-button {
+			display: none;
+		}
+	}
+
+	[aria-label="Calendar"] {
+		position: relative;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+}

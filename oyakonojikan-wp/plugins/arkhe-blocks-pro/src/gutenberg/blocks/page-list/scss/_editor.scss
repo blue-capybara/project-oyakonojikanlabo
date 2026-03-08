@@ -1,0 +1,51 @@
+.arkb-panel--pageList {
+
+	input.block-editor-url-input__input {
+		width: 100%;
+		max-width: 100%;
+		border: solid 1px #ccc;
+	}
+}
+
+.arkb-control--pageid {
+
+	.components-base-control__field {
+		display: flex;
+		align-items: center;
+
+		label {
+			margin: 0 8px 0 0;
+		}
+	}
+}
+
+
+.arkb-panel--pageList .block-editor-url-input {
+	min-width: auto;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.arkb-control--searchPage__suggestions {
+	min-width: 260px;
+}
+
+.arkb-control--searchPage {
+	position: relative;
+	// padding: 8px;
+	// border: solid 1px #ccc;
+
+	&::before {
+		position: absolute;
+		top: -16px;
+		left: 50%;
+		z-index: 0;
+		display: block;
+		width: 8px;
+		height: 8px;
+		border: solid 8px transparent;
+		border-bottom-color: #ccc;
+		transform: translateX(-50%);
+		content: "";
+	}
+}

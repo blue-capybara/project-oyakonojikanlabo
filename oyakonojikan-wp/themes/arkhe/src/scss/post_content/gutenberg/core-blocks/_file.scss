@@ -1,0 +1,8 @@
+// ファイルブロック
+[data-type="core/file"] {
+
+	.wp-block-file__textlink {
+		color: var(--ark-color--link);
+		text-decoration: underline;
+	}
+}

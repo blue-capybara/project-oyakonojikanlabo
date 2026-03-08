@@ -1,0 +1,51 @@
+.c-filterLayer.arkb-absLayer {
+	z-index: 1;
+
+	&::before {
+		content: none;
+	}
+}
+
+.arkb-absLayer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.arkb-obf-cover {
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+}
+
+.arkb-obf-contain {
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: contain;
+}
+
+@include pc {
+
+	.arkb-only-sp {
+		display: none !important;
+	}
+}
+
+@include sp {
+
+	.arkb-only-pc {
+		display: none !important;
+	}
+
+}
+
+
+.arkb-has-padding {
+	// --arkb-padding: 0;
+	padding: var(--arkb-padding, 0) !important;
+}

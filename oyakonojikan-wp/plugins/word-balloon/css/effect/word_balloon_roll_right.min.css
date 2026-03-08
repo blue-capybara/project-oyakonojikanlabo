@@ -1,0 +1,1 @@
+.w_b_roll_right{animation:roll_right 2.5s linear infinite}@keyframes roll_right{from{transform:perspective(500px) rotateY(0deg)}50%{transform:perspective(500px) rotateY(180deg)}to{transform:perspective(500px) rotateY(360deg)}}

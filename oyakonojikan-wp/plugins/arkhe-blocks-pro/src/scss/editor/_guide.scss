@@ -1,0 +1,51 @@
+// ガイド線を表示する
+.ark-has-guide {
+
+	&.has-child-selected::after,
+	&:hover::after {
+		z-index: 1;
+		outline: dashed 1px $color_guide;
+	}
+}
+
+// ガイド線を少し外側にする（一番親ブロック）
+.ark-has-guide,
+.arkb-tabBody__content {
+
+	// 6.1から after の存在が限定的になったので自分で指定する。
+	&::after {
+		position: absolute;
+		inset: var(--arkb-guide-offset, -4px);
+		border-radius: 2px;
+		content: "";
+		pointer-events: none;
+	}
+}
+
+
+.wp-block .wp-block,
+[data-align="full"] {
+	--arkb-guide-offset: 0;
+}
+
+// 本文エリア
+.block-editor-writing-flow {
+
+	// ガイド線を表示する
+	[data-type="arkhe-blocks/dl-dt"],
+	[data-type="arkhe-blocks/dl-dd"],
+	// .ark-block-accordion__body,
+	.ark-block-boxLink .arkb-boxLink__title,
+	.ark-block-boxLink .arkb-boxLink__content,
+	.ark-block-step__title,
+	.ark-block-timeline__label,
+	.ark-block-timeline__title,
+	.ark-block-step__body,
+	.ark-block-timeline__body {
+
+		&:hover {
+			outline: dashed 1px $color_guide;
+		}
+	}
+
+}

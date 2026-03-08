@@ -1,0 +1,1 @@
+.w_b_roll_up{animation:roll_up 2.5s linear infinite}@keyframes roll_up{from{transform:perspective(500px) rotateX(0deg)}50%{transform:perspective(500px) rotateX(180deg)}to{transform:perspective(500px) rotateX(360deg)}}

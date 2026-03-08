@@ -1,0 +1,53 @@
+.wp-block-image {
+	text-align: center;
+
+	img {
+		vertical-align: bottom; //下部の隙間なくす
+	}
+	// リンク付きの場合
+	a {
+		// display: block;
+		transition: opacity .25s;
+
+		&:hover {
+			opacity: .75;
+		}
+	}
+
+}
+
+
+//キャプション付き画像（TinyMCE）
+.wp-caption {
+	width: 100%;
+	max-width: 100%;
+	text-align: center;
+}
+
+.wp-caption-text {
+	margin-top: .75rem;
+	font-size: .8rem;
+	opacity: var(--ark-opacity--thin);
+}
+
+// TinyMCEでの中央寄せ画像
+img.aligncenter {
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+
+// 6.4からのlightbox用の調整. alignxxxが付いていない時のデフォルト配置をセンターにしつつ、拡大ボタンの位置が変にならないように。（画像サイズがブロックサイズになることが重要）
+// .wp-block-image.wp-lightbox-container:not([class*="align"]),
+figure.wp-block-image.wp-lightbox-container {
+	display: table;
+	max-width: fit-content;
+	margin-inline: auto;
+	// align-items: center;
+
+	.wp-element-caption {
+		display: table-caption;
+		caption-side: bottom;
+	}
+}

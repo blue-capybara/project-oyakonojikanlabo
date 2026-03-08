@@ -1,0 +1,125 @@
+// 背景が白 / テキスト 黒 で固定された要素
+%bgfff {
+	color: #333;
+	background-color: #fff;
+}
+
+// レイヤー要素
+%absLayer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 0;
+	width: 100%;
+	height: 100%;
+}
+
+%figcaption {
+	display: block;
+	margin-top: .75rem;
+	margin-bottom: 0; //core上書き
+	color: inherit; //core上書き
+	font-size: .8rem;
+	line-height: 1.5;
+	text-align: center;
+	opacity: var(--ark-opacity--thin);
+}
+
+// 画像用のシャドウ
+%imageShadow {
+	box-shadow:
+		0 2px 4px rgba(0, 0, 0, .1),
+		0 4px 8px -4px rgba(0, 0, 0, .2);
+}
+
+
+// ウィジェットタイトル
+%widgetTitle {
+	position: relative;
+	margin-bottom: 1em;
+	font-weight: bold;
+	font-size: 1.4em;
+	// overflow: hidden;
+}
+
+
+%reset_list {
+	// padding: 0;
+	--ark-list-padding: 0; // css変数側で打ち消したほうがセレクタの詳細度に影響されない
+	list-style: none;
+}
+
+
+// -------- メニューリスト系の共通スタイル --------
+
+// 親 ul
+%menu_list {
+
+	@extend %reset_list;
+	border-top: var(--ark-menulist_border);
+	border-bottom: var(--ark-menulist_border);
+}
+
+// li
+%menu_list__li {
+	position: relative;
+	margin: 0 !important; // post_content 内のliマージンを打ち消す
+	line-height: 1.5;
+	border-bottom: var(--ark-menulist_border);
+}
+
+// a
+%menu_list__a {
+	position: relative;
+	display: block;
+	padding: var(--ark-nav-padding--Y, .75rem) var(--ark-nav-padding--R, .5rem) var(--ark-nav-padding--Y, .75rem) var(--ark-nav-padding--L, .5rem);
+	color: inherit;
+	font-size: var(--ark-nav_fz, 1em);
+	text-decoration: none;
+	// transition: background-color .25s;
+}
+
+
+// グローバルナビでは違う処理にしたいので %menu_list__a の外に出してる
+%menu_list__a_hover {
+
+	&:hover {
+		background-color: var(--ark-color--gray--hover);
+	}
+}
+
+// 子メニュー
+%menu_list__children {
+
+	@extend %reset_list;
+
+	--ark-nav-padding--L: 1.5rem;
+	--ark-nav_fz: .925em;
+	border-top: dashed 1px var(--ark-color--border);
+
+	// 孫メニューはさらに広く
+	ul {
+		--ark-nav-padding--L: 2.25rem;
+	}
+}
+
+
+// 展開されるサブメニュー側
+%acc_sub_menu {
+	position: relative;
+	height: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	border-top: dashed 1px var(--ark-color--border);
+	visibility: hidden;
+	opacity: 0;
+	// overflow: hidden;
+	// transition: height .25s, opacity .25s, visibility .25s;
+
+	&.is-opened {
+		height: auto;
+		visibility: visible;
+		opacity: 1;
+	}
+}

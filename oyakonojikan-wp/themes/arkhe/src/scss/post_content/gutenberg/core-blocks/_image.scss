@@ -1,0 +1,36 @@
+//画像
+.wp-block-image {
+	// text-align: center;
+
+	// .is-resized は 50& とかにすると付くクラス。
+	// &.is-resized {}
+	.components-resizable-box__container {
+		max-width: 100% !important;
+		// height: auto !important;
+		vertical-align: top; // 6.0 で画像ブロック下側の余白が少し大きくなるのを防ぐ
+	}
+
+	// &.is-resized > div:not(.components-resizable-box__container) {
+	// 	max-width: 100% !important;
+	// 	height: auto !important;
+	// }
+}
+
+// defaultでセンター寄せ
+[data-type="core/image"] {
+
+	// zoom outモードではクラスがつかないのでdivでも効くように。
+	> :is(div, .components-resizable-box__container),
+	> :is(div, .components-resizable-box__container) > img {
+		margin-inline: auto;
+	}
+
+
+}
+
+// alignxxxがないデフォルト配置で、リンク付き画像もセンター寄せになるように。
+:where(:not([data-align])) > .wp-block-image > a {
+	display: block;
+	width: fit-content;
+	margin-inline: auto;
+}

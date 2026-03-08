@@ -1,0 +1,1 @@
+.w_b_flash{-webkit-animation:flash 1s ease infinite;animation:flash 1s ease infinite}@-webkit-keyframes flash{50%{opacity:0}}@keyframes flash{50%{opacity:0}}

@@ -5,7 +5,7 @@ const PrivacyPolicyPage: React.FC = () => (
   <StaticWpPage
     pageUri="/privacy-policy"
     pageName="プライバシーポリシー"
-    sharePath="/privacy"
+    sharePath="/privacy-policy"
     backLink={{ label: 'HOMEに戻る', to: '/' }}
   />
 );

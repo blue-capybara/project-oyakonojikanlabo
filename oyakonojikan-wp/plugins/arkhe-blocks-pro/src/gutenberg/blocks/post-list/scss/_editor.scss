@@ -1,0 +1,51 @@
+[data-type="arkhe-blocks/post-list"],
+[data-type="arkhe-blocks/page-list"],
+[data-type="arkhe-blocks/rss"] {
+
+	.p-postList {
+		box-sizing: border-box;
+		padding: 0;
+		list-style: none !important;
+
+		// 5.9~ デバイスプレビューで表示が崩れるのを防ぐ
+		.p-postList__item {
+			box-sizing: border-box;
+		}
+
+
+		// コアの ul へのCSS上書き
+		&:not(.-type-card) {
+			margin-right: 0;
+			margin-left: 0;
+		}
+	}
+
+	.p-postList__excerpt {
+
+		p {
+			margin: 0 !important;
+		}
+	}
+
+	li a {
+		pointer-events: none;
+	}
+}
+
+.arkb-panel--pickupTax {
+
+	.arkb-btns--relation {
+		margin-top: -16px;
+	}
+
+	.arkb-tree-select.-term {
+		margin-top: -8px;
+	}
+
+	// .-exCatChildren {
+	.arkb-check--exCatChild {
+		margin-top: -16px;
+		margin-bottom: 16px;
+		padding-bottom: 4px;
+	}
+}

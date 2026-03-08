@@ -1,0 +1,49 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+@use '../../css/core/variable/variable' as *;
+
+:root :where(p.is-style-sme-post-it) {
+	--sme-post-it--background-color: #{ core.darker($alert-color) };
+	--sme-post-it--dog-year-size: 1.8rem;
+
+	position: relative;
+	margin-bottom: var(--sme-post-it--dog-year-size) !important;
+	background-color: var(--sme-post-it--background-color);
+	padding: var(--_padding1) var(--_padding1) 0;
+	width: fit-content;
+
+	&:not(:last-child) {
+		margin-bottom: calc(var(--sme-post-it--dog-year-size) + var(--_margin1)) !important;
+	}
+
+	&::before {
+		content: '';
+		position: absolute;
+		display: block;
+		top: 100%;
+		right: 0;
+		border-width: var(--sme-post-it--dog-year-size) var(--sme-post-it--dog-year-size) 0 0;
+		border-style: solid;
+		border-color: var(--_lighter-color-gray) transparent;
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: calc(100% - 1px);
+		right: var(--sme-post-it--dog-year-size);
+		left: 0;
+		display: block;
+		background-color: inherit;
+		height: var(--sme-post-it--dog-year-size);
+	}
+
+	&.has-text-align-center {
+		margin-right: auto;
+		margin-left: auto;
+	}
+
+	&.has-text-align-right {
+		margin-right: 0;
+		margin-left: auto;
+	}
+}

@@ -1,0 +1,127 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/pricing-table-item",
+	"title": "Plan",
+	"description": "It is a child block of the pricing table block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/pricing-table" ],
+	"attributes": {
+		"title": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-pricing-table__item__title",
+			"default": ""
+		},
+		"price": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-pricing-table__item__price",
+			"default": ""
+		},
+		"lede": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-pricing-table__item__lede",
+			"default": ""
+		},
+		"displayImage": {
+			"type": "boolean",
+			"default": false
+		},
+		"imageID": {
+			"type": "number",
+			"default": 0
+		},
+		"imageURL": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-pricing-table__item__figure > img",
+			"attribute": "src",
+			"default": ""
+		},
+		"imageAlt": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-pricing-table__item__figure > img",
+			"attribute": "alt",
+			"default": ""
+		},
+		"imageWidth": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-pricing-table__item__figure > img",
+			"attribute": "width",
+			"default": ""
+		},
+		"imageHeight": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-pricing-table__item__figure > img",
+			"attribute": "height",
+			"default": ""
+		},
+		"imageSizeSlug": {
+			"type": "string",
+			"default": "full"
+		},
+		"displayBtn": {
+			"type": "boolean",
+			"default": false
+		},
+		"btnLabel": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-pricing-table__item__btn > .smb-btn__label",
+			"default": ""
+		},
+		"btnURL": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-pricing-table__item__btn",
+			"attribute": "href",
+			"default": ""
+		},
+		"btnTarget": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-pricing-table__item__btn",
+			"attribute": "target",
+			"default": "_self"
+		},
+		"btnBackgroundColor": {
+			"type": "string"
+		},
+		"btnBackgroundGradientColor": {
+			"type": "string"
+		},
+		"btnTextColor": {
+			"type": "string"
+		},
+		"btnSize": {
+			"type": "string",
+			"default": ""
+		},
+		"btnBorderRadius": {
+			"type": "string"
+		},
+		"btnWrap": {
+			"type": "boolean",
+			"default": false
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"background": true,
+			"text": true,
+			"link": true
+		}
+	},
+	"editorScript": "file:./index.js"
+}

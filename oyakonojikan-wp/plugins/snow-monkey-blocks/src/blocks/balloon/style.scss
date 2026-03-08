@@ -1,0 +1,192 @@
+@use '../../../node_modules/sass-basis/src/css/core';
+
+.smb-balloon {
+	--smb-balloon--border-radius: var(--_global--border-radius);
+	--smb-balloon--background-color: var(--_lightest-color-gray);
+	--smb-balloon--border-color: var(--_lightest-color-gray);
+	--smb-balloon--border-style: solid;
+	--smb-balloon--border-width: 0px;
+	--smb-balloon--color: inherit;
+	--smb-balloon--avatar-border-color: var(--_lighter-color-gray);
+	--smb-balloon--avatar-border-style: solid;
+	--smb-balloon--avatar-border-width: 3px;
+	--smb-balloon--gap: calc(var(--_margin-1) + var(--smb-balloon--border-width));
+
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+
+	@include core.media-min(md) {
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: center;
+	}
+
+	&__person {
+		margin: 0 0 var(--smb-balloon--gap) var(--smb-balloon--border-width);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+
+		@include core.media-min(md) {
+			margin: 0 var(--smb-balloon--gap) 0 0;
+			flex-direction: column;
+		}
+
+		.smb-balloon__name {
+			margin: 0 0 0 5px;
+
+			@include core.media-min(md) {
+				margin: 5px 0 0 0;
+			}
+		}
+	}
+
+	&__figure {
+		position: relative;
+		flex: 0 0 auto;
+		@include core.circle(60px);
+		box-sizing: content-box;
+		border: var(--smb-balloon--avatar-border-width) var(--smb-balloon--avatar-border-style) var(--smb-balloon--avatar-border-color);
+
+		.components-button.image-button {
+			height: 100%;
+			width: 100%;
+		}
+
+		img {
+			height: 100%;
+			width: 100%;
+			object-fit: cover;
+			object-position: 50% 50%;
+		}
+	}
+
+	&__name {
+		@include core.set-font-size-level(-2);
+		white-space: nowrap;
+	}
+
+	&__body {
+		position: relative;
+		flex: 1 1 auto;
+		border-radius: var(--smb-balloon--border-radius);
+		background-color: var(--smb-balloon--background-color);
+		border: var(--smb-balloon--border-width) var(--smb-balloon--border-style) var(--smb-balloon--border-color);
+		color: var(--smb-balloon--color);
+		overflow-wrap: break-word;
+		padding: var(--_padding1);
+
+		&::before,
+		&::after {
+			content: "";
+			display: block;
+			position: absolute;
+			margin-left: 0;
+			height: 0;
+			width: 0;
+			border-color: transparent;
+			border-style: solid;
+
+			@include core.media-min(md) {
+				border-color: transparent;
+			}
+		}
+
+		&::before {
+			top: calc(-10px - var(--smb-balloon--border-width) * 2);
+			left: calc(((60px + var(--smb-balloon--avatar-border-width) * 2) - (10px + var(--smb-balloon--border-width) * 2)) / 2);
+			border-bottom-color: var(--smb-balloon--border-color);
+			border-width: 0 calc(5px + var(--smb-balloon--border-width)) calc((5px + var(--smb-balloon--border-width)) * 2);
+
+			@include core.media-min(md) {
+				top: calc(50% - 5px - var(--smb-balloon--border-width));
+				left: calc(-10px - var(--smb-balloon--border-width) * 2);
+				border-right-color: var(--smb-balloon--border-color);
+				border-width: calc(5px + var(--smb-balloon--border-width)) calc((5px + var(--smb-balloon--border-width)) * 2) calc(5px + var(--smb-balloon--border-width)) 0;
+			}
+		}
+
+		&::after {
+			top: -10px;
+			left: calc(((60px + var(--smb-balloon--avatar-border-width) * 2) - 10px) / 2);
+			border-bottom-color: var(--smb-balloon--background-color);
+			border-width: 0 5px 10px;
+
+			@include core.media-min(md) {
+				top: calc(50% - 5px);
+				left: -10px;
+				border-right-color: var(--smb-balloon--background-color);
+				border-width: 5px 10px 5px 0;
+			}
+		}
+	}
+
+	&--reverse {
+		align-items: flex-end;
+
+		@include core.media-min(md) {
+			flex-direction: row-reverse;
+			align-items: center;
+		}
+
+		.smb-balloon__person {
+			margin: 0 var(--smb-balloon--border-width) var(--smb-balloon--gap) 0;
+
+			@include core.media-min(md) {
+				margin: 0 0 0 var(--smb-balloon--gap);
+			}
+
+			.smb-balloon__name {
+				margin-right: 5px;
+				order: -1;
+
+				@include core.media-min(md) {
+					margin-right: 0;
+					order: initial;
+				}
+			}
+		}
+
+		.smb-balloon__body {
+			&::before,
+			&::after {
+				left: auto;
+
+				@include core.media-min(md) {
+					border-color: transparent;
+				}
+			}
+
+			&::before {
+				right: calc(((60px + var(--smb-balloon--avatar-border-width) * 2) - (10px + var(--smb-balloon--border-width) * 2)) / 2);
+
+				@include core.media-min(md) {
+					right: calc(-10px - var(--smb-balloon--border-width) * 2);
+					border-left-color: var(--smb-balloon--border-color);
+					border-width: calc(5px + var(--smb-balloon--border-width)) 0 calc(5px + var(--smb-balloon--border-width)) calc((5px + var(--smb-balloon--border-width)) * 2);
+				}
+			}
+
+			&::after {
+				right: calc(((60px + var(--smb-balloon--avatar-border-width) * 2) - 10px) / 2);
+
+				@include core.media-min(md) {
+					right: -10px;
+					border-left-color: var(--smb-balloon--background-color);
+					border-width: 5px 0 5px 10px;
+				}
+			}
+		}
+	}
+}
+
+:where(.smb-balloon__body.is-layout-constrained > *) {
+	--wp--style--global--content-size: 100%;
+	--wp--style--global--wide-size: 100%;
+}
+
+// For WordPress
+.smb-balloon:where([style*=border-width]) {
+	border: none;
+}

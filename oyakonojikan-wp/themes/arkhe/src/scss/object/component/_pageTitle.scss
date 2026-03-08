@@ -1,0 +1,47 @@
+// .c-pageTitle {}
+
+.c-pageTitle__main {
+	position: relative;
+	font-weight: 700;
+	font-size: 2rem;
+	line-height: 1.5;
+}
+
+.c-pageTitle__sub {
+	position: relative;
+	font-weight: normal;
+	font-size: .9rem;
+	font-style: italic;
+	vertical-align: middle;
+
+	&::before,
+	&::after {
+		margin: 0 1em;
+		vertical-align: baseline;
+		content: "–";
+	}
+
+	//コンテンツ内 表示時
+	.p-page__title & {
+		margin-left: .5em;
+	}
+}
+
+//コンテンツ内 表示時
+.p-page__title,
+.p-archive__title {
+	margin-bottom: 2.5rem;
+}
+
+.p-404__title {
+	padding-top: 2rem;
+	font-size: 1.5rem;
+	text-align: center;
+}
+
+// ウィジェットタイトルと同じ
+.c-secTitle,
+.c-bottomSection__title {
+
+	@extend %widgetTitle;
+}

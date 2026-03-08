@@ -1,0 +1,60 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"version": "23.0.1",
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/panels-item-block-link",
+	"title": "Panel (Free input / Block link)",
+	"description": "It is a child block of the panels block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/panels" ],
+	"attributes": {
+		"linkText": {
+			"type": "string",
+			"source": "html",
+			"selector": ".smb-panels__item__action > a .screen-reader-text",
+			"role": "content"
+		},
+		"linkURL": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__action > a",
+			"attribute": "href"
+		},
+		"rel": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__action > a",
+			"attribute": "rel"
+		},
+		"linkTarget": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-panels__item__action > a",
+			"attribute": "target"
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"html": false,
+		"color": {
+			"background": true,
+			"gradients": true,
+			"text": true,
+			"link": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		}
+	},
+	"editorScript": "file:./index.js",
+	"viewScript": "file:/view.js"
+}

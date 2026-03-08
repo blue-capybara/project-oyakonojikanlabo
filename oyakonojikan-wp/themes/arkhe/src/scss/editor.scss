@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+// mixin
+@import "foundation/mixin/media";
+
+// setting
+@import "foundation/setting/variable";
+@import "foundation/setting/placeholder";
+
+// icon
+@import "foundation/icon/ark-svg";
+
+// root 変数
+@import "foundation/base/root";
+
+// html要素
+.mce-content-body,
+.editor-styles-wrapper {
+
+	@import "foundation/base/elements";
+}
+
+// レイアウト系 (EXテンプレート用) -> ファイル分ける？
+@import "layout/article";
+@import "layout/container";
+@import "layout/header";
+@import "layout/header/*.scss";
+// @import "layout/footer";
+// @import "layout/footer/*.scss";
+@import "object/component/gnav";
+
+
+// object
+@import "object/**/*.scss";
+
+// post_content
+@import "post_content/editor";
+@import "post_content/common/utility/**/*.scss";
+@import "post_content/common/blocks/**/*.scss";
+@import "post_content/gutenberg/**/*.scss";

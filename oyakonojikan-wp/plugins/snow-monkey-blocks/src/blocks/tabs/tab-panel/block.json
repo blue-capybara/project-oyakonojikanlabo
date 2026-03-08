@@ -1,0 +1,50 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"textdomain": "snow-monkey-blocks",
+	"name": "snow-monkey-blocks/tab-panel",
+	"title": "Tab panel",
+	"description": "This is tab panel block.",
+	"category": "smb",
+	"parent": [ "snow-monkey-blocks/tabs" ],
+	"attributes": {
+		"tabPanelId": {
+			"type": "string",
+			"default": ""
+		},
+		"ariaHidden": {
+			"type": "string",
+			"source": "attribute",
+			"selector": ".smb-tab-panel",
+			"attribute": "aria-hidden",
+			"default": "true"
+		},
+		"templateLock": {
+			"type": [ "string", "boolean" ],
+			"enum": [ "all", "insert", "contentOnly", false ]
+		}
+	},
+	"supports": {
+		"customClassName": false,
+		"reusable": false,
+		"html": false,
+		"anchor": true,
+		"__experimentalToolbar": false,
+		"inserter": false,
+		"color": {
+			"background": true,
+			"text": true,
+			"link": true
+		},
+		"layout": {
+			"allowSwitching": false,
+			"allowEditing": false,
+			"allowInheriting": false,
+			"default": {
+				"type": "constrained"
+			}
+		}
+	},
+	"example": {},
+	"editorScript": "file:./index.js"
+}

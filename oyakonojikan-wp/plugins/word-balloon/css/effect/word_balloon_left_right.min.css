@@ -1,0 +1,1 @@
+.w_b_left_right{-webkit-animation:left_right 1s infinite alternate;animation:left_right 1s infinite alternate}@-webkit-keyframes left_right{0%{transform:translateX(5px)}100%{transform:translateX(-5px)}}@keyframes left_right{0%{transform:translateX(5px)}100%{transform:translateX(-5px)}}

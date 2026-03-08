@@ -1,0 +1,15 @@
+Phase2 source rows: 1664
+Phase2 unique normalized paths: 1530
+Kept known valid paths: 17
+Exact 301 candidates: 1
+Exact 410 candidates: 1153
+Phase1 rules: /Users/ns/projects/app/project-oyakonojikanlabo/tmp_oyako/phase1_minimal_safe_rules.conf
+Phase2 rollout list: /Users/ns/projects/app/project-oyakonojikanlabo/tmp_oyako/phase2_rollout_list.md
+Duplicate query keys(sample): {'p': 12, 'utm_medium': 10, 'utm_campaign': 10, 'utm_source': 9, 'preview': 7, 's': 6, 'cat': 4, 'fbclid': 1, 'ssp_iabi': 1, 'openExternalBrowser': 1}
+b1_events_legacy: 24
+b2_safe_legacy_prefix: 32
+b3_single_ascii: 956
+b4_single_nonascii: 75
+b5_multi_ascii: 64
+b5_weird_chars: 2
+b6_multi_nonascii: 0
