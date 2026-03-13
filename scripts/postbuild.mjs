@@ -5,7 +5,8 @@ import process from 'node:process';
 async function main() {
   const projectRoot = process.cwd();
   const source = path.join(projectRoot, '.htaccess');
-  const distDir = path.join(projectRoot, 'dist');
+  const outDir = process.env.BUILD_OUT_DIR ?? 'dist';
+  const distDir = path.join(projectRoot, outDir);
   const destination = path.join(distDir, '.htaccess');
 
   try {
@@ -19,7 +20,7 @@ async function main() {
 
   try {
     await copyFile(source, destination);
-    console.log('postbuild: copied .htaccess into dist/');
+    console.log(`postbuild: copied .htaccess into ${outDir}/`);
   } catch (error) {
     console.error('postbuild: failed to copy .htaccess', error);
     process.exitCode = 1;

@@ -6,6 +6,20 @@ React Routerを使用したSPA（Single Page Application）では、直接URLに
 
 ## 解決方法
 
+### 環境別ビルド
+
+`stg` と `prod` でビルド成果物を分ける場合は、以下の npm script を使います。
+
+```bash
+npm run build:stg
+npm run build:prod
+```
+
+- `build:stg`: 出力先は `dist/stg/` です。`.htaccess` のコピーのみ実行します。
+- `build:prod`: 出力先は `dist/prod/` です。sitemap 生成と `.htaccess` コピーまで実行します。
+- `stg` ビルドでは `import.meta.env.MODE === 'stg'` になるため、既存の `noindex` 判定をそのまま利用できます。
+- `npm run build` は互換性のため従来通り `dist/` に出力します。環境別ビルドを並列実行したい場合は `build:stg` と `build:prod` を使ってください。
+
 ### 1. 開発環境での解決
 
 Viteの設定で`historyApiFallback`を有効にしました：
