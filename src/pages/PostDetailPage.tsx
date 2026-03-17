@@ -5,6 +5,9 @@ import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
 import useFavorite from '../hooks/useFavorite';
 import WordPressContent from '../components/Post/WordPressContent';
+import ArticleHeroImage from '../components/article/ArticleHeroImage';
+import ArticleTitleBlock from '../components/article/ArticleTitleBlock';
+import ArticleBodyContainer from '../components/article/ArticleBodyContainer';
 import { getFeatureFlag } from '../config/featureFlags';
 import { send404Event, sendRelatedPostClickEvent, sendShareClickEvent } from '../lib/ga';
 import Seo from '../components/seo/Seo';
@@ -391,6 +394,21 @@ const PostDetailPage: React.FC = () => {
   const tags = post.tags?.nodes ?? [];
   const ogImage = post.featuredImage?.node?.sourceUrl ?? undefined;
   const description = post.excerpt ?? post.content ?? undefined;
+  const favoriteAction = showMembershipFeatures ? (
+    <button
+      type="button"
+      onClick={handleFavoriteClick}
+      disabled={favoriteBusy}
+      className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-full transition-colors ${
+        favoriteBusy ? 'cursor-not-allowed opacity-60' : 'hover:bg-gray-50'
+      }`}
+    >
+      <div className="w-5 h-5 flex items-center justify-center">
+        <i className={`${isFavorited ? 'ri-heart-fill text-red-500' : 'ri-heart-line'}`}></i>
+      </div>
+      <span>お気に入り</span>
+    </button>
+  ) : null;
 
   return (
     <Layout>
@@ -408,140 +426,75 @@ const PostDetailPage: React.FC = () => {
         ]}
       />
 
-      {/* 記事ヘッダー */}
-      <section className="pt-36 pb-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
-            <Link to="/archive" className="flex items-center text-gray-600 hover:text-primary">
-              <div className="w-5 h-5 flex items-center justify-center mr-1">
-                <i className="ri-arrow-left-line"></i>
-              </div>
-              <span>記事一覧に戻る</span>
-            </Link>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-              <button
-                type="button"
-                onClick={handleShare}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-full transition-colors hover:bg-gray-50"
-              >
-                <div className="w-5 h-5 flex items-center justify-center">
-                  <i className="ri-share-line"></i>
-                </div>
-                <span>シェアする</span>
-              </button>
-              {showMembershipFeatures && (
-                <button
-                  type="button"
-                  onClick={handleFavoriteClick}
-                  disabled={favoriteBusy}
-                  className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-full transition-colors ${
-                    favoriteBusy ? 'cursor-not-allowed opacity-60' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <i
-                      className={`${isFavorited ? 'ri-heart-fill text-red-500' : 'ri-heart-line'}`}
-                    ></i>
-                  </div>
-                  <span>お気に入り</span>
-                </button>
-              )}
-            </div>
-          </div>
+      <ArticleHeroImage src={post.featuredImage?.node?.sourceUrl} alt={post.title} />
 
-          {/* タグ */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {tags.map((tag, index) =>
-              tag.slug ? (
-                <Link
-                  key={`${tag.slug}-${index}`}
-                  to={`/tag/${encodeURIComponent(tag.slug)}`}
-                  className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full hover:bg-blue-200 transition-colors"
-                >
-                  {tag.name}
-                </Link>
-              ) : (
-                <span
-                  key={`${tag.name}-${index}`}
-                  className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full"
-                >
-                  {tag.name}
-                </span>
-              ),
-            )}
-          </div>
-
-          {/* タイトルと日付 */}
-          <h1 className="text-3xl md:text-4xl font-bold mb-6">{post.title}</h1>
-          <p className="text-sm text-gray-500">
-            {new Date(post.date).toLocaleDateString('ja-JP', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-        </div>
-      </section>
-
-      {/* メインビジュアル */}
-      {post.featuredImage?.node?.sourceUrl && (
-        <div className="w-full h-[50vh] md:h-[60vh] overflow-hidden relative">
-          <img
-            src={post.featuredImage.node.sourceUrl}
-            alt={post.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
+      <ArticleTitleBlock title={post.title} dateText={formatDateJa(post.date)} />
 
       {/* 記事本文 */}
-      <section className="py-12">
+      <ArticleBodyContainer>
+        {showMembershipFeatures && favoriteError && (
+          <p className="mb-4 text-sm text-red-500" role="alert">
+            {favoriteError}
+          </p>
+        )}
+        {/* WordPressのHTMLをそのままレンダリング */}
+        {post?.content ? (
+          <WordPressContent
+            html={post.content}
+            customCss={post.customCss}
+            customJs={post.customJs}
+            className="post-content"
+          />
+        ) : (
+          <p className="text-gray-500">この記事の内容は現在表示できません。</p>
+        )}
+      </ArticleBodyContainer>
+
+      <section className="pb-10 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            {showMembershipFeatures && favoriteError && (
-              <p className="mb-4 text-sm text-red-500" role="alert">
-                {favoriteError}
-              </p>
-            )}
-            {/* SNSシェアボタン（任意） */}
-            <div className="flex items-center justify-end space-x-4 mb-8">
-              <span className="text-sm text-gray-500">シェアする：</span>
-              <button
-                type="button"
-                onClick={() => handleShareClick('x')}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1DA1F2] text-white"
-                aria-label="Xでシェア"
-              >
-                <i className="ri-twitter-x-fill"></i>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleShareClick('facebook')}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1877F2] text-white"
-                aria-label="Facebookでシェア"
-              >
-                <i className="ri-facebook-fill"></i>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleShareClick('line')}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#06C755] text-white"
-                aria-label="LINEでシェア"
-              >
-                <i className="ri-line-fill"></i>
-              </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+              <Link to="/archive" className="flex items-center text-gray-600 hover:text-primary">
+                <div className="w-5 h-5 flex items-center justify-center mr-1">
+                  <i className="ri-arrow-left-line"></i>
+                </div>
+                <span>記事一覧に戻る</span>
+              </Link>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-full transition-colors hover:bg-gray-50"
+                >
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <i className="ri-share-line"></i>
+                  </div>
+                  <span>シェアする</span>
+                </button>
+                {favoriteAction}
+              </div>
             </div>
-
-            {/* WordPressのHTMLをそのままレンダリング */}
-            {post?.content ? (
-              <WordPressContent
-                html={post.content}
-                customCss={post.customCss}
-                customJs={post.customJs}
-                className="post-content"
-              />
-            ) : (
-              <p className="text-gray-500">この記事の内容は現在表示できません。</p>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag, index) =>
+                  tag.slug ? (
+                    <Link
+                      key={`${tag.slug}-${index}`}
+                      to={`/tag/${encodeURIComponent(tag.slug)}`}
+                      className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full hover:bg-blue-200 transition-colors"
+                    >
+                      {tag.name}
+                    </Link>
+                  ) : (
+                    <span
+                      key={`${tag.name}-${index}`}
+                      className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full"
+                    >
+                      {tag.name}
+                    </span>
+                  ),
+                )}
+              </div>
             )}
           </div>
         </div>
