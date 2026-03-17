@@ -5,6 +5,9 @@ import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
 import WordPressContent from '../components/Post/WordPressContent';
 import Seo from '../components/seo/Seo';
+import ArticleHeroImage from '../components/article/ArticleHeroImage';
+import ArticleTitleBlock from '../components/article/ArticleTitleBlock';
+import ArticleBodyContainer from '../components/article/ArticleBodyContainer';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 
@@ -41,6 +44,22 @@ const GET_PAGE_BY_URI = gql`
     }
   }
 `;
+
+const isValidDate = (value: string) => {
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.getTime());
+};
+
+const formatDateJa = (value?: string) => {
+  if (!value || !isValidDate(value)) {
+    return '';
+  }
+  return new Date(value).toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
 
 interface StaticWpPageProps {
   pageUri: string;
@@ -194,16 +213,33 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
       />
       <Breadcrumb items={[{ label: 'HOME', to: '/' }, { label: page.title ?? pageName }]} />
 
-      <section className="pt-36 pb-12 bg-gray-50">
+      <ArticleHeroImage src={page.featuredImage?.node?.sourceUrl} alt={page.title ?? pageName} />
+
+      <ArticleTitleBlock title={page.title ?? pageName} dateText={formatDateJa(page.date)} />
+
+      <ArticleBodyContainer>
+        {page.content ? (
+          <WordPressContent
+            html={page.content}
+            customCss={page.customCss}
+            customJs={page.customJs}
+            className="post-content"
+          />
+        ) : (
+          <p className="text-gray-500">現在、コンテンツが表示できません。</p>
+        )}
+      </ArticleBodyContainer>
+
+      <section className="pb-10 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
-            <Link to={backLink.to} className="flex items-center text-gray-600 hover:text-primary">
-              <div className="w-5 h-5 flex items-center justify-center mr-1">
-                <i className="ri-arrow-left-line"></i>
-              </div>
-              <span>{backLink.label}</span>
-            </Link>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <Link to={backLink.to} className="flex items-center text-gray-600 hover:text-primary">
+                <div className="w-5 h-5 flex items-center justify-center mr-1">
+                  <i className="ri-arrow-left-line"></i>
+                </div>
+                <span>{backLink.label}</span>
+              </Link>
               <button
                 type="button"
                 onClick={() => setShowShareModal(true)}
@@ -215,81 +251,6 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
                 <span>シェアする</span>
               </button>
             </div>
-          </div>
-
-          <h1 className="text-3xl md:text-4xl font-bold mb-6">{page.title ?? pageName}</h1>
-          {page.date && (
-            <p className="text-sm text-gray-500">
-              {new Date(page.date).toLocaleDateString('ja-JP', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
-          )}
-        </div>
-      </section>
-
-      {page.featuredImage?.node?.sourceUrl && (
-        <div className="relative w-full overflow-hidden bg-gray-100">
-          <img
-            src={page.featuredImage.node.sourceUrl}
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover scale-110 blur-2xl"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-white/35" />
-          <div className="relative mx-auto w-full max-w-[1280px] aspect-[16/9]">
-            <img
-              src={page.featuredImage.node.sourceUrl}
-              alt={page.title ?? pageName}
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
-      )}
-
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-end space-x-4 mb-8">
-              <span className="text-sm text-gray-500">シェアする：</span>
-              <button
-                type="button"
-                onClick={() => handleShareClick('x')}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1DA1F2] text-white"
-                aria-label="Xでシェア"
-              >
-                <i className="ri-twitter-x-fill"></i>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleShareClick('facebook')}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1877F2] text-white"
-                aria-label="Facebookでシェア"
-              >
-                <i className="ri-facebook-fill"></i>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleShareClick('line')}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#06C755] text-white"
-                aria-label="LINEでシェア"
-              >
-                <i className="ri-line-fill"></i>
-              </button>
-            </div>
-
-            {page.content ? (
-              <WordPressContent
-                html={page.content}
-                customCss={page.customCss}
-                customJs={page.customJs}
-                className="post-content"
-              />
-            ) : (
-              <p className="text-gray-500">現在、コンテンツが表示できません。</p>
-            )}
           </div>
         </div>
       </section>
