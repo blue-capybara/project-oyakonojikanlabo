@@ -5,7 +5,7 @@ import process from 'node:process';
 const SITE_ORIGIN = 'https://oyakonojikanlabo.jp';
 const GRAPHQL_ENDPOINT = process.env.WP_GRAPHQL_ENDPOINT ?? 'https://cms.oyakonojikanlabo.jp/graphql';
 const PAGE_SIZE = 100;
-const OUTPUT_PATH = path.join(process.cwd(), 'dist', 'sitemap.xml');
+const OUTPUT_PATH = path.join(process.cwd(), process.env.BUILD_OUT_DIR ?? 'dist', 'sitemap.xml');
 
 // SEO: ステージング URL がインデックスされると重複コンテンツ判定を受けるため、本番と判定できない環境では生成をスキップする。
 function isProduction() {
