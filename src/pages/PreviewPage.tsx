@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
 import WordPressContent from '../components/Post/WordPressContent';
@@ -115,12 +115,21 @@ const PreviewPage: React.FC = () => {
             <>
               {/* アイキャッチ画像（投稿詳細に近い大きさで表示） */}
               {featuredImageUrl && (
-                <div className="w-full h-[50vh] md:h-[60vh] overflow-hidden relative">
+                <div className="relative w-full overflow-hidden bg-gray-100">
                   <img
                     src={featuredImageUrl}
-                    alt={data.title}
-                    className="w-full h-full object-cover"
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 h-full w-full object-cover scale-110 blur-2xl"
                   />
+                  <div className="pointer-events-none absolute inset-0 bg-white/35" />
+                  <div className="relative mx-auto w-full max-w-[1280px] aspect-[16/9]">
+                    <img
+                      src={featuredImageUrl}
+                      alt={data.title}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 </div>
               )}
 

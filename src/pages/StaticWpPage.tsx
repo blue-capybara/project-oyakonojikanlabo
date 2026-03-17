@@ -238,12 +238,21 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
       </section>
 
       {page.featuredImage?.node?.sourceUrl && (
-        <div className="w-full h-[50vh] md:h-[60vh] overflow-hidden relative">
+        <div className="relative w-full overflow-hidden bg-gray-100">
           <img
             src={page.featuredImage.node.sourceUrl}
-            alt={page.title ?? pageName}
-            className="w-full h-full object-cover"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover scale-110 blur-2xl"
           />
+          <div className="pointer-events-none absolute inset-0 bg-white/35" />
+          <div className="relative mx-auto w-full max-w-[1280px] aspect-[16/9]">
+            <img
+              src={page.featuredImage.node.sourceUrl}
+              alt={page.title ?? pageName}
+              className="w-full h-full object-contain"
+            />
+          </div>
         </div>
       )}
 
