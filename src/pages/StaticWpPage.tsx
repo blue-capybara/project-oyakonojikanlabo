@@ -8,6 +8,9 @@ import Seo from '../components/seo/Seo';
 import ArticleHeroImage from '../components/article/ArticleHeroImage';
 import ArticleTitleBlock from '../components/article/ArticleTitleBlock';
 import ArticleBodyContainer from '../components/article/ArticleBodyContainer';
+import GonePage from './GonePage';
+import NotFoundPage from './NotFoundPage';
+import { fetchUrlLifecycle } from '../lib/urlLifecycle';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 
@@ -81,6 +84,7 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [gone, setGone] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
@@ -89,12 +93,34 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
         setLoading(true);
         setError(null);
         setNotFound(false);
+        setGone(false);
+
+        const lifecycle = await fetchUrlLifecycle(endpoint, pageUri);
+        if (lifecycle?.status === 301 && lifecycle.redirectTo) {
+          window.location.replace(lifecycle.redirectTo);
+          return;
+        }
+
+        if (lifecycle?.status === 410) {
+          setPage(null);
+          setGone(true);
+          setNotFound(false);
+          return;
+        }
+
+        if (lifecycle?.status === 404) {
+          setPage(null);
+          setNotFound(true);
+          setGone(false);
+          return;
+        }
 
         const data = await request<PageResponse>(endpoint, GET_PAGE_BY_URI, { uri: pageUri });
 
         if (!data.page) {
           setNotFound(true);
-          setError('ページが見つかりませんでした');
+          setError(null);
+          setGone(false);
           setPage(null);
           return;
         }
@@ -103,6 +129,8 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
       } catch (err) {
         console.error('固定ページの取得に失敗しました:', err);
         setError('ページの読み込み中にエラーが発生しました');
+        setNotFound(false);
+        setGone(false);
       } finally {
         setLoading(false);
       }
@@ -173,8 +201,10 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="max-w-md w-full text-center">
             <div className="mb-8">
-              <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">ページが見つかりません</h2>
+              <h1 className="text-6xl font-bold text-gray-300 mb-4">ERROR</h1>
+              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                ページを読み込めませんでした
+              </h2>
               <p className="text-gray-600 mb-8">{error}</p>
             </div>
             <div className="space-y-4">
@@ -196,7 +226,22 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
     );
   }
 
-  if (!page || notFound) {
+  if (gone) {
+    return (
+      <GonePage
+        title="このページは公開を終了しました"
+        message="このページは削除または公開終了のため、現在は表示できません。"
+        backTo={backLink.to}
+        backLabel={backLink.label}
+      />
+    );
+  }
+
+  if (notFound) {
+    return <NotFoundPage />;
+  }
+
+  if (!page) {
     return (
       <Layout>
         <div className="container mx-auto py-32 text-center">ページが見つかりませんでした。</div>

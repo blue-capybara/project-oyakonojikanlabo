@@ -9,6 +9,9 @@ import useSwipe from '../hooks/useSwipe';
 import { send404Event, sendShareClickEvent } from '../lib/ga';
 import Seo from '../components/seo/Seo';
 import { withBase } from '../utils/paths';
+import GonePage from './GonePage';
+import NotFoundPage from './NotFoundPage';
+import { fetchUrlLifecycle } from '../lib/urlLifecycle';
 
 interface EventScheduleEntry {
   time: string;
@@ -1080,6 +1083,7 @@ const EventDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [gone, setGone] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [activeArtistSlug, setActiveArtistSlug] = useState<string | null>(null);
   const [artistDetail, setArtistDetail] = useState<ArtistProfile | null>(null);
@@ -1316,6 +1320,7 @@ const EventDetailPage: React.FC = () => {
       if (!routeSlug) {
         setError('イベントスラッグが指定されていません');
         setNotFound(true);
+        setGone(false);
         setEvent(null);
         setUsingFallback(false);
         setLoading(false);
@@ -1328,6 +1333,29 @@ const EventDetailPage: React.FC = () => {
         setLoading(true);
         setError(null);
         setNotFound(false);
+        setGone(false);
+
+        const lifecycle = await fetchUrlLifecycle(endpoint, `/event/${routeSlug}`);
+        if (lifecycle?.status === 301 && lifecycle.redirectTo) {
+          window.location.replace(lifecycle.redirectTo);
+          return;
+        }
+
+        if (lifecycle?.status === 410) {
+          setEvent(null);
+          setUsingFallback(false);
+          setNotFound(false);
+          setGone(true);
+          return;
+        }
+
+        if (lifecycle?.status === 404) {
+          setEvent(null);
+          setUsingFallback(false);
+          setNotFound(true);
+          setGone(false);
+          return;
+        }
 
         const data = await request<EventResponse>(endpoint, GET_EVENT_DETAIL, { slug: routeSlug });
 
@@ -1339,6 +1367,7 @@ const EventDetailPage: React.FC = () => {
         setEvent(formatEvent(data.event));
         setUsingFallback(false);
         setNotFound(false);
+        setGone(false);
       } catch (err) {
         const message = err instanceof Error ? err.message : '不明なエラーが発生しました';
         setError(message);
@@ -1348,14 +1377,17 @@ const EventDetailPage: React.FC = () => {
           setEvent(null);
           setUsingFallback(false);
           setNotFound(true); // SEO: コンテンツ不存在が確定したときだけ 404 を GA に送る
+          setGone(false);
         } else if (isDevMode) {
           setEvent(buildFallbackEvent(routeSlug ?? 'fallback'));
           setUsingFallback(true);
           setNotFound(false);
+          setGone(false);
         } else {
           setEvent(null);
           setUsingFallback(false);
           setNotFound(false); // 通信エラーなどは 404 と区別して計測しない
+          setGone(false);
         }
       } finally {
         setLoading(false);
@@ -1493,7 +1525,11 @@ const EventDetailPage: React.FC = () => {
     const encodedUrl = encodeURIComponent(shareUrl);
     const encodedText = encodeURIComponent(shareText);
 
-    sendShareClickEvent({ platform, content_type: 'event', content_slug: slug ?? '' });
+    sendShareClickEvent({
+      platform,
+      content_type: 'event',
+      content_slug: event?.slug ?? routeSlug ?? '',
+    });
 
     switch (platform) {
       case 'x': {
@@ -1605,6 +1641,21 @@ const EventDetailPage: React.FC = () => {
       </div>
     );
   };
+
+  if (gone) {
+    return (
+      <GonePage
+        title="このイベントは公開を終了しました"
+        message="このイベントは削除または公開終了のため、現在は表示できません。"
+        backTo="/event"
+        backLabel="イベント一覧に戻る"
+      />
+    );
+  }
+
+  if (notFound) {
+    return <NotFoundPage />;
+  }
 
   return (
     <Layout>
