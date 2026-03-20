@@ -1,5 +1,11 @@
 RewriteEngine On
 
+# 410ページ自体は通常配信（ErrorDocument 内部参照時のループ回避）
+RewriteRule ^410\.html$ - [L]
+
+# 410レスポンス時に表示する日本語ページ
+ErrorDocument 410 /410.html
+
 # BEGIN OJL URL LIFECYCLE
 # このブロックは scripts/postbuild.mjs により自動更新されます。
 # END OJL URL LIFECYCLE

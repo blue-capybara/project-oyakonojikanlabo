@@ -404,7 +404,9 @@ const PostDetailPage: React.FC = () => {
           <div className="max-w-md w-full text-center">
             <div className="mb-8">
               <h1 className="text-6xl font-bold text-gray-300 mb-4">ERROR</h1>
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">記事を読み込めませんでした</h2>
+              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                記事を読み込めませんでした
+              </h2>
               <p className="text-gray-600 mb-8">{error}</p>
             </div>
 

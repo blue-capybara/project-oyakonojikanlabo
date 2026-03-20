@@ -1525,7 +1525,11 @@ const EventDetailPage: React.FC = () => {
     const encodedUrl = encodeURIComponent(shareUrl);
     const encodedText = encodeURIComponent(shareText);
 
-    sendShareClickEvent({ platform, content_type: 'event', content_slug: event?.slug ?? routeSlug ?? '' });
+    sendShareClickEvent({
+      platform,
+      content_type: 'event',
+      content_slug: event?.slug ?? routeSlug ?? '',
+    });
 
     switch (platform) {
       case 'x': {

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,follow" />
+  <title>410 | このページは公開を終了しました</title>
+  <style>
+    :root {
+      --bg: #f9fafb;
+      --text-main: #374151;
+      --text-sub: #4b5563;
+      --text-muted: #6b7280;
+      --text-light: #d1d5db;
+      --link: #2563eb;
+      --link-hover: #1d4ed8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans',
+        'Noto Sans JP', Meiryo, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    .wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .card {
+      width: min(100%, 640px);
+      text-align: center;
+    }
+
+    .status {
+      margin: 0 0 12px;
+      font-size: clamp(80px, 18vw, 144px);
+      line-height: 1;
+      font-weight: 800;
+      color: var(--text-light);
+      letter-spacing: 0.02em;
+    }
+
+    .title {
+      margin: 0 0 16px;
+      font-size: clamp(24px, 4vw, 32px);
+      line-height: 1.4;
+      color: var(--text-main);
+    }
+
+    .message {
+      margin: 0 0 32px;
+      color: var(--text-sub);
+      line-height: 1.8;
+    }
+
+    .button {
+      display: inline-block;
+      text-decoration: none;
+      color: #fff;
+      background: var(--link);
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-weight: 700;
+      transition: background-color 0.2s ease;
+    }
+
+    .button:hover {
+      background: var(--link-hover);
+    }
+
+    .links {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .links a {
+      color: var(--link);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
+    .note {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1 class="status">410</h1>
+      <h2 class="title">このページは公開を終了しました</h2>
+      <p class="message">
+        お探しのコンテンツは削除または公開終了となり、現在はご利用いただけません。<br />
+        お手数ですが、トップページまたは以下のリンクからご覧ください。
+      </p>
+      <a class="button" href="/">ホームに戻る</a>
+      <nav class="links" aria-label="主要リンク">
+        <a href="/archive">コラム記事一覧</a>
+        <a href="/event">イベント一覧</a>
+        <a href="/culture-school">カルチャースクール</a>
+      </nav>
+      <p class="note">URLを直接保存されている場合は、ブックマークの更新をお願いします。</p>
+    </section>
+  </main>
+</body>
+
+</html>
