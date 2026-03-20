@@ -11,6 +11,9 @@ import ArticleBodyContainer from '../components/article/ArticleBodyContainer';
 import { getFeatureFlag } from '../config/featureFlags';
 import { send404Event, sendRelatedPostClickEvent, sendShareClickEvent } from '../lib/ga';
 import Seo from '../components/seo/Seo';
+import GonePage from './GonePage';
+import NotFoundPage from './NotFoundPage';
+import { fetchUrlLifecycle } from '../lib/urlLifecycle';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 const relatedEndpoint = `${new URL(endpoint).origin}/wp-json/okjl/v1`;
@@ -154,6 +157,7 @@ const PostDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [gone, setGone] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState<RelatedPost[]>([]);
   const [relatedLoading, setRelatedLoading] = useState(false);
@@ -255,6 +259,7 @@ const PostDetailPage: React.FC = () => {
     if (!slug) {
       setError('記事のスラッグが指定されていません');
       setNotFound(true);
+      setGone(false);
       setLoading(false);
       setRelatedPosts([]);
       setRelatedLoading(false);
@@ -266,19 +271,44 @@ const PostDetailPage: React.FC = () => {
         setLoading(true);
         setError(null);
         setNotFound(false);
+        setGone(false);
+
+        const lifecycle = await fetchUrlLifecycle(endpoint, `/${slug}`);
+        if (lifecycle?.status === 301 && lifecycle.redirectTo) {
+          window.location.replace(lifecycle.redirectTo);
+          return;
+        }
+
+        if (lifecycle?.status === 410) {
+          setPost(null);
+          setGone(true);
+          setNotFound(false);
+          return;
+        }
+
+        if (lifecycle?.status === 404) {
+          setPost(null);
+          setNotFound(true);
+          setGone(false);
+          return;
+        }
+
         const data = await request<PostResponse>(endpoint, GET_POST_BY_SLUG, { slug });
         if (!data.post) {
-          setError('指定された記事が見つかりません');
+          setError(null);
           setNotFound(true); // SEO: コンテンツ不存在が確定したときだけ 404 を GA に送る
+          setGone(false);
           setPost(null);
         } else {
           setPost(data.post);
           setNotFound(false);
+          setGone(false);
         }
       } catch (error) {
         console.error('記事取得エラー:', error);
         setError('記事の読み込み中にエラーが発生しました');
         setNotFound(false); // 通信エラーなどは 404 と区別し、SEO 計測しない
+        setGone(false);
       } finally {
         setLoading(false);
       }
@@ -352,14 +382,29 @@ const PostDetailPage: React.FC = () => {
     );
   }
 
+  if (gone) {
+    return (
+      <GonePage
+        title="この記事は公開を終了しました"
+        message="この記事は削除または公開終了のため、現在は表示できません。"
+        backTo="/archive"
+        backLabel="記事一覧に戻る"
+      />
+    );
+  }
+
+  if (notFound) {
+    return <NotFoundPage />;
+  }
+
   if (error) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="max-w-md w-full text-center">
             <div className="mb-8">
-              <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">記事が見つかりません</h2>
+              <h1 className="text-6xl font-bold text-gray-300 mb-4">ERROR</h1>
+              <h2 className="text-2xl font-semibold text-gray-700 mb-4">記事を読み込めませんでした</h2>
               <p className="text-gray-600 mb-8">{error}</p>
             </div>
 

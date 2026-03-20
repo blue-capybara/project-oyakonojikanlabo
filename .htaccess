@@ -1,9 +1,8 @@
-AuthUserFile "/home/capybara5150/oyakonojikanlabo.xyz/htpasswd/react.oyakonojikanlabo.xyz/.htpasswd"
-AuthName "Member Site"
-AuthType BASIC
-Require valid-user
-
 RewriteEngine On
+
+# BEGIN OJL URL LIFECYCLE
+# このブロックは scripts/postbuild.mjs により自動更新されます。
+# END OJL URL LIFECYCLE
 
 # Serve existing files and directories as-is
 RewriteCond %{REQUEST_FILENAME} -f [OR]
