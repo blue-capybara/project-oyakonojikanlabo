@@ -117,6 +117,78 @@ const rewriteCmsAnchors = (root: ParentNode) => {
   });
 };
 
+const PX_WIDTH_VALUE_PATTERN = /^([0-9]+(?:\.[0-9]+)?)px$/i;
+const PX_HEIGHT_VALUE_PATTERN = /^([0-9]+(?:\.[0-9]+)?)px$/i;
+
+const parseInlineStyleDeclarations = (styleText: string) => {
+  const declarations = new Map<string, string>();
+
+  styleText
+    .split(';')
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .forEach((segment) => {
+      const colonIndex = segment.indexOf(':');
+      if (colonIndex <= 0) {
+        return;
+      }
+
+      const property = segment.slice(0, colonIndex).trim().toLowerCase();
+      const value = segment.slice(colonIndex + 1).trim();
+      if (!property || !value) {
+        return;
+      }
+      declarations.set(property, value);
+    });
+
+  return declarations;
+};
+
+const serializeInlineStyleDeclarations = (declarations: Map<string, string>) =>
+  Array.from(declarations.entries())
+    .map(([property, value]) => `${property}: ${value}`)
+    .join('; ');
+
+const normalizeResponsiveMediaStyles = (root: ParentNode) => {
+  root.querySelectorAll<HTMLImageElement>('img[style]').forEach((img) => {
+    const styleText = img.getAttribute('style');
+    if (!styleText) {
+      return;
+    }
+
+    const declarations = parseInlineStyleDeclarations(styleText);
+    const widthValue = declarations.get('width');
+    if (!widthValue) {
+      return;
+    }
+
+    const widthMatch = widthValue.match(PX_WIDTH_VALUE_PATTERN);
+    if (!widthMatch) {
+      return;
+    }
+
+    const widthPx = Number(widthMatch[1]);
+    if (!Number.isFinite(widthPx) || widthPx <= 0) {
+      return;
+    }
+
+    // インライン固定幅(px)を端末幅に追従する形へ正規化し、横方向のはみ出しを防ぐ。
+    declarations.set('width', `min(100%, ${widthPx}px)`);
+    declarations.set('max-width', '100%');
+
+    const heightValue = declarations.get('height');
+    if (
+      heightValue &&
+      PX_HEIGHT_VALUE_PATTERN.test(heightValue) &&
+      !declarations.has('aspect-ratio')
+    ) {
+      declarations.set('height', 'auto');
+    }
+
+    img.setAttribute('style', serializeInlineStyleDeclarations(declarations));
+  });
+};
+
 const WordPressContent: React.FC<WordPressContentProps> = ({
   html,
   className,
@@ -155,6 +227,14 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
         .wp-article-root svg {
           max-width: 100%;
           height: auto;
+        }
+        .wp-article-root .wp-block-image,
+        .wp-article-root figure {
+          max-width: 100%;
+        }
+        .wp-article-root img[style*="width"] {
+          max-width: 100% !important;
+          height: auto !important;
         }
       `;
       shadow.appendChild(baseStyle);
@@ -626,6 +706,7 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
         const scripts = Array.from(template.content.querySelectorAll('script'));
         scripts.forEach((node) => node.remove());
         rewriteCmsAnchors(template.content);
+        normalizeResponsiveMediaStyles(template.content);
 
         container.innerHTML = '';
         container.appendChild(template.content.cloneNode(true));
