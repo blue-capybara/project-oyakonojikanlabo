@@ -39,23 +39,48 @@ const GET_URL_LIFECYCLE = gql`
   }
 `;
 
+const normalizeSegment = (segment: string) => {
+  if (!segment) return '';
+
+  try {
+    return encodeURIComponent(decodeURIComponent(segment));
+  } catch {
+    return encodeURIComponent(segment);
+  }
+};
+
 const normalizePath = (inputPath: string) => {
   if (!inputPath) return '';
 
-  let path = inputPath.trim();
-  if (!path) return '';
+  let pathname = inputPath.trim();
+  if (!pathname) return '';
 
-  if (!path.startsWith('/')) {
-    path = `/${path}`;
+  try {
+    pathname = new URL(inputPath, 'https://oyakonojikanlabo.jp').pathname;
+  } catch {
+    pathname = inputPath;
   }
 
-  path = path.replace(/\/{2,}/g, '/');
+  pathname = pathname.split('#')[0].split('?')[0].trim();
+  if (!pathname) return '';
 
-  if (path.length > 1 && path.endsWith('/')) {
-    path = path.slice(0, -1);
+  pathname = pathname.replace(/\/{2,}/g, '/');
+
+  if (!pathname.startsWith('/')) {
+    pathname = `/${pathname}`;
   }
 
-  return path.toLowerCase();
+  const normalized = pathname
+    .split('/')
+    .map((segment, index) => (index === 0 ? '' : normalizeSegment(segment)))
+    .join('/');
+
+  const canonical = normalized.length > 1 ? normalized.replace(/\/+$/, '') : normalized;
+  if (!canonical) {
+    return '/';
+  }
+
+  return canonical.toLowerCase();
 };
 
 const normalizeStatus = (statusValue?: number | null): UrlLifecycleStatus | null => {

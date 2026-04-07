@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { request, gql } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
@@ -153,6 +153,7 @@ const buildRelatedPostPath = (relatedPost: RelatedPost) => {
 
 const PostDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const [post, setPost] = useState<PostData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -273,7 +274,7 @@ const PostDetailPage: React.FC = () => {
         setNotFound(false);
         setGone(false);
 
-        const lifecycle = await fetchUrlLifecycle(endpoint, `/${slug}`);
+        const lifecycle = await fetchUrlLifecycle(endpoint, location.pathname);
         if (lifecycle?.status === 301 && lifecycle.redirectTo) {
           window.location.replace(lifecycle.redirectTo);
           return;
@@ -315,7 +316,7 @@ const PostDetailPage: React.FC = () => {
     };
 
     fetchPost();
-  }, [slug]);
+  }, [location.pathname, slug]);
 
   useEffect(() => {
     if (!post?.databaseId) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { gql, request } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
@@ -80,6 +80,7 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
   sharePath,
   backLink = { label: 'HOMEに戻る', to: '/' },
 }) => {
+  const location = useLocation();
   const [page, setPage] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +96,7 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
         setNotFound(false);
         setGone(false);
 
-        const lifecycle = await fetchUrlLifecycle(endpoint, pageUri);
+        const lifecycle = await fetchUrlLifecycle(endpoint, location.pathname);
         if (lifecycle?.status === 301 && lifecycle.redirectTo) {
           window.location.replace(lifecycle.redirectTo);
           return;
@@ -137,7 +138,7 @@ const StaticWpPage: React.FC<StaticWpPageProps> = ({
     };
 
     fetchPage();
-  }, [pageUri]);
+  }, [location.pathname, pageUri]);
 
   const shareUrl = useMemo(() => {
     if (typeof window !== 'undefined') {

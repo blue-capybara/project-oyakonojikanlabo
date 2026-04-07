@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { gql, request } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
@@ -1079,6 +1079,7 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
 
 const EventDetailPage: React.FC = () => {
   const { slug: routeSlug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1335,7 +1336,7 @@ const EventDetailPage: React.FC = () => {
         setNotFound(false);
         setGone(false);
 
-        const lifecycle = await fetchUrlLifecycle(endpoint, `/event/${routeSlug}`);
+        const lifecycle = await fetchUrlLifecycle(endpoint, location.pathname);
         if (lifecycle?.status === 301 && lifecycle.redirectTo) {
           window.location.replace(lifecycle.redirectTo);
           return;
@@ -1395,7 +1396,7 @@ const EventDetailPage: React.FC = () => {
     };
 
     fetchEvent();
-  }, [routeSlug]);
+  }, [location.pathname, routeSlug]);
 
   useEffect(() => {
     if (notFound) {
