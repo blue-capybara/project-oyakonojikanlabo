@@ -502,6 +502,26 @@ const determineStatus = (slot?: EventSlot): Event['status'] => {
   return 'upcoming';
 };
 
+const determineAggregateStatus = (slots?: EventSlot[] | null): Event['status'] => {
+  if (!slots || slots.length === 0) {
+    return 'upcoming';
+  }
+
+  let hasUpcoming = false;
+
+  for (const slot of slots) {
+    const slotStatus = determineStatus(slot);
+    if (slotStatus === 'current') {
+      return 'current';
+    }
+    if (slotStatus === 'upcoming') {
+      hasUpcoming = true;
+    }
+  }
+
+  return hasUpcoming ? 'upcoming' : 'past';
+};
+
 const formatPrice = (price?: number | null, priceType?: string | null) => {
   if (priceType === 'free') {
     return '無料';
@@ -904,7 +924,7 @@ const formatEvent = (node: EventNode): Event => {
     image: eventCpt.mainImage?.node?.sourceUrl ?? '',
     galleryImages,
     slotSchedules,
-    status: determineStatus(primarySlot),
+    status: determineAggregateStatus(eventCpt.singleSlots),
     description: descriptionText || undefined,
     descriptionHtml,
     detailHtml: detailHtml,
@@ -1129,6 +1149,9 @@ const EventDetailPage: React.FC = () => {
   const defaultReservationPath = `/event/${event?.slug ?? routeSlug ?? ''}/reserve`;
   const isExternalReservationOverride = Boolean(
     reservationOverrideUrl && /^https?:\/\//i.test(reservationOverrideUrl),
+  );
+  const isReservationClosed = Boolean(
+    event && (event.reservationOpen === false || event.status === 'past'),
   );
   const eventImages = useMemo<ArtistMedia[]>(() => {
     if (!event) {
@@ -1923,6 +1946,16 @@ const EventDetailPage: React.FC = () => {
                           </div>
                           読み込み中…
                         </span>
+                      ) : isReservationClosed ? (
+                        <span
+                          className="flex flex-1 cursor-not-allowed items-center justify-center rounded-button bg-gray-300 px-8 py-3 font-medium text-white"
+                          aria-disabled="true"
+                        >
+                          <div className="mr-2 flex h-5 w-5 items-center justify-center">
+                            <i className="ri-close-circle-line"></i>
+                          </div>
+                          申込終了
+                        </span>
                       ) : reservationOverrideUrl ? (
                         <a
                           href={reservationOverrideUrl}
@@ -2077,6 +2110,16 @@ const EventDetailPage: React.FC = () => {
                             <i className="ri-time-line"></i>
                           </div>
                           読み込み中…
+                        </span>
+                      ) : isReservationClosed ? (
+                        <span
+                          className="inline-flex w-full cursor-not-allowed items-center justify-center rounded-button bg-gray-300 px-8 py-4 font-medium whitespace-nowrap text-white md:w-auto"
+                          aria-disabled="true"
+                        >
+                          <div className="mr-2 flex h-5 w-5 items-center justify-center">
+                            <i className="ri-close-circle-line"></i>
+                          </div>
+                          申込終了
                         </span>
                       ) : reservationOverrideUrl ? (
                         <a
