@@ -49,7 +49,6 @@ interface GraphqlEventCpt {
   capacity?: string | number | null;
   reservationOpen?: boolean | null;
   waitlistEnabled?: boolean | null;
-  displayBadges?: (string | null)[] | null;
   mainImage?: GraphqlImage | null;
   singleSlots?: (GraphqlSlot | null)[] | null;
   venueRef?: {
@@ -357,7 +356,6 @@ const GET_SCHOOL_EVENTS = gql`
           capacity
           reservationOpen
           waitlistEnabled
-          displayBadges
           venueMapsUrl
           notes
           mainImage {
@@ -491,6 +489,49 @@ const buildSlots = (slots?: (GraphqlSlot | null)[] | null): NormalizedSlot[] => 
   return normalized.sort((a, b) => a.date.getTime() - b.date.getTime());
 };
 
+const combineSlotDateTime = (isoDate: string, time?: string | null) => {
+  const normalizedTime = time ? `${time}:00` : '00:00:00';
+  const parsed = new Date(`${isoDate}T${normalizedTime}`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const determineSlotTimingStatus = (slot: NormalizedSlot): 'current' | 'upcoming' | 'past' => {
+  const now = new Date();
+  const start = combineSlotDateTime(slot.isoDate, slot.startTimeLabel);
+  const end = combineSlotDateTime(slot.isoDate, slot.endTimeLabel) ?? start;
+
+  if (start && end) {
+    if (now >= start && now <= end) return 'current';
+    return now < start ? 'upcoming' : 'past';
+  }
+
+  if (start) {
+    return now < start ? 'upcoming' : 'past';
+  }
+
+  return 'upcoming';
+};
+
+const determineSlotsTimingStatus = (slots: NormalizedSlot[]): 'current' | 'upcoming' | 'past' => {
+  if (slots.length === 0) {
+    return 'upcoming';
+  }
+
+  let hasUpcoming = false;
+
+  for (const slot of slots) {
+    const slotStatus = determineSlotTimingStatus(slot);
+    if (slotStatus === 'current') {
+      return 'current';
+    }
+    if (slotStatus === 'upcoming') {
+      hasUpcoming = true;
+    }
+  }
+
+  return hasUpcoming ? 'upcoming' : 'past';
+};
+
 const buildScheduleParts = (slot?: NormalizedSlot) => {
   if (!slot) {
     return {
@@ -550,15 +591,12 @@ const buildLocationLabel = (
   return '開催場所：お問い合わせください';
 };
 
-const deriveStatusBadge = (eventCpt: GraphqlEventCpt | null | undefined, slot?: NormalizedSlot) => {
-  if (eventCpt?.displayBadges) {
-    const matched = eventCpt.displayBadges.find(
-      (badge): badge is keyof typeof DISPLAY_BADGE_MAP =>
-        typeof badge === 'string' && DISPLAY_BADGE_MAP[badge],
-    );
-    if (matched) {
-      return DISPLAY_BADGE_MAP[matched];
-    }
+const deriveStatusBadge = (
+  eventCpt: GraphqlEventCpt | null | undefined,
+  slotStatus: 'current' | 'upcoming' | 'past',
+) => {
+  if (slotStatus === 'past') {
+    return STATUS_BADGES.past;
   }
   if (eventCpt?.reservationOpen === false) {
     return DISPLAY_BADGE_MAP.closed;
@@ -566,14 +604,7 @@ const deriveStatusBadge = (eventCpt: GraphqlEventCpt | null | undefined, slot?: 
   if (eventCpt?.waitlistEnabled) {
     return DISPLAY_BADGE_MAP.wait;
   }
-  if (!slot) {
-    return STATUS_BADGES.upcoming;
-  }
-  const now = Date.now();
-  if (slot.date.getTime() < now) {
-    return STATUS_BADGES.past;
-  }
-  return STATUS_BADGES.upcoming;
+  return STATUS_BADGES[slotStatus];
 };
 
 const deriveCategoryTags = (node: GraphqlEventNode, slots: NormalizedSlot[]): CategoryKey[] => {
@@ -1141,7 +1172,7 @@ const CultureSchoolPage: React.FC = () => {
                       {renderCtaButton(
                         item.event.reservationUrl ?? item.event.detailUrl,
                         'w-full bg-primary text-white py-2 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors text-center text-sm',
-                        '詳細・予約はこちら',
+                        item.event.reservationUrl ? '詳細・予約はこちら' : '詳細はこちら',
                       )}
                     </div>
                   ))}
@@ -1485,14 +1516,17 @@ const transformSchoolEvent = (node: GraphqlEventNode | null): SchoolEventDisplay
   const slots = buildSlots(node.eventCpt?.singleSlots);
   const primarySlot = slots[0];
   const scheduleParts = buildScheduleParts(primarySlot);
-  const statusBadge = deriveStatusBadge(node.eventCpt, primarySlot);
+  const slotStatus = determineSlotsTimingStatus(slots);
+  const statusBadge = deriveStatusBadge(node.eventCpt, slotStatus);
   const descriptionSource =
     stripHtml(node.eventCpt?.summary) || stripHtml(node.eventDetailExt?.detailBody) || '';
   const description = descriptionSource || '詳細はスクールページをご覧ください。';
 
   const detailUrl = `/school-detail/${node.slug}`;
-  const reservationUrl =
-    node.eventDetailExt?.contact?.reservationOverrideUrl ?? node.eventDetailExt?.contact?.formUrl;
+  const isReservationClosed = node.eventCpt?.reservationOpen === false || slotStatus === 'past';
+  const reservationUrl = isReservationClosed
+    ? undefined
+    : node.eventDetailExt?.contact?.reservationOverrideUrl ?? node.eventDetailExt?.contact?.formUrl;
   const image = node.eventCpt?.mainImage?.node?.sourceUrl ?? EVENT_IMAGE_FALLBACK;
 
   return {

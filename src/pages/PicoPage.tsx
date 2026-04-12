@@ -24,7 +24,6 @@ interface PicoEventCpt {
   capacity?: number | string | null;
   reservationOpen?: boolean | null;
   waitlistEnabled?: boolean | null;
-  displayBadges?: (string | null)[] | null;
   mainImage?: {
     node?: {
       sourceUrl?: string | null;
@@ -94,6 +93,7 @@ interface PicoEventDisplay {
   statusLabel: string;
   statusClassName: string;
   ctaUrl: string;
+  ctaLabel: string;
   sortOrder: number;
   eventType: PicoEventType;
 }
@@ -162,7 +162,6 @@ const GET_PICO_EVENTS = gql`
             capacity
             reservationOpen
             waitlistEnabled
-            displayBadges
             mainImage {
               node {
                 sourceUrl
@@ -281,6 +280,28 @@ const determineSlotStatus = (slot?: PicoEventSlot): 'current' | 'upcoming' | 'pa
   return 'upcoming';
 };
 
+const determineAggregateSlotStatus = (
+  slots?: PicoEventSlot[] | null,
+): 'current' | 'upcoming' | 'past' => {
+  if (!slots || slots.length === 0) {
+    return 'upcoming';
+  }
+
+  let hasUpcoming = false;
+
+  for (const slot of slots) {
+    const slotStatus = determineSlotStatus(slot);
+    if (slotStatus === 'current') {
+      return 'current';
+    }
+    if (slotStatus === 'upcoming') {
+      hasUpcoming = true;
+    }
+  }
+
+  return hasUpcoming ? 'upcoming' : 'past';
+};
+
 const stripHtml = (html?: string | null) => {
   if (!html) return '';
   return html
@@ -355,12 +376,8 @@ const deriveReservationBadge = (
   eventCpt: PicoEventCpt | null | undefined,
   slotStatus: 'current' | 'upcoming' | 'past',
 ) => {
-  const badgeKey = eventCpt?.displayBadges?.find(
-    (value): value is keyof typeof DISPLAY_BADGE_MAP =>
-      typeof value === 'string' && value in DISPLAY_BADGE_MAP,
-  );
-  if (badgeKey) {
-    return DISPLAY_BADGE_MAP[badgeKey];
+  if (slotStatus === 'past') {
+    return STATUS_BADGES.past;
   }
   if (eventCpt?.reservationOpen === false) {
     return DISPLAY_BADGE_MAP.closed;
@@ -371,11 +388,14 @@ const deriveReservationBadge = (
   return STATUS_BADGES[slotStatus];
 };
 
-const mapContactUrl = (node: PicoEventNode & { slug: string }) => {
+const buildDetailPath = (slug: string, eventType: PicoEventType) =>
+  eventType === 'school' ? `/school-detail/${slug}` : `/event/${slug}`;
+
+const mapContactUrl = (node: PicoEventNode & { slug: string }, eventType: PicoEventType) => {
   const url =
     node.eventDetailExt?.contact?.reservationOverrideUrl ?? node.eventDetailExt?.contact?.formUrl;
   if (url) return url;
-  return `/event/${node.slug}`;
+  return buildDetailPath(node.slug, eventType);
 };
 
 const transformEventNode = (
@@ -385,17 +405,20 @@ const transformEventNode = (
   const eventType = normalizeEventType(eventCpt?.eventType);
   const primarySlot = selectPrimarySlot(eventCpt?.singleSlots);
   const scheduleParts = buildScheduleParts(primarySlot);
-  const statusBadge = deriveReservationBadge(eventCpt, determineSlotStatus(primarySlot));
+  const slotStatus = determineAggregateSlotStatus(eventCpt?.singleSlots);
+  const statusBadge = deriveReservationBadge(eventCpt, slotStatus);
   const categorySlug =
     node.eventCategories?.nodes?.find((item) => item?.slug)?.slug ?? PICO_CATEGORY_SLUG;
   const categoryBadge = mapCategoryBadge(categorySlug);
   const descriptionSource = eventCpt?.summary ?? node.eventDetailExt?.detailBody ?? '';
+  const detailPath = buildDetailPath(node.slug, eventType);
+  const isReservationClosed = eventCpt?.reservationOpen === false || slotStatus === 'past';
 
   return {
     id: node.id,
     slug: node.slug,
     title: node.title,
-    link: node.link ?? `/event/${node.slug}`,
+    link: detailPath,
     categorySlug,
     categoryLabel: categoryBadge.label,
     categoryClassName: categoryBadge.className,
@@ -409,7 +432,8 @@ const transformEventNode = (
     capacityLabel: formatCapacityLabel(eventCpt?.capacity),
     statusLabel: statusBadge.label,
     statusClassName: statusBadge.className,
-    ctaUrl: mapContactUrl(node),
+    ctaUrl: isReservationClosed ? detailPath : mapContactUrl(node, eventType),
+    ctaLabel: isReservationClosed ? '詳細を見る' : eventType === 'school' ? '申し込む' : '予約する',
     sortOrder: scheduleParts.sortOrder,
     eventType,
   };
@@ -966,7 +990,7 @@ const PicoPage: React.FC = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center bg-primary text-white px-6 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors"
                     >
-                      予約する
+                      {featuredEvent.ctaLabel}
                       <i className="ri-external-link-line ml-2"></i>
                     </a>
                   ) : (
@@ -974,7 +998,7 @@ const PicoPage: React.FC = () => {
                       to={featuredEvent.ctaUrl}
                       className="inline-flex items-center justify-center bg-primary text-white px-6 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors"
                     >
-                      予約する
+                      {featuredEvent.ctaLabel}
                     </Link>
                   )}
                 </div>
@@ -1557,7 +1581,7 @@ const PicoPage: React.FC = () => {
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center bg-primary text-white px-6 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors"
                       >
-                        申し込む
+                        {featuredSchoolEvent.ctaLabel}
                         <i className="ri-external-link-line ml-2"></i>
                       </a>
                     ) : (
@@ -1565,7 +1589,7 @@ const PicoPage: React.FC = () => {
                         to={featuredSchoolEvent.ctaUrl}
                         className="inline-flex items-center justify-center bg-primary text-white px-6 py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors"
                       >
-                        申し込む
+                        {featuredSchoolEvent.ctaLabel}
                       </Link>
                     )}
                   </div>

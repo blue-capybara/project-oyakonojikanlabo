@@ -93,6 +93,8 @@ interface ReservationEvent {
   timeSlots: TimeSlotOption[];
   dateOptions?: string[];
   primarySlot?: EventSlot;
+  reservationOpen?: boolean | null;
+  status: 'current' | 'upcoming' | 'past';
 }
 
 interface ReservationRow {
@@ -174,6 +176,54 @@ const GET_EVENT_DETAIL = gql`
 const selectPrimarySlot = (slots?: EventSlot[] | null) => {
   if (!slots || slots.length === 0) return undefined;
   return slots.find((slot) => slot.date) ?? slots[0];
+};
+
+const combineDateTime = (date?: string | null, time?: string | null) => {
+  if (!date) return null;
+  const normalizedTime = time ? (time.length === 5 ? `${time}:00` : time) : '00:00:00';
+  const parsed = new Date(`${date}T${normalizedTime}`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const determineSlotStatus = (slot?: EventSlot): ReservationEvent['status'] => {
+  const now = new Date();
+  if (!slot?.date) {
+    return 'upcoming';
+  }
+
+  const start = combineDateTime(slot.date, slot.startTime);
+  const end = combineDateTime(slot.date, slot.endTime) ?? start;
+
+  if (start && end) {
+    if (now >= start && now <= end) return 'current';
+    return now < start ? 'upcoming' : 'past';
+  }
+
+  if (start) {
+    return now < start ? 'upcoming' : 'past';
+  }
+
+  return 'upcoming';
+};
+
+const determineAggregateStatus = (slots?: EventSlot[] | null): ReservationEvent['status'] => {
+  if (!slots || slots.length === 0) {
+    return 'upcoming';
+  }
+
+  let hasUpcoming = false;
+
+  for (const slot of slots) {
+    const slotStatus = determineSlotStatus(slot);
+    if (slotStatus === 'current') {
+      return 'current';
+    }
+    if (slotStatus === 'upcoming') {
+      hasUpcoming = true;
+    }
+  }
+
+  return hasUpcoming ? 'upcoming' : 'past';
 };
 
 const formatDateLabel = (date?: string | null) => {
@@ -417,6 +467,7 @@ const formatReservationEvent = (node: EventNode): ReservationEvent => {
     .map((value) => (value ? stripHtml(value) : ''))
     .find((text) => text.length > 0);
   const dateOptions = buildDateOptions(eventCpt.singleSlots);
+  const status = determineAggregateStatus(eventCpt.singleSlots);
 
   return {
     id: node.id,
@@ -438,6 +489,8 @@ const formatReservationEvent = (node: EventNode): ReservationEvent => {
     timeSlots: createTimeSlots(eventCpt.singleSlots),
     dateOptions,
     primarySlot,
+    reservationOpen: eventCpt.reservationOpen ?? null,
+    status,
   };
 };
 
@@ -475,6 +528,8 @@ const buildFallbackEvent = (slug: string): ReservationEvent => ({
     '2025年6月8日（日） 15:30〜16:00',
   ],
   primarySlot: { date: '2025-06-08', startTime: '14:00', endTime: '14:30' },
+  reservationOpen: true,
+  status: 'upcoming',
 });
 
 const generateReservationReference = () => {
@@ -728,6 +783,11 @@ const EventReservationPage: React.FC = () => {
       return;
     }
 
+    if (event.reservationOpen === false || event.status === 'past') {
+      setReservationError('このイベントの申込受付は終了しました。');
+      return;
+    }
+
     if (!agreement) {
       setAgreementError(true);
       return;
@@ -781,7 +841,7 @@ const EventReservationPage: React.FC = () => {
       slotOption?.slot?.startTime ?? event.primarySlot?.startTime ?? null,
     );
 
-    const eventSlug = event.slug || id || 'unknown-event';
+    const eventSlug = event.slug || routeSlug || 'unknown-event';
     const reservationCode = generateReservationReference();
 
     try {
@@ -867,6 +927,9 @@ const EventReservationPage: React.FC = () => {
     (completedReservation?.time_slot ?? selectedTimeSlot) || '調整中';
   const displayedReservationQuantity = completedReservation?.quantity ?? quantity;
   const displayedEventTitle = completedReservation?.event_title ?? event?.title ?? 'イベント情報';
+  const isReservationClosed = Boolean(
+    event && (event.reservationOpen === false || event.status === 'past'),
+  );
 
   if (loading) {
     return (
@@ -1023,10 +1086,49 @@ const EventReservationPage: React.FC = () => {
           </div>
         )}
 
+        {isReservationClosed && (
+          <div className="max-w-4xl mx-auto mb-6 bg-gray-50 border border-gray-200 text-gray-800 px-4 py-3 rounded-lg">
+            <div className="flex items-start">
+              <div className="w-6 h-6 flex items-center justify-center mr-2 text-gray-500">
+                <i className="ri-close-circle-line"></i>
+              </div>
+              <div>
+                <p className="font-medium">このイベントの申込受付は終了しました。</p>
+                <p className="text-sm">
+                  イベント詳細ページは引き続きご覧いただけます。最新情報は詳細ページをご確認ください。
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              {!showMembershipFeatures ? (
+              {isReservationClosed ? (
+                <div className="p-6 md:p-8 space-y-4">
+                  <h2 className="text-xl font-bold">申込受付は終了しました</h2>
+                  <p className="text-gray-700 leading-relaxed">
+                    このイベントは終了済み、または現在は申込受付を停止しています。ページはそのまま公開していますが、この画面から新規申込はできません。
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleReturnToDetail}
+                      className="inline-flex items-center px-5 py-3 bg-primary text-white rounded-button hover:bg-primary/90 transition-colors"
+                    >
+                      <i className="ri-arrow-left-line mr-2"></i>
+                      イベント詳細に戻る
+                    </button>
+                    <Link
+                      to="/contact"
+                      className="inline-flex items-center px-5 py-3 border border-primary text-primary rounded-button hover:bg-primary/5 transition-colors"
+                    >
+                      お問い合わせ
+                    </Link>
+                  </div>
+                </div>
+              ) : !showMembershipFeatures ? (
                 <div className="p-6 md:p-8 space-y-4">
                   <h2 className="text-xl font-bold">会員機能は準備中です</h2>
                   <p className="text-gray-700 leading-relaxed">

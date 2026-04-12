@@ -196,6 +196,7 @@ interface SchoolEventDetail {
   capacityText?: string | null;
   recommendations: RecommendationItem[];
   curriculum: CurriculumItem[];
+  reservationOpen?: boolean | null;
 }
 
 interface ArtistProfile {
@@ -280,6 +281,49 @@ const buildSlots = (slots?: (GraphqlSlot | null)[] | null): NormalizedSlot[] => 
     })
     .filter((slot): slot is NormalizedSlot => slot !== null);
   return normalized.sort((a, b) => a.date.getTime() - b.date.getTime());
+};
+
+const combineSlotDateTime = (isoDate: string, time?: string) => {
+  const normalizedTime = time ? `${time}:00` : '00:00:00';
+  const parsed = new Date(`${isoDate}T${normalizedTime}`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const determineSlotTimingStatus = (slot: NormalizedSlot): 'current' | 'upcoming' | 'past' => {
+  const now = new Date();
+  const start = combineSlotDateTime(slot.isoDate, slot.startTime);
+  const end = combineSlotDateTime(slot.isoDate, slot.endTime) ?? start;
+
+  if (start && end) {
+    if (now >= start && now <= end) return 'current';
+    return now < start ? 'upcoming' : 'past';
+  }
+
+  if (start) {
+    return now < start ? 'upcoming' : 'past';
+  }
+
+  return 'upcoming';
+};
+
+const determineSlotsTimingStatus = (slots: NormalizedSlot[]): 'current' | 'upcoming' | 'past' => {
+  if (slots.length === 0) {
+    return 'upcoming';
+  }
+
+  let hasUpcoming = false;
+
+  for (const slot of slots) {
+    const slotStatus = determineSlotTimingStatus(slot);
+    if (slotStatus === 'current') {
+      return 'current';
+    }
+    if (slotStatus === 'upcoming') {
+      hasUpcoming = true;
+    }
+  }
+
+  return hasUpcoming ? 'upcoming' : 'past';
 };
 
 const buildLocationLabel = (
@@ -464,6 +508,7 @@ const transformSchoolEventDetail = (node: GraphqlEventNode | null): SchoolEventD
     capacityText,
     recommendations,
     curriculum,
+    reservationOpen: node.eventCpt?.reservationOpen ?? null,
   };
 };
 
@@ -940,6 +985,10 @@ const SchoolDetailPage: React.FC = () => {
   const contactEmail = eventData?.contact?.email;
   const reservationUrl =
     eventData?.contact?.reservationOverrideUrl ?? eventData?.contact?.formUrl ?? '';
+  const reservationStatus = determineSlotsTimingStatus(eventData?.slots ?? []);
+  const isReservationClosed = Boolean(
+    eventData && (eventData.reservationOpen === false || reservationStatus === 'past'),
+  );
   const mapUrl = eventData?.mapUrl ?? 'https://maps.app.goo.gl/TzUQQmCq7pUzkBRJ6';
   const benefits = eventData?.benefits ?? [];
   const belongingsList = eventData?.belongings?.length ? eventData.belongings : FALLBACK_ITEMS;
@@ -1032,6 +1081,16 @@ const SchoolDetailPage: React.FC = () => {
   });
 
   const renderReservationButton = (className: string, label = '予約ページへ進む') => {
+    if (isReservationClosed) {
+      return (
+        <span
+          className={`${className} cursor-not-allowed bg-gray-300 text-white hover:bg-gray-300`}
+          aria-disabled="true"
+        >
+          申込終了
+        </span>
+      );
+    }
     if (!reservationUrl) {
       return (
         <Link to="/contact" className={className}>
