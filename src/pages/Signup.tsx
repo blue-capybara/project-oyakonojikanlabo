@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
+import ExternalLink from '../components/ExternalLink';
 import Seo from '../components/seo/Seo';
 import { shouldNoIndex } from '../utils/seo';
 import { supabase } from '../lib/supabaseClient';
@@ -181,14 +182,14 @@ const Signup: React.FC = () => {
           <label className="block text-sm">
             <input type="checkbox" name="storeConsent" onChange={handleChange} className="mr-2" />
             <span>
-              <a
+              <ExternalLink
                 href="https://shop.oyakonojikanlabo.jp/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline"
               >
                 親子の時間研究所STORE
-              </a>
+              </ExternalLink>
               にも登録して最新情報を受け取る
             </span>
           </label>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { sendOutboundClickEvent } from '../../lib/ga';
+import ExternalLink from '../ExternalLink';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -24,42 +25,45 @@ const Footer: React.FC = () => {
               あれこれ気になることを、たのしくお届けしています。
             </p>
             <div className="flex space-x-4">
-              <a href="https://x.com/oyakonojikan" className="text-gray-400 hover:text-white">
+              <ExternalLink
+                href="https://x.com/oyakonojikan"
+                className="text-gray-400 hover:text-white"
+              >
                 <div className="w-8 h-8 flex items-center justify-center">
                   <i className="ri-twitter-x-line ri-lg"></i>
                 </div>
-              </a>
-              <a
+              </ExternalLink>
+              <ExternalLink
                 href="https://www.instagram.com/oyako_jikan_labo/"
                 className="text-gray-400 hover:text-white"
               >
                 <div className="w-8 h-8 flex items-center justify-center">
                   <i className="ri-instagram-line ri-lg"></i>
                 </div>
-              </a>
-              <a
+              </ExternalLink>
+              <ExternalLink
                 href="https://www.facebook.com/oyakonojikanlabo"
                 className="text-gray-400 hover:text-white"
               >
                 <div className="w-8 h-8 flex items-center justify-center">
                   <i className="ri-facebook-circle-line ri-lg"></i>
                 </div>
-              </a>
-              <a
+              </ExternalLink>
+              <ExternalLink
                 href="https://www.youtube.com/@oyakolabo"
                 className="text-gray-400 hover:text-white"
               >
                 <div className="w-8 h-8 flex items-center justify-center">
                   <i className="ri-youtube-line ri-lg"></i>
                 </div>
-              </a>
+              </ExternalLink>
             </div>
           </div>
           <div>
             <h3 className="font-bold text-lg mb-4">コンテンツ</h3>
             <ul className="space-y-2">
               <li>
-                <a
+                <ExternalLink
                   href="https://shop.oyakonojikanlabo.jp/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -72,10 +76,10 @@ const Footer: React.FC = () => {
                   }
                 >
                   おかいもの
-                </a>
+                </ExternalLink>
               </li>
               <li>
-                <a
+                <ExternalLink
                   href="https://ehonyasan-moe.oyakonojikanlabo.jp/socks/"
                   className="text-gray-400 hover:text-white"
                   onClick={() =>
@@ -86,7 +90,7 @@ const Footer: React.FC = () => {
                   }
                 >
                   絵本の靴下
-                </a>
+                </ExternalLink>
               </li>
               <li>
                 <Link to="/event" className="text-gray-400 hover:text-white">

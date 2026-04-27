@@ -5,6 +5,7 @@ import { searchHistoryApi, SearchHistory } from '../../lib/searchHistory';
 import { getFeatureFlag } from '../../config/featureFlags';
 import { withBase } from '../../utils/paths';
 import { sendOutboundClickEvent } from '../../lib/ga';
+import ExternalLink from '../ExternalLink';
 
 const menuItems = [
   { label: 'ホーム', to: '/' },
@@ -57,25 +58,31 @@ const Header: React.FC = () => {
   }, [drawerOpen, drawerVisible]);
 
   const renderMenuLinks = (itemClassName: string, onItemClick?: () => void) =>
-    menuItems.map((item, i) =>
-      item.to ? (
-        <Link key={i} to={item.to} onClick={onItemClick} className={itemClassName}>
-          {item.label}
-        </Link>
-      ) : (
-        <a
+    menuItems.map((item, i) => {
+      if (item.to) {
+        return (
+          <Link key={i} to={item.to} onClick={onItemClick} className={itemClassName}>
+            {item.label}
+          </Link>
+        );
+      }
+
+      const href = item.href ?? '#';
+
+      return (
+        <ExternalLink
           key={i}
-          href={item.href}
+          href={href}
           onClick={() => {
-            sendOutboundClickEvent({ url: item.href!, link_text: item.label });
+            sendOutboundClickEvent({ url: href, link_text: item.label });
             onItemClick?.();
           }}
           className={itemClassName}
         >
           {item.label}
-        </a>
-      ),
-    );
+        </ExternalLink>
+      );
+    });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
