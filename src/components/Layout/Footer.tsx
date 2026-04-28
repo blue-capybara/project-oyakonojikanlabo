@@ -85,11 +85,11 @@ const Footer: React.FC = () => {
                   onClick={() =>
                     sendOutboundClickEvent({
                       url: 'https://ehonyasan-moe.oyakonojikanlabo.jp/socks/',
-                      link_text: '絵本の靴下',
+                      link_text: '絵本のくつした',
                     })
                   }
                 >
-                  絵本の靴下
+                  絵本のくつした
                 </ExternalLink>
               </li>
               <li>
