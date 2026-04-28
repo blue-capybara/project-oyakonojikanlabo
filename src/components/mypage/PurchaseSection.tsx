@@ -44,7 +44,7 @@ const PurchaseSection: React.FC = () => {
                     'https://readdy.ai/api/search-image?query=children%2520book%2520with%2520cute%2520animal%2520characters%2C%2520Japanese%2520style%2520illustration%2C%2520soft%2520colors%2C%2520white%2520background&width=200&height=200&seq=7&orientation=squarish',
                 },
                 {
-                  name: '絵本の靴下「おはなしの森」',
+                  name: '絵本のくつした「おはなしの森」',
                   author: 'サイズ：22-24cm',
                   date: '2025年6月10日',
                   number: 'P25061001',
