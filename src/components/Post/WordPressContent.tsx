@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { addStoredUtmToExternalUrl } from '../../utils/utm';
 
 interface WordPressContentProps {
   html: string;
@@ -6,6 +7,10 @@ interface WordPressContentProps {
   customCss?: string | null;
   customJs?: string | null;
 }
+
+type ScriptWithShadowRoot = HTMLScriptElement & {
+  __shadowRoot?: ShadowRoot;
+};
 
 /**
  * WordPress本番サイトのスタイルをShadow DOM内に読み込み、
@@ -114,6 +119,18 @@ const rewriteCmsAnchors = (root: ParentNode) => {
 
     if (!shouldRewriteCmsLink(url)) return;
     anchor.setAttribute('href', buildPublicUrl(url));
+  });
+};
+
+const addStoredUtmToAnchors = (root: ParentNode) => {
+  root.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((anchor) => {
+    const href = anchor.getAttribute('href');
+    if (!href) return;
+
+    const decoratedHref = addStoredUtmToExternalUrl(href);
+    if (decoratedHref !== href) {
+      anchor.setAttribute('href', decoratedHref);
+    }
   });
 };
 
@@ -564,7 +581,7 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
         });
 
         // Shadow DOM内の要素へアクセスできるよう、currentScript経由でshadowRootを渡す
-        (runnable as any).__shadowRoot = shadowRoot;
+        (runnable as ScriptWithShadowRoot).__shadowRoot = shadowRoot;
 
         if (original.src) {
           scriptElementsRef.current.push(runnable);
@@ -665,7 +682,7 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
           try {
             window.document.execCommand('copy');
             showMessage();
-          } catch (e) {
+          } catch {
             alert('コピーできませんでした。お手数ですが手動でコピーしてください。');
           }
           window.document.body.removeChild(textarea);
@@ -681,7 +698,7 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
               await navigator.clipboard.writeText(text);
               showMessage();
               return;
-            } catch (e) {
+            } catch {
               // fall through
             }
           }
@@ -706,6 +723,7 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
         const scripts = Array.from(template.content.querySelectorAll('script'));
         scripts.forEach((node) => node.remove());
         rewriteCmsAnchors(template.content);
+        addStoredUtmToAnchors(template.content);
         normalizeResponsiveMediaStyles(template.content);
 
         container.innerHTML = '';
@@ -878,7 +896,8 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
         return true;
       }
 
-      const url = new URL(href, window.location.href);
+      const decoratedHref = addStoredUtmToExternalUrl(href);
+      const url = new URL(decoratedHref, window.location.href);
       if (
         url.origin === window.location.origin &&
         url.pathname === window.location.pathname &&
