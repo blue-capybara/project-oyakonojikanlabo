@@ -1,16 +1,38 @@
-export const UTM_STORAGE_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'line_id'] as const;
+export const STANDARD_UTM_KEYS = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+] as const;
+export const UTM_STORAGE_KEYS = [...STANDARD_UTM_KEYS, 'line_id'] as const;
 export const UTM_EXPIRE_KEY = 'utm_expire';
 export const UTM_EXPIRE_DAYS = 7;
+export const LP_UTM_STORAGE_KEY = 'oyakonojikanlabo-lp-utm-attribution-v1';
 
+export type StandardUtmKey = (typeof STANDARD_UTM_KEYS)[number];
 export type UtmStorageKey = (typeof UTM_STORAGE_KEYS)[number];
+export type StandardUtm = Partial<Record<StandardUtmKey, string>>;
 export type StoredUtm = Partial<Record<UtmStorageKey, string>>;
+
+interface StoredLpUtm {
+  expiresAt: number;
+  utm: StandardUtm;
+}
 
 const EXCLUDED_PROTOCOLS = new Set(['mailto:', 'tel:', 'javascript:']);
 const DAY_IN_MS = 86_400_000;
+const UTM_VALUE_MAX_LENGTH = 200;
 
-const normalizeValue = (value: string | null): string | null => {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
+const normalizeValue = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null;
+
+  const withoutControlCharacters = Array.from(value, (character) => {
+    const codePoint = character.codePointAt(0) ?? 0;
+    return codePoint <= 31 || codePoint === 127 ? ' ' : character;
+  }).join('');
+  const normalized = withoutControlCharacters.replace(/\s+/g, ' ').trim();
+  return normalized ? Array.from(normalized).slice(0, UTM_VALUE_MAX_LENGTH).join('') : null;
 };
 
 const canUseWindow = () => typeof window !== 'undefined';
@@ -107,6 +129,95 @@ const isExternalHttpUrl = (url: URL): boolean => {
   return url.hostname !== window.location.hostname;
 };
 
+const isSameOriginLpUrl = (url: URL): boolean => {
+  if (!canUseWindow()) return false;
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+
+  return url.origin === window.location.origin && url.pathname.startsWith('/lp/');
+};
+
+const readStandardUtmFromUrl = (url: URL): StandardUtm => {
+  const utm: StandardUtm = {};
+
+  STANDARD_UTM_KEYS.forEach((key) => {
+    const value = normalizeValue(url.searchParams.get(key));
+    if (value) {
+      utm[key] = value;
+    }
+  });
+
+  return utm;
+};
+
+const hasStandardUtm = (utm: StandardUtm): boolean => Object.keys(utm).length > 0;
+
+const saveLpUtm = (utm: StandardUtm): boolean => {
+  if (!canUseWindow() || !hasStandardUtm(utm)) return false;
+
+  try {
+    const storedLpUtm: StoredLpUtm = {
+      expiresAt: Date.now() + UTM_EXPIRE_DAYS * DAY_IN_MS,
+      utm,
+    };
+    window.localStorage.setItem(LP_UTM_STORAGE_KEY, JSON.stringify(storedLpUtm));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const getStoredLpUtm = (): StandardUtm => {
+  const storedValue = readLocalStorage(LP_UTM_STORAGE_KEY);
+  if (!storedValue) return {};
+
+  try {
+    const parsed = JSON.parse(storedValue);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {};
+    }
+    const storedLpUtm = parsed as Partial<StoredLpUtm>;
+    if (
+      typeof storedLpUtm.expiresAt !== 'number' ||
+      !Number.isFinite(storedLpUtm.expiresAt) ||
+      Date.now() > storedLpUtm.expiresAt
+    ) {
+      removeLocalStorageItem(LP_UTM_STORAGE_KEY);
+      return {};
+    }
+    if (!storedLpUtm.utm || typeof storedLpUtm.utm !== 'object') {
+      removeLocalStorageItem(LP_UTM_STORAGE_KEY);
+      return {};
+    }
+
+    const storedUtm: StandardUtm = {};
+    STANDARD_UTM_KEYS.forEach((key) => {
+      const value = normalizeValue((storedLpUtm.utm as Record<string, unknown>)[key]);
+      if (value) {
+        storedUtm[key] = value;
+      }
+    });
+    if (!hasStandardUtm(storedUtm)) {
+      removeLocalStorageItem(LP_UTM_STORAGE_KEY);
+    }
+    return storedUtm;
+  } catch {
+    removeLocalStorageItem(LP_UTM_STORAGE_KEY);
+    return {};
+  }
+};
+
+const getLpUtmForPropagation = (): StandardUtm => {
+  if (!canUseWindow()) return {};
+
+  const currentUtm = readStandardUtmFromUrl(new URL(window.location.href));
+  if (hasStandardUtm(currentUtm)) {
+    saveLpUtm(currentUtm);
+    return currentUtm;
+  }
+
+  return getStoredLpUtm();
+};
+
 export const getStoredUtm = (): StoredUtm => {
   if (!canUseWindow()) return {};
   clearExpiredStoredUtm();
@@ -121,6 +232,17 @@ export const getStoredUtm = (): StoredUtm => {
   });
 
   return storedUtm;
+};
+
+export const captureLpUtmFromUrl = (sourceUrl?: string): boolean => {
+  if (!canUseWindow()) return false;
+
+  try {
+    const url = new URL(sourceUrl ?? window.location.href, window.location.href);
+    return saveLpUtm(readStandardUtmFromUrl(url));
+  } catch {
+    return false;
+  }
 };
 
 export const saveUtmFromUrl = (sourceUrl?: string): boolean => {
@@ -174,11 +296,37 @@ export const addStoredUtmToExternalUrl = (href: string): string => {
   return url.toString();
 };
 
-let externalLinkHandlerCleanup: (() => void) | null = null;
+export const addUtmToLinkUrl = (href: string): string => {
+  const url = resolveUrl(href);
+  if (!url) return href;
 
-export const installUtmExternalLinkHandler = (): (() => void) => {
+  if (!isSameOriginLpUrl(url)) {
+    return addStoredUtmToExternalUrl(href);
+  }
+
+  // WordPress側で明示されたUTMは、そのリンク固有の計測値として優先する。
+  if (hasStandardUtm(readStandardUtmFromUrl(url))) {
+    return href;
+  }
+
+  const utm = getLpUtmForPropagation();
+  if (!hasStandardUtm(utm)) return href;
+
+  STANDARD_UTM_KEYS.forEach((key) => {
+    const value = utm[key];
+    if (value) {
+      url.searchParams.set(key, value);
+    }
+  });
+
+  return url.toString();
+};
+
+let linkHandlerCleanup: (() => void) | null = null;
+
+export const installUtmLinkHandler = (): (() => void) => {
   if (typeof document === 'undefined') return () => undefined;
-  if (externalLinkHandlerCleanup) return externalLinkHandlerCleanup;
+  if (linkHandlerCleanup) return linkHandlerCleanup;
 
   const handleClick = (event: MouseEvent) => {
     const target = event.target;
@@ -186,11 +334,12 @@ export const installUtmExternalLinkHandler = (): (() => void) => {
 
     const anchor = target.closest('a[href]');
     if (!(anchor instanceof HTMLAnchorElement)) return;
+    if (anchor.dataset.utmPropagation === 'off') return;
 
     const rawHref = anchor.getAttribute('href');
     if (!rawHref) return;
 
-    const decoratedHref = addStoredUtmToExternalUrl(rawHref);
+    const decoratedHref = addUtmToLinkUrl(rawHref);
     if (decoratedHref !== rawHref) {
       anchor.href = decoratedHref;
     }
@@ -198,10 +347,12 @@ export const installUtmExternalLinkHandler = (): (() => void) => {
 
   document.addEventListener('click', handleClick, true);
 
-  externalLinkHandlerCleanup = () => {
+  linkHandlerCleanup = () => {
     document.removeEventListener('click', handleClick, true);
-    externalLinkHandlerCleanup = null;
+    linkHandlerCleanup = null;
   };
 
-  return externalLinkHandlerCleanup;
+  return linkHandlerCleanup;
 };
+
+export const installUtmExternalLinkHandler = installUtmLinkHandler;
