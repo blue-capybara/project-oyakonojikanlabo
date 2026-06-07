@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { addStoredUtmToExternalUrl } from '../../utils/utm';
+import { addUtmToLinkUrl } from '../../utils/utm';
 
 interface WordPressContentProps {
   html: string;
@@ -122,12 +122,14 @@ const rewriteCmsAnchors = (root: ParentNode) => {
   });
 };
 
-const addStoredUtmToAnchors = (root: ParentNode) => {
+const addUtmToAnchors = (root: ParentNode) => {
   root.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((anchor) => {
+    if (anchor.dataset.utmPropagation === 'off') return;
+
     const href = anchor.getAttribute('href');
     if (!href) return;
 
-    const decoratedHref = addStoredUtmToExternalUrl(href);
+    const decoratedHref = addUtmToLinkUrl(href);
     if (decoratedHref !== href) {
       anchor.setAttribute('href', decoratedHref);
     }
@@ -723,7 +725,7 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
         const scripts = Array.from(template.content.querySelectorAll('script'));
         scripts.forEach((node) => node.remove());
         rewriteCmsAnchors(template.content);
-        addStoredUtmToAnchors(template.content);
+        addUtmToAnchors(template.content);
         normalizeResponsiveMediaStyles(template.content);
 
         container.innerHTML = '';
@@ -825,10 +827,16 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
       const target = event.target as HTMLElement | null;
       const link = target?.closest<HTMLAnchorElement>('a');
       if (!link) return;
+      if (link.dataset.utmPropagation === 'off') return;
 
-      const href = link.getAttribute('href');
-      if (!href || href.startsWith('mailto:') || href.startsWith('tel:')) {
+      const rawHref = link.getAttribute('href');
+      if (!rawHref || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) {
         return;
+      }
+
+      const href = addUtmToLinkUrl(rawHref);
+      if (href !== rawHref) {
+        link.setAttribute('href', href);
       }
 
       const url = href.startsWith('#')
@@ -879,6 +887,9 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
       if (!href) {
         return false;
       }
+      if (link?.dataset.utmPropagation === 'off') {
+        return false;
+      }
 
       if (viaKeyboard) {
         event.preventDefault();
@@ -896,7 +907,7 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
         return true;
       }
 
-      const decoratedHref = addStoredUtmToExternalUrl(href);
+      const decoratedHref = addUtmToLinkUrl(href);
       const url = new URL(decoratedHref, window.location.href);
       if (
         url.origin === window.location.origin &&
