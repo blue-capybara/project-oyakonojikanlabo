@@ -12,6 +12,36 @@ type ScriptWithShadowRoot = HTMLScriptElement & {
   __shadowRoot?: ShadowRoot;
 };
 
+interface CampaignAsset {
+  src?: string;
+  width?: number;
+  height?: number;
+}
+
+interface CampaignItem {
+  id?: string;
+  title?: string;
+  href?: string;
+  target?: string;
+  sites?: string[];
+  placements?: string[];
+  priority?: number;
+  startAt?: string | null;
+  endAt?: string | null;
+  alt?: string;
+  assets?: {
+    desktop?: CampaignAsset;
+    mobile?: CampaignAsset;
+  };
+  tracking?: {
+    campaign?: string;
+  };
+}
+
+interface CampaignPayload {
+  items?: CampaignItem[];
+}
+
 /**
  * WordPress本番サイトのスタイルをShadow DOM内に読み込み、
  * 取得したHTMLをアプリ全体のスタイルから切り離して表示するコンポーネント。
@@ -89,6 +119,11 @@ const WORDPRESS_STYLESHEETS: readonly string[] = [
 const CMS_HOSTS = new Set(['cms.oyakonojikanlabo.jp']);
 const PUBLIC_ORIGIN = 'https://cms.oyakonojikanlabo.jp';
 const CMS_PATH_BLOCKLIST = ['/wp-admin', '/wp-json', '/wp-content', '/wp-includes'];
+const CAMPAIGNS_JSON_URL =
+  'https://cms.oyakonojikanlabo.jp/wp-content/uploads/okjl-campaigns/v1/campaigns.json';
+const CAMPAIGN_CACHE_BUCKET_MS = 5 * 60 * 1000;
+const DEFAULT_CAMPAIGN_SITE = 'react';
+const DEFAULT_CAMPAIGN_PLACEMENT = 'global_header';
 
 let accordionSequence = 0;
 
@@ -208,6 +243,173 @@ const normalizeResponsiveMediaStyles = (root: ParentNode) => {
   });
 };
 
+const getCampaignJsonUrlWithCacheBucket = () => {
+  const url = new URL(CAMPAIGNS_JSON_URL);
+  url.searchParams.set('v', String(Math.floor(Date.now() / CAMPAIGN_CACHE_BUCKET_MS)));
+  return url.toString();
+};
+
+const fetchCampaignPayload = async (signal: AbortSignal): Promise<CampaignPayload | null> => {
+  try {
+    const response = await fetch(getCampaignJsonUrlWithCacheBucket(), {
+      cache: 'no-cache',
+      signal,
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as CampaignPayload;
+    return data && Array.isArray(data.items) ? data : null;
+  } catch (error) {
+    if (signal.aborted) {
+      return null;
+    }
+    console.warn('キャンペーンJSONの取得に失敗しました。', error);
+    return null;
+  }
+};
+
+const parseCampaignDate = (value: string | null | undefined, fallback: number) => {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const getCampaignSlotConfig = (slot: HTMLElement) => ({
+  site: slot.dataset.site?.trim() || DEFAULT_CAMPAIGN_SITE,
+  placement: slot.dataset.placement?.trim() || DEFAULT_CAMPAIGN_PLACEMENT,
+});
+
+const isCampaignActiveForSlot = (
+  item: CampaignItem,
+  site: string,
+  placement: string,
+  now: number,
+) => {
+  const sites = Array.isArray(item.sites) && item.sites.length > 0 ? item.sites : ['all'];
+  const placements =
+    Array.isArray(item.placements) && item.placements.length > 0
+      ? item.placements
+      : [DEFAULT_CAMPAIGN_PLACEMENT];
+  const start = parseCampaignDate(item.startAt, 0);
+  const end = parseCampaignDate(item.endAt, Infinity);
+  const siteOk = sites.includes('all') || sites.includes(site);
+  const placementOk = placements.includes(placement);
+
+  return siteOk && placementOk && now >= start && now <= end;
+};
+
+const selectCampaignForSlot = (items: CampaignItem[], slot: HTMLElement) => {
+  const { site, placement } = getCampaignSlotConfig(slot);
+  const now = Date.now();
+
+  return items
+    .filter((item) => item.href && item.assets?.desktop?.src)
+    .filter((item) => isCampaignActiveForSlot(item, site, placement, now))
+    .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))[0];
+};
+
+const setImageDimension = (
+  image: HTMLImageElement,
+  attribute: 'width' | 'height',
+  value: number | undefined,
+) => {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    return;
+  }
+
+  image.setAttribute(attribute, String(Math.round(value)));
+};
+
+const renderCampaignSlot = (slot: HTMLElement, item: CampaignItem | undefined) => {
+  const { site, placement } = getCampaignSlotConfig(slot);
+
+  slot.textContent = '';
+  slot.dataset.site = site;
+  slot.dataset.placement = placement;
+
+  if (!item?.href || !item.assets?.desktop?.src) {
+    slot.hidden = true;
+    slot.removeAttribute('data-campaign-id');
+    return;
+  }
+
+  const desktopAsset = item.assets.desktop;
+  const mobileAsset = item.assets.mobile;
+  const link = document.createElement('a');
+  const picture = document.createElement('picture');
+  const image = document.createElement('img');
+
+  slot.hidden = false;
+  slot.classList.add('okjl-campaign-banner');
+  slot.dataset.campaignId = item.id || '';
+  if (item.tracking?.campaign) {
+    slot.dataset.trackingCampaign = item.tracking.campaign;
+  } else {
+    delete slot.dataset.trackingCampaign;
+  }
+
+  link.className = 'okjl-campaign-banner__link';
+  link.href = addUtmToLinkUrl(item.href);
+  if (item.target === '_blank') {
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+
+  picture.className = 'okjl-campaign-banner__picture';
+  if (mobileAsset?.src) {
+    const source = document.createElement('source');
+    source.media = '(max-width: 767px)';
+    source.srcset = mobileAsset.src;
+    picture.appendChild(source);
+  }
+
+  image.className = 'okjl-campaign-banner__image';
+  image.src = desktopAsset.src;
+  image.alt = item.alt || item.title || '';
+  image.loading = 'lazy';
+  image.decoding = 'async';
+  setImageDimension(image, 'width', desktopAsset.width);
+  setImageDimension(image, 'height', desktopAsset.height);
+
+  picture.appendChild(image);
+  link.appendChild(picture);
+  slot.appendChild(link);
+};
+
+const initializeCampaignSlots = (root: ParentNode) => {
+  const slots = Array.from(
+    root.querySelectorAll<HTMLElement>('[data-okjl-campaign-slot], [data-okjl-campaign-root]'),
+  );
+  if (slots.length === 0) {
+    return () => undefined;
+  }
+
+  const controller = new AbortController();
+  let disposed = false;
+
+  fetchCampaignPayload(controller.signal).then((payload) => {
+    if (disposed || controller.signal.aborted) {
+      return;
+    }
+
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    slots.forEach((slot) => {
+      renderCampaignSlot(slot, selectCampaignForSlot(items, slot));
+    });
+  });
+
+  return () => {
+    disposed = true;
+    controller.abort();
+  };
+};
+
 const WordPressContent: React.FC<WordPressContentProps> = ({
   html,
   className,
@@ -254,6 +456,26 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
         .wp-article-root img[style*="width"] {
           max-width: 100% !important;
           height: auto !important;
+        }
+        .wp-article-root [data-okjl-campaign-slot],
+        .wp-article-root [data-okjl-campaign-root] {
+          display: block;
+          margin: 2rem 0;
+        }
+        .wp-article-root .okjl-campaign-banner[hidden] {
+          display: none !important;
+        }
+        .wp-article-root .okjl-campaign-banner__link {
+          display: block;
+          text-decoration: none;
+        }
+        .wp-article-root .okjl-campaign-banner__picture,
+        .wp-article-root .okjl-campaign-banner__image {
+          display: block;
+          width: 100%;
+        }
+        .wp-article-root .okjl-campaign-banner__image {
+          height: auto;
         }
       `;
       shadow.appendChild(baseStyle);
@@ -800,6 +1022,9 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
 
     initializeAccordions();
     setupCopyButtons();
+    const cleanupCampaignSlots = contentRef.current
+      ? initializeCampaignSlots(contentRef.current)
+      : () => undefined;
     const scrollToHash = (hash: string) => {
       const targetId = hash.replace(/^#/, '');
       if (!targetId) return false;
@@ -973,6 +1198,7 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
       contentRef.current?.removeEventListener('keydown', handleLinkBoxKeyDown);
       window.removeEventListener('hashchange', handleHashChange);
       detachCopyHandlers.forEach((fn) => fn());
+      cleanupCampaignSlots();
     };
   }, [html, customCss, customJs]);
 

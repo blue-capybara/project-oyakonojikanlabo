@@ -26,6 +26,11 @@ describe('WordPressContent', () => {
     setStoredUtm();
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
   it('GraphQL由来の本文外部リンクに保存済みUTMを付与する', async () => {
     const { container } = render(
       <WordPressContent
@@ -157,5 +162,86 @@ describe('WordPressContent', () => {
       '_blank',
       'noopener,noreferrer',
     );
+  });
+
+  it('カスタムHTMLブロックのキャンペーン枠をJSONから描画する', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        items: [
+          {
+            id: 'campaign-article-1',
+            title: '記事内キャンペーン',
+            href: 'https://shop.example.com/campaign?variant=1',
+            target: '_blank',
+            sites: ['react'],
+            placements: ['global_header'],
+            priority: 10,
+            startAt: null,
+            endAt: null,
+            alt: '記事内キャンペーンバナー',
+            assets: {
+              desktop: {
+                src: 'https://cms.example.com/desktop.webp',
+                width: 1200,
+                height: 400,
+              },
+              mobile: {
+                src: 'https://cms.example.com/mobile.webp',
+                width: 800,
+                height: 800,
+              },
+            },
+            tracking: {
+              campaign: 'article-campaign',
+            },
+          },
+        ],
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { container } = render(
+      <WordPressContent
+        className="post-content"
+        html='<div data-okjl-campaign-slot data-placement="global_header"></div>'
+      />,
+    );
+
+    await waitFor(() => {
+      expect(getShadowRoot(container).querySelector('.okjl-campaign-banner__image')).not.toBeNull();
+    });
+
+    const shadowRoot = getShadowRoot(container);
+    const slot = shadowRoot.querySelector<HTMLElement>('[data-okjl-campaign-slot]');
+    const link = shadowRoot.querySelector<HTMLAnchorElement>('.okjl-campaign-banner__link');
+    const source = shadowRoot.querySelector<HTMLSourceElement>('source');
+    const image = shadowRoot.querySelector<HTMLImageElement>('.okjl-campaign-banner__image');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/okjl-campaigns/v1/campaigns.json?v='),
+      expect.objectContaining({ cache: 'no-cache', signal: expect.any(AbortSignal) }),
+    );
+    expect(slot).not.toBeNull();
+    expect(slot?.hidden).toBe(false);
+    expect(slot?.dataset.site).toBe('react');
+    expect(slot?.dataset.placement).toBe('global_header');
+    expect(slot?.dataset.campaignId).toBe('campaign-article-1');
+    expect(slot?.dataset.trackingCampaign).toBe('article-campaign');
+
+    expect(source?.getAttribute('media')).toBe('(max-width: 767px)');
+    expect(source?.getAttribute('srcset')).toBe('https://cms.example.com/mobile.webp');
+    expect(image?.getAttribute('src')).toBe('https://cms.example.com/desktop.webp');
+    expect(image?.getAttribute('alt')).toBe('記事内キャンペーンバナー');
+    expect(image?.getAttribute('width')).toBe('1200');
+    expect(image?.getAttribute('height')).toBe('400');
+
+    expect(link?.target).toBe('_blank');
+    expect(link?.rel).toBe('noopener noreferrer');
+    const linkUrl = new URL(link?.href ?? '');
+    expect(linkUrl.searchParams.get('variant')).toBe('1');
+    expect(linkUrl.searchParams.get('utm_source')).toBe('line');
+    expect(linkUrl.searchParams.get('utm_campaign')).toBe('20260428_kodomonotomo_01');
+    expect(linkUrl.searchParams.get('line_id')).toBe('01');
   });
 });
