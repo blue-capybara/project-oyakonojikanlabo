@@ -123,7 +123,7 @@ const HomePageContent: React.FC = () => {
       <section className="relative min-h-[720px] overflow-hidden bg-gradient-to-br from-primary/90 to-primary">
         <div className="container mx-auto px-4 relative">
           <div className="flex flex-col lg:flex-row items-center justify-between min-h-[720px] py-16">
-            <div className="w-full lg:w-1/2 text-white z-10">
+            <div className="order-2 mt-12 w-full text-white z-10 lg:order-1 lg:mt-0 lg:w-1/2">
               <div className="flex gap-2 mb-6">
                 <span className="inline-block bg-white/20 text-white px-4 py-1 text-xs rounded-full">
                   特集
@@ -134,9 +134,17 @@ const HomePageContent: React.FC = () => {
                   </span>
                 )}
               </div>
-              <h2 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight animate-fade-in">
-                {main?.post?.title ?? '特集記事を読み込み中です…'}
-              </h2>
+              {main ? (
+                <Link to={`/${main.post.slug}`} className="block text-white no-underline">
+                  <h2 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight animate-fade-in">
+                    {main.post.title}
+                  </h2>
+                </Link>
+              ) : (
+                <h2 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight animate-fade-in">
+                  特集記事を読み込み中です…
+                </h2>
+              )}
               <p className="text-base lg:text-lg mb-8 leading-relaxed opacity-90">{description}</p>
               <div className="flex flex-col lg:flex-row gap-4">
                 {main ? (
@@ -153,28 +161,35 @@ const HomePageContent: React.FC = () => {
                 )}
               </div>
             </div>
-            <div className="w-full lg:w-1/2 mt-12 lg:mt-0 relative z-10">
+            <div className="order-1 w-full lg:order-2 lg:w-1/2 relative z-10">
               <div className="relative w-full max-w-xl mx-auto">
-                <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white/10">
-                  {mainSlides.map((item, idx) => (
-                    <img
-                      key={item.featureId}
-                      src={
-                        item.post.featuredImage?.node?.sourceUrl ??
-                        withBase('images/readdy/921de84646a0d38dfa688f1d826685e6.jpeg')
-                      }
-                      alt={item.post.title}
-                      className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${
-                        idx === currentIndex ? 'opacity-100' : 'opacity-0'
-                      }`}
-                    />
-                  ))}
-                  {!mainSlides.length && (
+                {main ? (
+                  <Link
+                    to={`/${main.post.slug}`}
+                    className="block relative aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white/10 no-underline"
+                    aria-label={`${main.post.title}の記事を読む`}
+                  >
+                    {mainSlides.map((item, idx) => (
+                      <img
+                        key={item.featureId}
+                        src={
+                          item.post.featuredImage?.node?.sourceUrl ??
+                          withBase('images/readdy/921de84646a0d38dfa688f1d826685e6.jpeg')
+                        }
+                        alt={item.post.title}
+                        className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${
+                          idx === currentIndex ? 'opacity-100' : 'opacity-0'
+                        }`}
+                      />
+                    ))}
+                  </Link>
+                ) : (
+                  <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white/10">
                     <div className="absolute inset-0 flex items-center justify-center text-white/70">
                       画像を準備中です
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
                 <div className="absolute -right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2">
                   <button
                     type="button"

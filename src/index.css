@@ -2,46 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ローカルフォント定義（LINESeedJP WOFF2） */
-@font-face {
-  font-family: 'LINESeedJP';
-  src: url('/fonts/LINESeedJP_OTF_Th.woff2') format('woff2');
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'LINESeedJP';
-  src: url('/fonts/LINESeedJP_OTF_Rg.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'LINESeedJP';
-  src: url('/fonts/LINESeedJP_OTF_Bd.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'LINESeedJP';
-  src: url('/fonts/LINESeedJP_OTF_Eb.woff2') format('woff2');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* カスタムスタイル */
 :where([class^='ri-'])::before {
   content: '\f3c2';
 }
 
 body {
-  font-family: 'LINESeedJP', sans-serif;
+  font-family:
+    'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'YuGothic', 'Meiryo',
+    sans-serif;
   color: #333;
 }
 

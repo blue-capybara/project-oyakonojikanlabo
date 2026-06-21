@@ -8,8 +8,24 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'line-seed': ['LINESeedJP', 'sans-serif'],
-        sans: ['LINESeedJP', 'sans-serif'],
+        'line-seed': [
+          'Noto Sans JP',
+          'Hiragino Sans',
+          'Hiragino Kaku Gothic ProN',
+          'Yu Gothic',
+          'YuGothic',
+          'Meiryo',
+          'sans-serif',
+        ],
+        sans: [
+          'Noto Sans JP',
+          'Hiragino Sans',
+          'Hiragino Kaku Gothic ProN',
+          'Yu Gothic',
+          'YuGothic',
+          'Meiryo',
+          'sans-serif',
+        ],
       },
       colors: {
         primary: '#8CB9DD',
