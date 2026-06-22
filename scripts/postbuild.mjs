@@ -2,8 +2,6 @@ import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
-import { buildLocalLifecycleRules } from './url-lifecycle-local-rules.mjs';
-
 const BEGIN_MARKER = '# BEGIN OJL URL LIFECYCLE';
 const END_MARKER = '# END OJL URL LIFECYCLE';
 const BASIC_AUTH_PATTERNS = [
@@ -21,7 +19,8 @@ const getRulesEndpoint = () => {
     return process.env.URL_LIFECYCLE_RULES_ENDPOINT;
   }
 
-  const graphqlEndpoint = process.env.WP_GRAPHQL_ENDPOINT ?? 'https://cms.oyakonojikanlabo.jp/graphql';
+  const graphqlEndpoint =
+    process.env.WP_GRAPHQL_ENDPOINT ?? 'https://cms.oyakonojikanlabo.jp/graphql';
 
   try {
     const parsed = new URL(graphqlEndpoint);
@@ -44,8 +43,6 @@ const buildLifecycleBlock = (rules) => {
   lines.push(END_MARKER);
   return `${lines.join('\n')}\n`;
 };
-
-const mergeLifecycleRules = (...rulesets) => rulesets.map((rules) => rules.trim()).filter(Boolean).join('\n\n');
 
 const injectLifecycleBlock = (baseHtaccess, rules) => {
   const block = buildLifecycleBlock(rules);
@@ -144,11 +141,7 @@ async function main() {
     if (removed > 0) {
       console.warn(`postbuild: removed ${removed} BASIC auth directive(s) from source .htaccess`);
     }
-    const [remoteLifecycleRules, localLifecycleRules] = await Promise.all([
-      fetchLifecycleRules(),
-      buildLocalLifecycleRules({ projectRoot }),
-    ]);
-    const lifecycleRules = mergeLifecycleRules(remoteLifecycleRules, localLifecycleRules);
+    const lifecycleRules = await fetchLifecycleRules();
     const mergedHtaccess = injectLifecycleBlock(baseHtaccess, lifecycleRules);
 
     await writeFile(destination, mergedHtaccess, 'utf8');
