@@ -14,6 +14,7 @@ import Seo from '../components/seo/Seo';
 import GonePage from './GonePage';
 import NotFoundPage from './NotFoundPage';
 import { resolveUrlLifecycleFromGraphQL } from '../lib/urlLifecycle';
+import { measureFrontendOperation } from '../lib/frontendPerformance';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 const relatedEndpoint = `${new URL(endpoint).origin}/wp-json/okjl/v1`;
@@ -300,10 +301,14 @@ const PostDetailPage: React.FC = () => {
 
         // 記事と URL ライフサイクルを同じクエリで取得し、CMSが付与する
         // extensions も併用して、本文取得と301/404/410判定を1リクエストで完結させます。
-        const response = await rawRequest<PostResponse, { slug: string; path: string }>(
-          endpoint,
-          GET_POST_BY_SLUG,
-          { slug, path: location.pathname },
+        const response = await measureFrontendOperation(
+          'post_graphql_request',
+          () =>
+            rawRequest<PostResponse, { slug: string; path: string }>(endpoint, GET_POST_BY_SLUG, {
+              slug,
+              path: location.pathname,
+            }),
+          { content_type: 'post' },
         );
         const lifecycle = resolveUrlLifecycleFromGraphQL(location.pathname, {
           data: response.data,
