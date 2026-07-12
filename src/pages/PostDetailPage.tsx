@@ -475,7 +475,8 @@ const PostDetailPage: React.FC = () => {
   }
 
   const tags = post.tags?.nodes ?? [];
-  const ogImage = post.featuredImage?.node?.sourceUrl ?? undefined;
+  const heroImage = post.featuredImage?.node;
+  const ogImage = heroImage?.sourceUrl ?? undefined;
   const description = post.excerpt ?? post.content ?? undefined;
   const favoriteAction = showMembershipFeatures ? (
     <button
@@ -509,7 +510,13 @@ const PostDetailPage: React.FC = () => {
         ]}
       />
 
-      <ArticleHeroImage src={post.featuredImage?.node?.sourceUrl} alt={post.title} />
+      <ArticleHeroImage
+        src={heroImage?.sourceUrl}
+        srcSet={heroImage?.srcSet}
+        width={heroImage?.mediaDetails?.width}
+        height={heroImage?.mediaDetails?.height}
+        alt={post.title}
+      />
 
       <ArticleTitleBlock title={post.title} dateText={formatDateJa(post.date)} />
 
