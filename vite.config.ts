@@ -60,6 +60,34 @@ export default defineConfig(({ mode }) => {
     base: env.VITE_BASE_PATH || '/',
     build: {
       outDir,
+      rollupOptions: {
+        output: {
+          // 遅延チャンク内の依存を入口チャンクへ空importで巻き上げない。
+          hoistTransitiveImports: false,
+          manualChunks(id) {
+            // ReactとViteランタイムを明示的に分け、Apollo/Supabase側へ混在させない。
+            if (id.includes('vite/preload-helper')) {
+              return 'vite-runtime';
+            }
+            if (
+              id.includes('/node_modules/react/') ||
+              id.includes('/node_modules/react-dom/') ||
+              id.includes('/node_modules/scheduler/')
+            ) {
+              return 'vendor-react';
+            }
+            if (id.includes('/node_modules/graphql/')) {
+              return 'vendor-graphql';
+            }
+            if (id.includes('/node_modules/@supabase/')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('/node_modules/@apollo/')) {
+              return 'vendor-apollo';
+            }
+          },
+        },
+      },
     },
     plugins: [
       {

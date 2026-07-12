@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import useHeaderHeight from '../../hooks/useHeaderHeight';
-import { supabase } from '../../lib/supabaseClient';
 import { sendNewsletterSignupEvent } from '../../lib/ga';
 
 interface LayoutProps {
@@ -34,6 +33,8 @@ const Layout: React.FC<LayoutProps> = ({ children, showNewsletter = false }) => 
     setNewsletterMessage(null);
 
     try {
+      // フォーム送信時にだけSDKを読み込み、通常閲覧の初期バンドルを小さく保つ。
+      const { supabase } = await import('../../lib/supabaseClient');
       const { data, error } = await supabase.functions.invoke('register_newsletter', {
         body: { email },
       });
