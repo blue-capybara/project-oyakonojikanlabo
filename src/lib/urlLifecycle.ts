@@ -95,6 +95,46 @@ const normalizeStatus = (statusValue?: number | null): UrlLifecycleStatus | null
   }
 };
 
+interface UrlLifecycleGraphQLPayload {
+  data?: UrlLifecycleGraphQLResponse | null;
+  extensions?: UrlLifecycleGraphQLExtensions | null;
+}
+
+/**
+ * GraphQL レスポンスに付与された URL ライフサイクル判定を正規化します。
+ * 記事などの本体クエリにも同じ extensions が付くため、追加リクエストなしで再利用できます。
+ */
+export const resolveUrlLifecycleFromGraphQL = (
+  inputPath: string,
+  payload: UrlLifecycleGraphQLPayload,
+): UrlLifecycleResult | null => {
+  const path = normalizePath(inputPath);
+  if (!path) return null;
+
+  const extensionLifecycle = payload.extensions?.urlLifecycle ?? null;
+  const dataLifecycle = payload.data?.urlLifecycle ?? null;
+
+  const status =
+    normalizeStatus(payload.extensions?.status) ??
+    normalizeStatus(extensionLifecycle?.status) ??
+    normalizeStatus(dataLifecycle?.status) ??
+    null;
+
+  if (!status) {
+    return null;
+  }
+
+  const redirectTo = extensionLifecycle?.redirectTo ?? dataLifecycle?.redirectTo ?? null;
+  const reason = extensionLifecycle?.reason ?? dataLifecycle?.reason ?? undefined;
+
+  return {
+    path,
+    status,
+    reason: reason ?? undefined,
+    redirectTo,
+  };
+};
+
 export const fetchUrlLifecycle = async (
   endpoint: string,
   inputPath: string,
@@ -109,29 +149,10 @@ export const fetchUrlLifecycle = async (
       { path },
     );
 
-    const extensions = (response.extensions ?? null) as UrlLifecycleGraphQLExtensions | null;
-    const extensionLifecycle = extensions?.urlLifecycle ?? null;
-    const dataLifecycle = response.data?.urlLifecycle ?? null;
-
-    const status =
-      normalizeStatus(extensions?.status) ??
-      normalizeStatus(extensionLifecycle?.status) ??
-      normalizeStatus(dataLifecycle?.status) ??
-      null;
-
-    if (!status) {
-      return null;
-    }
-
-    const redirectTo = extensionLifecycle?.redirectTo ?? dataLifecycle?.redirectTo ?? null;
-    const reason = extensionLifecycle?.reason ?? dataLifecycle?.reason ?? undefined;
-
-    return {
-      path,
-      status,
-      reason: reason ?? undefined,
-      redirectTo,
-    };
+    return resolveUrlLifecycleFromGraphQL(path, {
+      data: response.data,
+      extensions: (response.extensions ?? null) as UrlLifecycleGraphQLExtensions | null,
+    });
   } catch (error) {
     console.warn('URLライフサイクル判定の取得に失敗しました。既存判定で続行します。', error);
     return null;
