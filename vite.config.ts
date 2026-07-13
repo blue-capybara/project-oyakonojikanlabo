@@ -60,6 +60,19 @@ export default defineConfig(({ mode }) => {
     base: env.VITE_BASE_PATH || '/',
     build: {
       outDir,
+      modulePreload: {
+        resolveDependencies(filename, deps) {
+          const keepsSupabaseOnDemand =
+            filename.includes('HomePage-') || filename.includes('PostDetailPage-');
+
+          if (!keepsSupabaseOnDemand) {
+            return deps;
+          }
+
+          // Homeのニュースレター送信・記事のお気に入り操作まではSupabaseを取得しない。
+          return deps.filter((dependency) => !dependency.includes('vendor-supabase-'));
+        },
+      },
       rollupOptions: {
         output: {
           // 遅延チャンク内の依存を入口チャンクへ空importで巻き上げない。
