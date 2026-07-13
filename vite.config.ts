@@ -70,7 +70,10 @@ export default defineConfig(({ mode }) => {
           }
 
           // Homeのニュースレター送信・記事のお気に入り操作まではSupabaseを取得しない。
-          return deps.filter((dependency) => !dependency.includes('vendor-supabase-'));
+          return deps.filter(
+            (dependency) =>
+              !dependency.includes('supabase-client-') && !dependency.includes('vendor-supabase-'),
+          );
         },
       },
       rollupOptions: {
@@ -81,6 +84,9 @@ export default defineConfig(({ mode }) => {
             // ReactとViteランタイムを明示的に分け、Apollo/Supabase側へ混在させない。
             if (id.includes('vite/preload-helper')) {
               return 'vite-runtime';
+            }
+            if (id.endsWith('/src/lib/supabaseClient.ts')) {
+              return 'supabase-client';
             }
             if (
               id.includes('/node_modules/react/') ||
