@@ -1,5 +1,3 @@
-import { supabase } from './supabaseClient';
-
 export interface SearchHistory {
   id: string;
   query: string;
@@ -7,10 +5,14 @@ export interface SearchHistory {
   user_id?: string;
 }
 
+// 検索パネルを開くまではSupabase SDKを読み込まない。
+const loadSupabase = async () => (await import('./supabaseClient')).supabase;
+
 export const searchHistoryApi = {
   // 検索履歴を保存
   async saveSearchHistory(query: string): Promise<void> {
     try {
+      const supabase = await loadSupabase();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -35,6 +37,7 @@ export const searchHistoryApi = {
   // ユーザーの検索履歴を取得
   async getSearchHistory(limit: number = 10): Promise<SearchHistory[]> {
     try {
+      const supabase = await loadSupabase();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -65,6 +68,7 @@ export const searchHistoryApi = {
   // 検索履歴を削除
   async deleteSearchHistory(id: string): Promise<void> {
     try {
+      const supabase = await loadSupabase();
       const { error } = await supabase.from('search_history').delete().eq('id', id);
 
       if (error) {
@@ -78,6 +82,7 @@ export const searchHistoryApi = {
   // 検索履歴をすべて削除
   async clearSearchHistory(): Promise<void> {
     try {
+      const supabase = await loadSupabase();
       const {
         data: { user },
       } = await supabase.auth.getUser();
