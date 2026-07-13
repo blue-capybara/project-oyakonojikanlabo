@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PostgrestError } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabaseClient';
 import { getFeatureFlag } from '../config/featureFlags';
 import { sendFavoriteAddEvent, sendFavoriteRemoveEvent } from '../lib/ga';
 
@@ -27,6 +26,9 @@ interface UseFavoriteState {
 
 const friendlyError = 'お気に入り状態の取得に失敗しました。時間をおいて再度お試しください。';
 const friendlyToggleError = 'お気に入りの更新に失敗しました。時間をおいて再度お試しください。';
+
+// 会員機能が無効な通常閲覧では Supabase SDK を初期バンドルへ含めない。
+const loadSupabase = async () => (await import('../lib/supabaseClient')).supabase;
 
 const isAuthSessionMissingError = (error: unknown): boolean => {
   if (!error || typeof error !== 'object') {
@@ -74,6 +76,7 @@ export const useFavorite = ({ targetType, targetId }: UseFavoriteOptions): UseFa
     setError(null);
 
     try {
+      const supabase = await loadSupabase();
       const {
         data: { user },
         error: authError,
@@ -127,6 +130,7 @@ export const useFavorite = ({ targetType, targetId }: UseFavoriteOptions): UseFa
 
   useEffect(() => {
     let isMounted = true;
+    let unsubscribe: (() => void) | undefined;
 
     const run = async () => {
       if (!isMounted) return;
@@ -145,16 +149,27 @@ export const useFavorite = ({ targetType, targetId }: UseFavoriteOptions): UseFa
       };
     }
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      if (!isMounted) return;
-      refresh();
-    });
+    void loadSupabase()
+      .then((supabase) => {
+        if (!isMounted) return;
+
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(() => {
+          if (!isMounted) return;
+          void refresh();
+        });
+        unsubscribe = () => subscription.unsubscribe();
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.error('Failed to subscribe to auth state changes:', err);
+        }
+      });
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, [membershipEnabled, refresh]);
 
@@ -179,6 +194,7 @@ export const useFavorite = ({ targetType, targetId }: UseFavoriteOptions): UseFa
     setNeedsAuth(false);
 
     try {
+      const supabase = await loadSupabase();
       const {
         data: { user },
         error: authError,

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { request, gql } from 'graphql-request';
+import { gql, rawRequest } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
 import useFavorite from '../hooks/useFavorite';
@@ -13,7 +13,8 @@ import { send404Event, sendRelatedPostClickEvent, sendShareClickEvent } from '..
 import Seo from '../components/seo/Seo';
 import GonePage from './GonePage';
 import NotFoundPage from './NotFoundPage';
-import { fetchUrlLifecycle } from '../lib/urlLifecycle';
+import { resolveUrlLifecycleFromGraphQL } from '../lib/urlLifecycle';
+import { measureFrontendOperation } from '../lib/frontendPerformance';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 const relatedEndpoint = `${new URL(endpoint).origin}/wp-json/okjl/v1`;
@@ -35,6 +36,12 @@ interface PostData {
   featuredImage?: {
     node?: {
       sourceUrl?: string | null;
+      srcSet?: string | null;
+      sizes?: string | null;
+      mediaDetails?: {
+        width?: number | null;
+        height?: number | null;
+      } | null;
     } | null;
   } | null;
   tags: {
@@ -44,6 +51,12 @@ interface PostData {
 
 interface PostResponse {
   post: PostData | null;
+  urlLifecycle?: {
+    path?: string | null;
+    status?: number | null;
+    reason?: string | null;
+    redirectTo?: string | null;
+  } | null;
 }
 
 interface RelatedPostRawItem {
@@ -71,7 +84,13 @@ interface RelatedPost {
 }
 
 const GET_POST_BY_SLUG = gql`
-  query GetPostBySlug($slug: ID!) {
+  query GetPostBySlug($slug: ID!, $path: String!) {
+    urlLifecycle(path: $path) {
+      path
+      status
+      reason
+      redirectTo
+    }
     post(id: $slug, idType: SLUG) {
       databaseId
       title
@@ -83,6 +102,12 @@ const GET_POST_BY_SLUG = gql`
       featuredImage {
         node {
           sourceUrl
+          srcSet
+          sizes
+          mediaDetails {
+            width
+            height
+          }
         }
       }
       tags {
@@ -274,7 +299,22 @@ const PostDetailPage: React.FC = () => {
         setNotFound(false);
         setGone(false);
 
-        const lifecycle = await fetchUrlLifecycle(endpoint, location.pathname);
+        // 記事と URL ライフサイクルを同じクエリで取得し、CMSが付与する
+        // extensions も併用して、本文取得と301/404/410判定を1リクエストで完結させます。
+        const response = await measureFrontendOperation(
+          'post_graphql_request',
+          () =>
+            rawRequest<PostResponse, { slug: string; path: string }>(endpoint, GET_POST_BY_SLUG, {
+              slug,
+              path: location.pathname,
+            }),
+          { content_type: 'post' },
+        );
+        const lifecycle = resolveUrlLifecycleFromGraphQL(location.pathname, {
+          data: response.data,
+          extensions: response.extensions,
+        });
+
         if (lifecycle?.status === 301 && lifecycle.redirectTo) {
           window.location.replace(lifecycle.redirectTo);
           return;
@@ -294,7 +334,7 @@ const PostDetailPage: React.FC = () => {
           return;
         }
 
-        const data = await request<PostResponse>(endpoint, GET_POST_BY_SLUG, { slug });
+        const data = response.data;
         if (!data.post) {
           setError(null);
           setNotFound(true); // SEO: コンテンツ不存在が確定したときだけ 404 を GA に送る
@@ -440,7 +480,8 @@ const PostDetailPage: React.FC = () => {
   }
 
   const tags = post.tags?.nodes ?? [];
-  const ogImage = post.featuredImage?.node?.sourceUrl ?? undefined;
+  const heroImage = post.featuredImage?.node;
+  const ogImage = heroImage?.sourceUrl ?? undefined;
   const description = post.excerpt ?? post.content ?? undefined;
   const favoriteAction = showMembershipFeatures ? (
     <button
@@ -474,7 +515,13 @@ const PostDetailPage: React.FC = () => {
         ]}
       />
 
-      <ArticleHeroImage src={post.featuredImage?.node?.sourceUrl} alt={post.title} />
+      <ArticleHeroImage
+        src={heroImage?.sourceUrl}
+        srcSet={heroImage?.srcSet}
+        width={heroImage?.mediaDetails?.width}
+        height={heroImage?.mediaDetails?.height}
+        alt={post.title}
+      />
 
       <ArticleTitleBlock title={post.title} dateText={formatDateJa(post.date)} />
 

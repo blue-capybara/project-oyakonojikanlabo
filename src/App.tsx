@@ -2,16 +2,17 @@ import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { GA4_B_LINKER_DOMAINS, initGa4B } from './analytics/ga4b';
 import { useGa4BPageView } from './analytics/useGa4BPageView';
-import AuthConversionTracker from './analytics/AuthConversionTracker';
 import Seo from './components/seo/Seo';
 import NormalizeUrl from './components/seo/NormalizeUrl';
 import ScrollToTop from './components/ScrollToTop';
-import HomePage from './pages/HomePage';
+import PageLoading from './components/loading/PageLoading';
 import { getFeatureFlag } from './config/featureFlags';
 import { shouldNoIndex } from './utils/seo';
 import { STATIC_WP_ROUTES } from './routes/staticWpRoutes';
 import './index.css';
 
+const AuthConversionTracker = lazy(() => import('./analytics/AuthConversionTracker'));
+const HomePage = lazy(() => import('./pages/HomePage'));
 const PostDetailPage = lazy(() => import('./pages/PostDetailPage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
 const EventReservationPage = lazy(() => import('./pages/EventReservationPage'));
@@ -59,10 +60,14 @@ function App() {
       {globalNoindex && <Seo noindex />}
       <NormalizeUrl />
       <ScrollToTop />
-      <AuthConversionTracker />
+      {showMembershipFeatures && (
+        <Suspense fallback={null}>
+          <AuthConversionTracker />
+        </Suspense>
+      )}
       <Ga4BPageView domains={GA4_B_LINKER_DOMAINS} />
       <div className="App">
-        <Suspense fallback={null}>
+        <Suspense fallback={<PageLoading />}>
           <Routes>
             {/* 固定ページ・一覧系（静的プレフィックスは記事スラッグより優先的にマッチさせる） */}
             <Route path="/" element={<HomePage />} />

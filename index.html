@@ -25,6 +25,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>親子の時間研究所</title>
 
+  <!-- JavaScriptの取得・評価中にも進行状況を表示するため、必要最小限のCSSをHTMLに含める -->
+  <style>
+    body {
+      margin: 0;
+    }
+
+    #app-static-loader {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      box-sizing: border-box;
+      background: #fff;
+      color: #4b5563;
+      font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
+      text-align: center;
+    }
+
+    .app-static-loader__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .app-static-loader__spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      box-sizing: border-box;
+      border: 4px solid #8cb9dd;
+      border-top-color: transparent;
+      border-radius: 9999px;
+      animation: app-static-loader-spin 0.8s linear infinite;
+    }
+
+    .app-static-loader__label {
+      margin: 0;
+      font-size: 0.875rem;
+    }
+
+    @keyframes app-static-loader-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .app-static-loader__spinner {
+        animation: none;
+        border-top-color: #8cb9dd;
+        opacity: 0.7;
+      }
+    }
+  </style>
+
   <!-- 旧GA4 (gtag.js) - ロールバック用にコメントアウト -->
   <!-- Google tag (gtag.js) / GA4
          本番ホスト以外（例: stg.oyakonojikanlabo.jp, localhost）は読み込みをスキップする。
@@ -63,6 +119,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cms.oyakonojikanlabo.jp" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap"
     rel="stylesheet"
@@ -78,7 +135,19 @@
   </noscript>
   <!-- End Google Tag Manager (noscript) -->
 
-  <div id="root"></div>
+  <div id="root">
+    <div id="app-static-loader" role="status" aria-live="polite" aria-busy="true">
+      <div class="app-static-loader__inner">
+        <span class="app-static-loader__spinner" aria-hidden="true"></span>
+        <p class="app-static-loader__label">ページを読み込んでいます…</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    if (window.performance && typeof window.performance.mark === 'function') {
+      window.performance.mark('okjl:static-loader-visible');
+    }
+  </script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
