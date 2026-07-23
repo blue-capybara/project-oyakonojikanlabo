@@ -260,8 +260,12 @@ const HomePageContent: React.FC = () => {
           </div>
         </div>
       </section>
-      {/* 特集セクション（独立表示） */}
-      <FeatureSection posts={undefined} loadingOverride={loading} errorOverride={Boolean(error)} />
+      {/* ヒーローと同じ取得結果を、一覧しやすい横長リストとして表示 */}
+      <FeatureSection
+        posts={featurePosts}
+        loadingOverride={loading}
+        errorOverride={Boolean(error)}
+      />
 
       {/* 記事一覧セクション */}
       <ArticlesSection />

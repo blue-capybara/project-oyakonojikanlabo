@@ -95,25 +95,10 @@ const ShoppingSection: React.FC = () => {
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8">
           <h2 className="text-3xl font-bold">おかいもの</h2>
-          <ExternalLink
-            href="https://shop.oyakonojikanlabo.jp/collections/all?sort_by=created-descending"
-            className="text-primary font-medium flex items-center"
-            onClick={() =>
-              sendOutboundClickEvent({
-                url: 'https://shop.oyakonojikanlabo.jp/collections/all?sort_by=created-descending',
-                link_text: '商品一覧へ',
-              })
-            }
-          >
-            商品一覧へ
-            <div className="w-5 h-5 flex items-center justify-center ml-1">
-              <i className="ri-arrow-right-line"></i>
-            </div>
-          </ExternalLink>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
           {products.map((product) => (
             <div
               key={product.id}
@@ -123,19 +108,21 @@ const ShoppingSection: React.FC = () => {
                 <img
                   src={product.image}
                   alt={product.title}
-                  className="w-full h-64 object-cover object-center"
+                  className="aspect-square w-full object-cover object-center sm:aspect-auto sm:h-64"
                 />
               </ExternalLink>
-              <div className="p-4 flex flex-col flex-grow">
+              <div className="flex flex-grow flex-col p-3 sm:p-4">
                 <ExternalLink href={product.url} target="_blank" rel="noopener noreferrer">
-                  <h3 className="text-lg font-bold mb-2 hover:underline">{product.title}</h3>
+                  <h3 className="mb-2 line-clamp-2 text-sm font-bold hover:underline sm:text-lg">
+                    {product.title}
+                  </h3>
                 </ExternalLink>
                 <div className="mt-auto">
                   <ExternalLink
                     href={product.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full inline-block text-center bg-primary text-white py-2 font-medium rounded-button"
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-button bg-primary px-2 py-2 text-center text-sm font-medium text-white sm:text-base"
                     onClick={() =>
                       sendOutboundClickEvent({ url: product.url, link_text: product.title })
                     }
@@ -146,6 +133,21 @@ const ShoppingSection: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+        <div className="mt-8 flex justify-center">
+          <ExternalLink
+            href="https://shop.oyakonojikanlabo.jp/collections/all?sort_by=created-descending"
+            className="inline-flex items-center text-primary hover:text-primary/80"
+            onClick={() =>
+              sendOutboundClickEvent({
+                url: 'https://shop.oyakonojikanlabo.jp/collections/all?sort_by=created-descending',
+                link_text: '商品一覧へ',
+              })
+            }
+          >
+            商品一覧へ
+            <i className="ri-arrow-right-line ml-2" aria-hidden="true"></i>
+          </ExternalLink>
         </div>
       </div>
     </section>

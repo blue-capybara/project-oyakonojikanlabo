@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { request, gql } from 'graphql-request';
+import { useIsMobileView } from '../../hooks/useIsMobileView';
 
 interface Article {
   id: string;
@@ -70,6 +71,8 @@ const GET_ARTICLES = gql`
 
 const ArticlesSection: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
+  const isMobile = useIsMobileView();
+  const visibleArticles = isMobile ? articles.slice(0, 3) : articles;
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -110,17 +113,11 @@ const ArticlesSection: React.FC = () => {
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8">
           <h2 className="text-3xl font-bold">記事一覧</h2>
-          <Link to="/archive" className="text-primary font-medium flex items-center">
-            すべて見る
-            <div className="w-5 h-5 flex items-center justify-center ml-1">
-              <i className="ri-arrow-right-line"></i>
-            </div>
-          </Link>
         </div>
         <div className="grid grid-cols-1 min-[600px]:grid-cols-2 lg:grid-cols-3 gap-8">
-          {articles.map((article) => (
+          {visibleArticles.map((article) => (
             <Link
               to={`/${article.slug}`}
               key={article.id}
@@ -154,6 +151,15 @@ const ArticlesSection: React.FC = () => {
               </div>
             </Link>
           ))}
+        </div>
+        <div className="mt-8 flex justify-center">
+          <Link
+            to="/archive"
+            className="inline-flex items-center text-primary hover:text-primary/80"
+          >
+            記事をすべて見る
+            <i className="ri-arrow-right-line ml-2" aria-hidden="true"></i>
+          </Link>
         </div>
       </div>
     </section>

@@ -10,6 +10,7 @@ import {
   isPastEventSchedule,
   type EventScheduleFields,
 } from '../../lib/eventSchedule';
+import { useIsMobileView } from '../../hooks/useIsMobileView';
 import { withBase } from '../../utils/paths';
 
 interface EventCpt {
@@ -223,6 +224,8 @@ const PicoEvents: React.FC = () => {
   const [events, setEvents] = useState<PicoEventCard[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobileView();
+  const visibleEvents = isMobile ? events.slice(0, 3) : events;
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -318,7 +321,7 @@ const PicoEvents: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 min-[600px]:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.map((event) => (
+            {visibleEvents.map((event) => (
               <div
                 key={event.id}
                 className="relative group bg-white rounded-lg overflow-hidden shadow-sm transition-transform duration-300 hover:-translate-y-1"

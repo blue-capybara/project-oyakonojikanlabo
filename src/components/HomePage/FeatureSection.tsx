@@ -19,6 +19,7 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
   });
 
   const resolvedPosts = posts ?? featurePosts;
+  const visiblePosts = resolvedPosts.slice(0, 4);
   const isLoading = loadingOverride ?? loading;
   const isError = errorOverride ?? Boolean(error);
 
@@ -53,52 +54,41 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
   }
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="bg-gray-50 py-10">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-8 text-center">特集</h2>
-        <div className="grid grid-cols-1 min-[600px]:grid-cols-2 lg:grid-cols-3 gap-8">
-          {resolvedPosts.map(({ featureId, post }) => (
+        <h2 className="mb-6 text-center text-3xl font-bold">注目の特集</h2>
+        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+          {visiblePosts.map(({ featureId, post }) => (
             <Link
               key={featureId}
               to={`/${post.slug}`}
-              className="bg-white rounded-lg shadow-md overflow-hidden block h-full transition-transform duration-200 hover:-translate-y-1"
+              className="group flex min-h-24 items-center gap-4 border-b border-gray-200 p-3 transition-colors duration-200 last:border-b-0 hover:bg-primary/5 focus-visible:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary sm:min-h-28 sm:gap-6 sm:p-4"
             >
-              <div className="w-full h-48 overflow-hidden bg-gray-100">
+              <div className="h-20 w-28 shrink-0 overflow-hidden rounded-md bg-gray-100 sm:h-24 sm:w-40">
                 <img
                   src={
                     post.featuredImage?.node?.sourceUrl ??
                     withBase('images/readdy/921de84646a0d38dfa688f1d826685e6.jpeg')
                   }
                   alt={post.title}
-                  className="w-full h-full object-cover object-top transition-transform duration-300 hover:scale-105"
+                  className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
-              <div className="p-6">
-                <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 text-xs rounded-full mb-3">
-                  特集
-                </span>
-                <h3
-                  className="text-xl font-bold mb-2 leading-tight"
-                  style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
+              <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between sm:gap-6">
+                <h3 className="line-clamp-2 text-base font-bold leading-snug text-gray-900 group-hover:text-primary sm:line-clamp-1 sm:text-lg">
                   {post.title}
                 </h3>
-                <p className="text-gray-600 mb-4 text-sm">
-                  公開日: {new Date(post.date).toLocaleDateString('ja-JP')}
-                </p>
-                <span className="text-primary font-medium flex items-center">
-                  詳しく見る
-                  <div className="w-5 h-5 flex items-center justify-center ml-1">
-                    <i className="ri-arrow-right-line"></i>
-                  </div>
-                </span>
+                <time
+                  dateTime={post.date}
+                  className="mt-2 block shrink-0 whitespace-nowrap text-xs text-gray-500 sm:mt-0 sm:text-sm"
+                >
+                  {new Date(post.date).toLocaleDateString('ja-JP')}
+                </time>
               </div>
+              <i
+                className="ri-arrow-right-line shrink-0 text-xl text-primary transition-transform duration-200 group-hover:translate-x-1"
+                aria-hidden="true"
+              ></i>
             </Link>
           ))}
         </div>
