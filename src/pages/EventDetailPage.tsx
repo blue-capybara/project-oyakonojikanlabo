@@ -7,6 +7,16 @@ import useFavorite from '../hooks/useFavorite';
 import { getFeatureFlag } from '../config/featureFlags';
 import useSwipe from '../hooks/useSwipe';
 import { send404Event, sendShareClickEvent } from '../lib/ga';
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  compactOccurrences,
+  formatEventOccurrence,
+  getDisplayOccurrence,
+  isEventScheduleReservable,
+  normalizeEventScheduleStatus,
+  type EventScheduleFields,
+  type EventScheduleStatus,
+} from '../lib/eventSchedule';
 import Seo from '../components/seo/Seo';
 import { withBase } from '../utils/paths';
 import GonePage from './GonePage';
@@ -83,7 +93,7 @@ interface Event {
   image: string;
   galleryImages?: ArtistMedia[];
   slotSchedules?: EventSlotSchedule[];
-  status: 'current' | 'upcoming' | 'past';
+  status: EventScheduleStatus;
   description?: string;
   descriptionHtml?: string;
   detailHtml?: string;
@@ -98,6 +108,7 @@ interface Event {
   belongings?: string[];
   notes?: string;
   reservationOpen?: boolean | null;
+  scheduleReservable: boolean;
 }
 
 interface SlotTimeDetailEntry {
@@ -174,7 +185,7 @@ interface EventDetailExt {
   } | null;
 }
 
-interface EventNode {
+interface EventNode extends EventScheduleFields {
   id: string;
   slug?: string | null;
   title?: string | null;
@@ -254,6 +265,7 @@ const GET_EVENT_DETAIL = gql`
       slug
       title
       content
+      ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
       eventCpt {
         summary
         eventType
@@ -409,11 +421,6 @@ const GET_ARTIST_DETAIL = gql`
   }
 `;
 
-const selectPrimarySlot = (slots?: EventSlot[] | null) => {
-  if (!slots || slots.length === 0) return undefined;
-  return slots.find((slot) => slot.date) ?? slots[0];
-};
-
 const toHourMinute = (time?: string | null) => {
   if (!time) return null;
   const trimmed = time.trim();
@@ -424,19 +431,20 @@ const toHourMinute = (time?: string | null) => {
 };
 
 const formatSchedule = (slot?: EventSlot) => {
-  if (!slot) return '日程未定';
+  if (!slot) return '開催予定・日程調整中';
 
   const { date, startTime, endTime } = slot;
   let dateLabel = date ?? '';
 
   if (date) {
-    const parsed = new Date(date);
+    const parsed = new Date(`${date.split('T')[0]}T12:00:00+09:00`);
     if (!Number.isNaN(parsed.getTime())) {
       dateLabel = parsed.toLocaleDateString('ja-JP', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         weekday: 'short',
+        timeZone: 'Asia/Tokyo',
       });
     }
   }
@@ -472,54 +480,6 @@ const buildLocationLabel = (
   }
 
   return '開催地未定';
-};
-
-const combineDateTime = (date?: string | null, time?: string | null) => {
-  if (!date) return null;
-  const normalizedTime = time ? (time.length === 5 ? `${time}:00` : time) : '00:00:00';
-  return new Date(`${date}T${normalizedTime}`);
-};
-
-const determineStatus = (slot?: EventSlot): Event['status'] => {
-  const now = new Date();
-  if (!slot?.date) {
-    return 'upcoming';
-  }
-
-  const start = combineDateTime(slot.date, slot.startTime);
-  const end = combineDateTime(slot.date, slot.endTime);
-
-  if (start && !Number.isNaN(start.getTime())) {
-    if (end && !Number.isNaN(end.getTime())) {
-      if (now >= start && now <= end) return 'current';
-      return now < start ? 'upcoming' : 'past';
-    }
-
-    if (start.toDateString() === now.toDateString()) return 'current';
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  return 'upcoming';
-};
-
-const determineAggregateStatus = (slots?: EventSlot[] | null): Event['status'] => {
-  if (!slots || slots.length === 0) {
-    return 'upcoming';
-  }
-
-  let hasUpcoming = false;
-
-  for (const slot of slots) {
-    const slotStatus = determineStatus(slot);
-    if (slotStatus === 'current') {
-      return 'current';
-    }
-    if (slotStatus === 'upcoming') {
-      hasUpcoming = true;
-    }
-  }
-
-  return hasUpcoming ? 'upcoming' : 'past';
 };
 
 const formatPrice = (price?: number | null, priceType?: string | null) => {
@@ -658,7 +618,7 @@ const buildSlotSchedules = (slots?: EventSlot[] | null): EventSlotSchedule[] | u
     .map((slot, index) => {
       const entries = buildSlotDetailEntries(slot.slotTimeSchedule);
       if (!entries || entries.length === 0) return null;
-      const label = formatSchedule(slot) || '日程未定';
+      const label = formatSchedule(slot) || '開催予定・日程調整中';
       return {
         id: `${slot.date ?? 'slot'}-${slot.startTime ?? index}`,
         label,
@@ -898,10 +858,22 @@ const parseArtistContent = (content?: string | null): ParsedArtistContent => {
 const formatEvent = (node: EventNode): Event => {
   const eventCpt = node.eventCpt ?? {};
   const eventDetailExt = node.eventDetailExt;
-  const primarySlot = selectPrimarySlot(eventCpt.singleSlots);
-  const dateLines = buildDateLines(eventCpt.singleSlots);
+  const status = normalizeEventScheduleStatus(node.computedScheduleStatus);
+  const reservationOccurrences = compactOccurrences(node.reservationOccurrences);
+  const computedSlots: EventSlot[] = reservationOccurrences.map((occurrence) => ({
+    date: occurrence.date,
+    startTime: occurrence.startTime,
+    endTime: occurrence.endTime,
+  }));
+  const displaySlots =
+    computedSlots.length > 0
+      ? computedSlots
+      : status === 'past'
+        ? (eventCpt.singleSlots ?? [])
+        : [];
+  const dateLines = buildDateLines(displaySlots);
   const scheduleFromExt = buildTimeScheduleEntries(eventDetailExt?.timeSchedule);
-  const scheduleFromSlots = createScheduleEntries(eventCpt.singleSlots);
+  const scheduleFromSlots = createScheduleEntries(displaySlots);
   const slotSchedules = buildSlotSchedules(eventCpt.singleSlots);
   const summaryHtml = normalizeHtml(eventCpt.summary);
   const detailHtml = normalizeHtml(eventDetailExt?.detailBody ?? node.content);
@@ -909,7 +881,7 @@ const formatEvent = (node: EventNode): Event => {
   const descriptionText =
     summaryHtml !== undefined ? stripHtml(summaryHtml) : stripHtml(detailHtml);
   const notes = eventCpt.notes?.trim();
-  const primaryDateLabel = formatSchedule(primarySlot);
+  const primaryDateLabel = formatEventOccurrence(getDisplayOccurrence(node)).fullLabel;
   const galleryImages = buildGalleryImages(eventDetailExt?.gallery);
 
   return {
@@ -924,7 +896,7 @@ const formatEvent = (node: EventNode): Event => {
     image: eventCpt.mainImage?.node?.sourceUrl ?? '',
     galleryImages,
     slotSchedules,
-    status: determineAggregateStatus(eventCpt.singleSlots),
+    status,
     description: descriptionText || undefined,
     descriptionHtml,
     detailHtml: detailHtml,
@@ -939,6 +911,7 @@ const formatEvent = (node: EventNode): Event => {
     belongings: extractTexts(eventDetailExt?.belongings),
     notes: notes && notes.length > 0 ? notes : undefined,
     reservationOpen: eventCpt.reservationOpen ?? null,
+    scheduleReservable: isEventScheduleReservable(node),
   };
 };
 
@@ -975,6 +948,7 @@ const buildFallbackEvent = (slug: string): Event => ({
   belongings: undefined,
   notes: undefined,
   reservationOpen: true,
+  scheduleReservable: true,
 });
 
 const formatArtist = (node: ArtistNode): ArtistProfile => {
@@ -1152,8 +1126,20 @@ const EventDetailPage: React.FC = () => {
     reservationOverrideUrl && /^https?:\/\//i.test(reservationOverrideUrl),
   );
   const isReservationClosed = Boolean(
-    event && (event.reservationOpen === false || event.status === 'past'),
+    event && (event.reservationOpen === false || !event.scheduleReservable),
   );
+  const isScheduleUndated = event?.status === 'undated';
+  const isReservationPending = Boolean(
+    event &&
+    event.status === 'upcoming' &&
+    event.reservationOpen !== false &&
+    !event.scheduleReservable,
+  );
+  const closedReservationLabel = isScheduleUndated
+    ? '開催予定・日程調整中'
+    : isReservationPending
+      ? '予約受付前'
+      : '申込終了';
   const eventImages = useMemo<ArtistMedia[]>(() => {
     if (!event) {
       return [
@@ -1955,7 +1941,7 @@ const EventDetailPage: React.FC = () => {
                           <div className="mr-2 flex h-5 w-5 items-center justify-center">
                             <i className="ri-close-circle-line"></i>
                           </div>
-                          申込終了
+                          {closedReservationLabel}
                         </span>
                       ) : reservationOverrideUrl ? (
                         <a
@@ -2120,7 +2106,7 @@ const EventDetailPage: React.FC = () => {
                           <div className="mr-2 flex h-5 w-5 items-center justify-center">
                             <i className="ri-close-circle-line"></i>
                           </div>
-                          申込終了
+                          {closedReservationLabel}
                         </span>
                       ) : reservationOverrideUrl ? (
                         <a

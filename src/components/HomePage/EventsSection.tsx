@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { gql, request } from 'graphql-request';
-
-interface EventSlot {
-  date?: string | null;
-  startTime?: string | null;
-  endTime?: string | null;
-}
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  compareEventSchedule,
+  formatEventOccurrence,
+  getDisplayOccurrence,
+  isEventScheduleReservable,
+  isPastEventSchedule,
+  type EventScheduleFields,
+} from '../../lib/eventSchedule';
 
 interface EventCpt {
   summary?: string | null;
@@ -19,7 +22,6 @@ interface EventCpt {
       sourceUrl?: string | null;
     } | null;
   } | null;
-  singleSlots?: EventSlot[] | null;
   venueRef?: {
     nodes?: Array<{
       __typename?: string | null;
@@ -30,7 +32,7 @@ interface EventCpt {
   venueMapsUrl?: string | null;
 }
 
-interface EventNode {
+interface EventNode extends EventScheduleFields {
   id: string;
   slug?: string | null;
   title?: string | null;
@@ -70,11 +72,12 @@ const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 
 const GET_EVENTS = gql`
   query GetEvents {
-    events(first: 3, where: { orderby: { field: DATE, order: DESC } }) {
+    events(first: 100, where: { orderby: { field: DATE, order: DESC } }) {
       nodes {
         id
         slug
         title
+        ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
         eventCpt {
           summary
           eventType
@@ -86,11 +89,6 @@ const GET_EVENTS = gql`
             node {
               sourceUrl
             }
-          }
-          singleSlots {
-            date
-            startTime
-            endTime
           }
           venueRef {
             nodes {
@@ -135,34 +133,6 @@ const stripHtml = (html?: string | null) => {
     .replace(/&nbsp;/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-};
-
-const selectPrimarySlot = (slots?: EventSlot[] | null) => {
-  if (!slots || slots.length === 0) return undefined;
-  return slots.find((slot) => slot.date) ?? slots[0];
-};
-
-const formatSchedule = (slot?: EventSlot) => {
-  if (!slot) return '日程未定';
-
-  const { date, startTime, endTime } = slot;
-  let dateLabel = date ?? '';
-
-  if (date) {
-    const parsed = new Date(date);
-    if (!Number.isNaN(parsed.getTime())) {
-      dateLabel = parsed.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'short',
-      });
-    }
-  }
-
-  const timeLabel = startTime ? `${startTime}${endTime ? `〜${endTime}` : ''}` : (endTime ?? '');
-
-  return [dateLabel, timeLabel].filter(Boolean).join(' ');
 };
 
 const resolveCategory = (eventType?: string | null) => {
@@ -214,10 +184,14 @@ const EventsSection: React.FC = () => {
           .filter((node): node is EventNode & { slug: string; title: string } =>
             Boolean(node.slug && node.title),
           )
+          .filter((node) => !isPastEventSchedule(node))
+          .sort(compareEventSchedule)
+          .slice(0, 3)
           .map((node) => {
             const eventCpt = node.eventCpt ?? {};
             const category = resolveCategory(eventCpt.eventType);
-            const slot = selectPrimarySlot(eventCpt.singleSlots);
+            const reservationOpen =
+              Boolean(eventCpt.reservationOpen) && isEventScheduleReservable(node);
             const regionTags =
               node.eventRegions?.nodes
                 ?.map((region) => region?.name)
@@ -233,13 +207,13 @@ const EventsSection: React.FC = () => {
                 buildLocationLabel(eventCpt, node.eventRegions),
                 MAX_LOCATION_CHARS,
               ),
-              scheduleLabel: formatSchedule(slot),
+              scheduleLabel: formatEventOccurrence(getDisplayOccurrence(node)).fullLabel,
               summary: stripHtml(eventCpt.summary),
               image: eventCpt.mainImage?.node?.sourceUrl ?? '/default.jpg',
-              reservationOpen: Boolean(eventCpt.reservationOpen),
+              reservationOpen,
               tags: [
                 { id: 'category', label: category.label, className: category.className },
-                ...(eventCpt.reservationOpen
+                ...(reservationOpen
                   ? [
                       {
                         id: 'reservation',

@@ -11,6 +11,7 @@ export const featureFlags = {
   showCollaborationSignup: toBoolean(import.meta.env.VITE_FEATURE_SHOW_COLLAB_SIGNUP, false),
   showPicoServiceSections: toBoolean(import.meta.env.VITE_FEATURE_SHOW_PICO_SERVICES, false),
   showMembershipFeatures: toBoolean(import.meta.env.VITE_FEATURE_SHOW_MEMBERSHIP, false),
+  showHomeGeneralEvents: toBoolean(import.meta.env.VITE_FEATURE_SHOW_HOME_GENERAL_EVENTS, false),
 } as const;
 
 export type FeatureFlagKey = keyof typeof featureFlags;

@@ -4,13 +4,16 @@ import { gql, request } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
 import { getFeatureFlag } from '../config/featureFlags';
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  compareEventSchedule,
+  formatEventOccurrence,
+  getDisplayOccurrence,
+  normalizeEventScheduleStatus,
+  type EventScheduleFields,
+  type EventScheduleStatus,
+} from '../lib/eventSchedule';
 import { withBase } from '../utils/paths';
-
-interface EventSlot {
-  date?: string | null;
-  startTime?: string | null;
-  endTime?: string | null;
-}
 
 interface EventCpt {
   summary?: string | null;
@@ -23,7 +26,6 @@ interface EventCpt {
       sourceUrl?: string | null;
     } | null;
   } | null;
-  singleSlots?: EventSlot[] | null;
   venueRef?: {
     nodes?: Array<{
       __typename?: string | null;
@@ -34,7 +36,7 @@ interface EventCpt {
   venueMapsUrl?: string | null;
 }
 
-interface EventNode {
+interface EventNode extends EventScheduleFields {
   id: string;
   slug?: string | null;
   title?: string | null;
@@ -69,7 +71,7 @@ interface EventsResponse {
   } | null;
 }
 
-interface Event {
+interface Event extends EventScheduleFields {
   id: string;
   slug: string;
   title: string;
@@ -80,10 +82,11 @@ interface Event {
   regionDisplay: string;
   regionName: string;
   image: string;
-  status: 'current' | 'upcoming' | 'past';
+  status: EventScheduleStatus;
 }
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
+const EVENTS_PER_PAGE = 100;
 
 const GET_EVENTS = gql`
   query GetEventArchive($first: Int!, $after: String) {
@@ -96,6 +99,7 @@ const GET_EVENTS = gql`
         id
         slug
         title
+        ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
         eventCpt {
           eventType
           summary
@@ -104,11 +108,6 @@ const GET_EVENTS = gql`
             node {
               sourceUrl
             }
-          }
-          singleSlots {
-            date
-            startTime
-            endTime
           }
           venueRef {
             nodes {
@@ -193,73 +192,6 @@ const CATEGORY_META: Record<string, { label: string; className: string }> = {
   workshop: { label: 'ワークショップ', className: 'bg-green-100 text-green-800' },
   event: { label: 'イベント', className: 'bg-purple-100 text-purple-800' },
   other: { label: 'その他', className: 'bg-gray-100 text-gray-800' },
-};
-
-const selectPrimarySlot = (slots?: EventSlot[] | null) => {
-  if (!slots || slots.length === 0) return undefined;
-  return slots.find((slot) => slot.date) ?? slots[0];
-};
-
-const formatSchedule = (slot?: EventSlot) => {
-  if (!slot) return '日程未定';
-
-  const { date, startTime, endTime } = slot;
-  let dateLabel = date ?? '';
-
-  if (date) {
-    const parsed = new Date(date);
-    if (!Number.isNaN(parsed.getTime())) {
-      dateLabel = parsed.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'short',
-      });
-    }
-  }
-
-  const normalizeTime = (time?: string | null) => {
-    if (!time) return '';
-    if (time.length >= 5) {
-      return time.slice(0, 5);
-    }
-    return time;
-  };
-
-  const startLabel = normalizeTime(startTime);
-  const endLabel = normalizeTime(endTime);
-
-  const timeLabel = startLabel ? `${startLabel}${endLabel ? `〜${endLabel}` : ''}` : endLabel;
-
-  return [dateLabel, timeLabel].filter(Boolean).join(' ');
-};
-
-const combineDateTime = (date?: string | null, time?: string | null) => {
-  if (!date) return null;
-  const normalizedTime = time ? (time.length === 5 ? `${time}:00` : time) : '00:00:00';
-  return new Date(`${date}T${normalizedTime}`);
-};
-
-const determineStatus = (slot?: EventSlot): Event['status'] => {
-  const now = new Date();
-  if (!slot?.date) {
-    return 'upcoming';
-  }
-
-  const start = combineDateTime(slot.date, slot.startTime);
-  const end = combineDateTime(slot.date, slot.endTime);
-
-  if (start && !Number.isNaN(start.getTime())) {
-    if (end && !Number.isNaN(end.getTime())) {
-      if (now >= start && now <= end) return 'current';
-      return now < start ? 'upcoming' : 'past';
-    }
-
-    if (start.toDateString() === now.toDateString()) return 'current';
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  return 'upcoming';
 };
 
 const buildLocationLabel = (eventCpt?: EventCpt | null, regions?: EventNode['eventRegions']) => {
@@ -405,7 +337,7 @@ const EventArchivePage: React.FC = () => {
 
     try {
       const data = await request<EventsResponse>(endpoint, GET_EVENTS, {
-        first: isAppend ? 9 : 12,
+        first: EVENTS_PER_PAGE,
         after: isAppend ? pageInfoRef.current.endCursor : null,
       });
 
@@ -417,26 +349,32 @@ const EventArchivePage: React.FC = () => {
         )
         .map((node) => {
           const eventCpt = node.eventCpt ?? {};
-          const primarySlot = selectPrimarySlot(eventCpt.singleSlots);
           const categorySlug = resolveCategory(node.eventCategories);
           const regionInfo = deriveRegionInfo(node.eventRegions);
+          const schedule = formatEventOccurrence(getDisplayOccurrence(node));
 
           return {
             id: node.id,
             slug: node.slug ?? node.id,
             title: node.title ?? 'イベント情報',
             category: categorySlug,
-            date: formatSchedule(primarySlot),
+            date: schedule.fullLabel,
             location: buildLocationLabel(eventCpt, node.eventRegions),
             region: regionInfo.regionSlug,
             regionDisplay: regionInfo.regionDisplay,
             regionName: regionInfo.regionName,
             image: eventCpt.mainImage?.node?.sourceUrl ?? '/default.jpg',
-            status: determineStatus(primarySlot),
+            status: normalizeEventScheduleStatus(node.computedScheduleStatus),
+            computedScheduleStatus: node.computedScheduleStatus,
+            currentOccurrence: node.currentOccurrence,
+            nextOccurrence: node.nextOccurrence,
+            reservationOccurrences: node.reservationOccurrences,
           };
         });
 
-      setEvents((prev) => (isAppend ? [...prev, ...formatted] : formatted));
+      setEvents((prev) =>
+        (isAppend ? [...prev, ...formatted] : formatted).sort(compareEventSchedule),
+      );
       pageInfoRef.current = {
         hasNextPage: Boolean(data.events?.pageInfo.hasNextPage),
         endCursor: data.events?.pageInfo.endCursor ?? null,
@@ -506,7 +444,10 @@ const EventArchivePage: React.FC = () => {
   const filteredEvents = events.filter((event) => {
     const categoryMatch = selectedCategory === 'all' || event.category === selectedCategory;
     const regionMatch = selectedRegion === 'all' || event.region === selectedRegion;
-    const periodMatch = selectedPeriod === 'all' || event.status === selectedPeriod;
+    const periodMatch =
+      selectedPeriod === 'all' ||
+      event.status === selectedPeriod ||
+      (selectedPeriod === 'upcoming' && event.status === 'undated');
     return categoryMatch && regionMatch && periodMatch;
   });
 
@@ -627,10 +568,13 @@ const EventArchivePage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">並び替え:</span>
                 <div className="relative">
-                  <select className="px-4 py-1 text-sm border rounded-lg appearance-none bg-white pr-8">
+                  <select
+                    aria-label="イベントの並び順"
+                    className="px-4 py-1 text-sm border rounded-lg appearance-none bg-white pr-8"
+                    value="date-asc"
+                    disabled
+                  >
                     <option value="date-asc">開催日（近い順）</option>
-                    <option value="date-desc">開催日（遠い順）</option>
-                    <option value="new">新着順</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                     <i className="ri-arrow-down-s-line text-gray-400"></i>

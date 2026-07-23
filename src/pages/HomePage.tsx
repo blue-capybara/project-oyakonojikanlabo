@@ -10,6 +10,7 @@ import PicoEvents from '../components/HomePage/PicoEvents';
 import CollaborationBanner from '../components/HomePage/CollaborationBanner';
 import FeatureSection from '../components/HomePage/FeatureSection';
 import { featureClient, useFeaturePosts } from '../components/HomePage/useFeaturePosts';
+import { getFeatureFlag } from '../config/featureFlags';
 import Seo from '../components/seo/Seo';
 import { withBase } from '../utils/paths';
 
@@ -55,6 +56,9 @@ const HomePageContent: React.FC = () => {
   const [showLoader, setShowLoader] = React.useState(false);
   const [isSearchPanelOpen, setIsSearchPanelOpen] = React.useState(false);
   const mainSlides = React.useMemo(() => featurePosts.slice(0, 5), [featurePosts]);
+  // 現在はPICOイベントのみを受け付けているため非表示にしています。
+  // PICO以外のイベント掲載を再開するときは、対応する環境変数をtrueにして復活させます。
+  const showHomeGeneralEvents = getFeatureFlag('showHomeGeneralEvents');
 
   // 検索パネル開閉イベントを購読し、スライダー自動進行の停止に利用
   React.useEffect(() => {
@@ -256,23 +260,27 @@ const HomePageContent: React.FC = () => {
           </div>
         </div>
       </section>
-      {/* 特集セクション（独立表示） */}
-      <FeatureSection posts={undefined} loadingOverride={loading} errorOverride={Boolean(error)} />
+      {/* ヒーローと同じ取得結果を、一覧しやすい横長リストとして表示 */}
+      <FeatureSection
+        posts={featurePosts}
+        loadingOverride={loading}
+        errorOverride={Boolean(error)}
+      />
 
       {/* 記事一覧セクション */}
       <ArticlesSection />
 
-      {/* イベント情報セクション */}
-      <EventsSection />
+      {/* 絵本アートイベント情報は、PICO以外のイベント掲載再開時にフラグで復活可能です。 */}
+      {showHomeGeneralEvents && <EventsSection />}
 
       {/* おかいものセクション */}
       <ShoppingSection />
 
-      {/* 豊中PICOバナー */}
-      <PicoBanner />
-
       {/* PICOイベント */}
       <PicoEvents />
+
+      {/* カルチャー＆ブックカフェ PICOの店舗紹介 */}
+      <PicoBanner />
 
       {/* コラボレーションバナー */}
       <CollaborationBanner />
