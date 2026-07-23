@@ -371,9 +371,12 @@ const PicoEvents: React.FC = () => {
           </div>
         )}
         <div className="flex justify-center mt-8">
-          <Link to="/event" className="inline-flex items-center text-primary hover:text-primary/80">
-            PICOでのイベントを見る
-            <i className="ri-arrow-right-line ml-2"></i>
+          <Link
+            to="/event?category=event-pico&sort=recommended"
+            className="inline-flex items-center text-primary hover:text-primary/80"
+          >
+            PICOイベントをすべて見る
+            <i className="ri-arrow-right-line ml-2" aria-hidden="true"></i>
           </Link>
         </div>
       </div>

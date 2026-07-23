@@ -127,14 +127,22 @@ const scheduleGroup = (event: SchedulableEvent) => {
   return 3;
 };
 
-const compareAutomaticSchedule = (left: SchedulableEvent, right: SchedulableEvent) => {
+const compareAutomaticSchedule = (
+  left: SchedulableEvent,
+  right: SchedulableEvent,
+  futureDirection: 'asc' | 'desc' = 'asc',
+) => {
   const groupComparison = scheduleGroup(left) - scheduleGroup(right);
   if (groupComparison !== 0) return groupComparison;
 
   const leftTime = left.nextOccurrence?.startsAt ?? left.currentOccurrence?.startsAt ?? '';
   const rightTime = right.nextOccurrence?.startsAt ?? right.currentOccurrence?.startsAt ?? '';
   const timeComparison = leftTime.localeCompare(rightTime);
-  if (timeComparison !== 0) return timeComparison;
+  if (timeComparison !== 0) {
+    return scheduleGroup(left) === 0 && futureDirection === 'desc'
+      ? -timeComparison
+      : timeComparison;
+  }
 
   const titleComparison = (left.title ?? '').localeCompare(right.title ?? '', 'ja');
   if (titleComparison !== 0) return titleComparison;
@@ -160,6 +168,25 @@ export const comparePicoEventSchedule = (left: SchedulableEvent, right: Schedula
  */
 export const compareEventSchedule = (left: SchedulableEvent, right: SchedulableEvent) =>
   compareAutomaticSchedule(left, right);
+
+/**
+ * 通常一覧用。今後のイベントだけを遠い順にし、日程未定・開催中・終了の位置は維持します。
+ */
+export const compareEventScheduleDescending = (left: SchedulableEvent, right: SchedulableEvent) =>
+  compareAutomaticSchedule(left, right, 'desc');
+
+/**
+ * PICO一覧用。開催中・今後を手動順位で並べ、終了イベントは手動順位を保持したまま後方へ送ります。
+ */
+export const comparePicoEventArchiveSchedule = (
+  left: SchedulableEvent,
+  right: SchedulableEvent,
+) => {
+  const leftIsPast = isPastEventSchedule(left);
+  const rightIsPast = isPastEventSchedule(right);
+  if (leftIsPast !== rightIsPast) return leftIsPast ? 1 : -1;
+  return comparePicoEventSchedule(left, right);
+};
 
 export const isPastEventSchedule = (schedule?: EventScheduleFields | null) =>
   normalizeEventScheduleStatus(schedule?.computedScheduleStatus) === 'past';

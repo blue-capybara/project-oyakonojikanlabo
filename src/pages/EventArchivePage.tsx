@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { gql, request } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
@@ -7,6 +7,8 @@ import { getFeatureFlag } from '../config/featureFlags';
 import {
   EVENT_OCCURRENCE_GRAPHQL_FIELDS,
   compareEventSchedule,
+  compareEventScheduleDescending,
+  comparePicoEventArchiveSchedule,
   formatEventOccurrence,
   getDisplayOccurrence,
   normalizeEventScheduleStatus,
@@ -18,6 +20,7 @@ import { withBase } from '../utils/paths';
 interface EventCpt {
   summary?: string | null;
   eventType?: string | null;
+  picoDisplayOrder?: number | null;
   price?: number | null;
   priceType?: string | null;
   reservationOpen?: boolean | null;
@@ -83,10 +86,16 @@ interface Event extends EventScheduleFields {
   regionName: string;
   image: string;
   status: EventScheduleStatus;
+  eventCpt?: {
+    picoDisplayOrder?: number | null;
+  } | null;
 }
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 const EVENTS_PER_PAGE = 100;
+const PICO_CATEGORY = 'event-pico';
+
+type EventSortMode = 'recommended' | 'date-asc' | 'date-desc';
 
 const GET_EVENTS = gql`
   query GetEventArchive($first: Int!, $after: String) {
@@ -102,6 +111,7 @@ const GET_EVENTS = gql`
         ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
         eventCpt {
           eventType
+          picoDisplayOrder
           summary
           reservationOpen
           mainImage {
@@ -309,7 +319,7 @@ const FALLBACK_EVENTS: Event[] = [
 
 const EventArchivePage: React.FC = () => {
   const showMembershipFeatures = getFeatureFlag('showMembershipFeatures');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedPeriod, setSelectedPeriod] = useState('all');
   const [events, setEvents] = useState<Event[]>([]);
@@ -320,6 +330,21 @@ const EventArchivePage: React.FC = () => {
     hasNextPage: true,
     endCursor: null,
   });
+  const categoryParam = searchParams.get('category');
+  const selectedCategory =
+    categoryParam && Object.prototype.hasOwnProperty.call(CATEGORY_META, categoryParam)
+      ? categoryParam
+      : 'all';
+  const sortParam = searchParams.get('sort');
+  const selectedSort: EventSortMode =
+    selectedCategory === PICO_CATEGORY
+      ? sortParam === 'date-asc' || sortParam === 'date-desc'
+        ? sortParam
+        : 'recommended'
+      : sortParam === 'date-desc'
+        ? 'date-desc'
+        : 'date-asc';
+  const isPicoCategory = selectedCategory === PICO_CATEGORY;
 
   const fetchEvents = useCallback(async ({ append }: { append?: boolean } = {}) => {
     const isAppend = append ?? false;
@@ -369,6 +394,9 @@ const EventArchivePage: React.FC = () => {
             currentOccurrence: node.currentOccurrence,
             nextOccurrence: node.nextOccurrence,
             reservationOccurrences: node.reservationOccurrences,
+            eventCpt: {
+              picoDisplayOrder: eventCpt.picoDisplayOrder,
+            },
           };
         });
 
@@ -441,15 +469,44 @@ const EventArchivePage: React.FC = () => {
     return [{ id: 'all', label: 'すべての地域' }, ...options];
   }, [events]);
 
-  const filteredEvents = events.filter((event) => {
-    const categoryMatch = selectedCategory === 'all' || event.category === selectedCategory;
-    const regionMatch = selectedRegion === 'all' || event.region === selectedRegion;
-    const periodMatch =
-      selectedPeriod === 'all' ||
-      event.status === selectedPeriod ||
-      (selectedPeriod === 'upcoming' && event.status === 'undated');
-    return categoryMatch && regionMatch && periodMatch;
-  });
+  const filteredEvents = useMemo(() => {
+    const filtered = events.filter((event) => {
+      const categoryMatch = selectedCategory === 'all' || event.category === selectedCategory;
+      const regionMatch = selectedRegion === 'all' || event.region === selectedRegion;
+      const periodMatch =
+        selectedPeriod === 'all' ||
+        event.status === selectedPeriod ||
+        (selectedPeriod === 'upcoming' && event.status === 'undated');
+      return categoryMatch && regionMatch && periodMatch;
+    });
+
+    const comparator =
+      selectedSort === 'recommended' && isPicoCategory
+        ? comparePicoEventArchiveSchedule
+        : selectedSort === 'date-desc'
+          ? compareEventScheduleDescending
+          : compareEventSchedule;
+
+    return filtered.sort(comparator);
+  }, [events, isPicoCategory, selectedCategory, selectedPeriod, selectedRegion, selectedSort]);
+
+  const updateCategory = (category: string) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (category === 'all') {
+      nextParams.delete('category');
+      nextParams.set('sort', 'date-asc');
+    } else {
+      nextParams.set('category', category);
+      nextParams.set('sort', category === PICO_CATEGORY ? 'recommended' : 'date-asc');
+    }
+    setSearchParams(nextParams);
+  };
+
+  const updateSort = (sort: EventSortMode) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('sort', sort);
+    setSearchParams(nextParams);
+  };
 
   const getCategoryStyle = (category: string) =>
     CATEGORY_META[category]?.className ?? CATEGORY_META.other.className;
@@ -482,8 +539,9 @@ const EventArchivePage: React.FC = () => {
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
                   <button
+                    type="button"
                     key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
+                    onClick={() => updateCategory(category.id)}
                     className={`px-4 py-2 text-sm rounded-full transition-colors ${
                       selectedCategory === category.id
                         ? 'bg-primary text-white'
@@ -560,7 +618,7 @@ const EventArchivePage: React.FC = () => {
 
           {/* 検索結果表示 */}
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-gray-600">
                 <span className="font-medium">{filteredEvents.length}</span>
                 件のイベントが見つかりました
@@ -570,11 +628,13 @@ const EventArchivePage: React.FC = () => {
                 <div className="relative">
                   <select
                     aria-label="イベントの並び順"
-                    className="px-4 py-1 text-sm border rounded-lg appearance-none bg-white pr-8"
-                    value="date-asc"
-                    disabled
+                    className="w-full appearance-none rounded-lg border bg-white py-2 pl-4 pr-8 text-sm focus:border-primary focus:ring-1 focus:ring-primary sm:w-auto"
+                    value={selectedSort}
+                    onChange={(event) => updateSort(event.target.value as EventSortMode)}
                   >
+                    {isPicoCategory && <option value="recommended">おすすめ順</option>}
                     <option value="date-asc">開催日（近い順）</option>
+                    <option value="date-desc">開催日（遠い順）</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                     <i className="ri-arrow-down-s-line text-gray-400"></i>

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   compareEventSchedule,
+  compareEventScheduleDescending,
+  comparePicoEventArchiveSchedule,
   comparePicoEventSchedule,
   formatEventOccurrence,
   isEventScheduleReservable,
@@ -91,6 +93,77 @@ describe('eventSchedule', () => {
     expect(events.sort(compareEventSchedule).map((event) => event.id)).toEqual([
       'near',
       'far-manual',
+    ]);
+  });
+
+  it('遠い順でも今後・日程未定・開催中・終了のグループ順を維持する', () => {
+    const events: SchedulableEvent[] = [
+      {
+        id: 'past',
+        title: '終了済み',
+        computedScheduleStatus: 'past',
+      },
+      {
+        id: 'current',
+        title: '開催中',
+        computedScheduleStatus: 'current',
+        currentOccurrence: occurrence('2026-07-23'),
+      },
+      {
+        id: 'future-near',
+        title: '未来・近い',
+        computedScheduleStatus: 'upcoming',
+        nextOccurrence: occurrence('2026-08-01'),
+      },
+      {
+        id: 'undated',
+        title: '日程未定',
+        computedScheduleStatus: 'undated',
+      },
+      {
+        id: 'future-far',
+        title: '未来・遠い',
+        computedScheduleStatus: 'upcoming',
+        nextOccurrence: occurrence('2026-09-01'),
+      },
+    ];
+
+    expect(events.sort(compareEventScheduleDescending).map((event) => event.id)).toEqual([
+      'future-far',
+      'future-near',
+      'undated',
+      'current',
+      'past',
+    ]);
+  });
+
+  it('PICO一覧のおすすめ順では手動順位付きの終了イベントも開催中・今後より後ろにする', () => {
+    const events: SchedulableEvent[] = [
+      {
+        id: 'past-manual',
+        title: '終了済み・手動1位',
+        computedScheduleStatus: 'past',
+        eventCpt: { picoDisplayOrder: 1 },
+      },
+      {
+        id: 'active-unset',
+        title: '開催中・今後・未設定',
+        computedScheduleStatus: 'upcoming',
+        nextOccurrence: occurrence('2026-08-01'),
+      },
+      {
+        id: 'active-manual',
+        title: '開催中・今後・手動2位',
+        computedScheduleStatus: 'current',
+        currentOccurrence: occurrence('2026-07-23'),
+        eventCpt: { picoDisplayOrder: 2 },
+      },
+    ];
+
+    expect(events.sort(comparePicoEventArchiveSchedule).map((event) => event.id)).toEqual([
+      'active-manual',
+      'active-unset',
+      'past-manual',
     ]);
   });
 
