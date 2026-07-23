@@ -825,8 +825,11 @@ const PicoPage: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold">開催中・今後のイベント</h2>
-            <Link to="/event" className="text-primary font-medium flex items-center">
-              もっと見る
+            <Link
+              to="/event?category=event-pico&sort=recommended"
+              className="text-primary font-medium flex items-center"
+            >
+              すべて見る
               <div className="w-5 h-5 flex items-center justify-center ml-1">
                 <i className="ri-arrow-right-line"></i>
               </div>
