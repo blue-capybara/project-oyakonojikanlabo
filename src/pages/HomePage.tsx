@@ -272,11 +272,11 @@ const HomePageContent: React.FC = () => {
       {/* おかいものセクション */}
       <ShoppingSection />
 
-      {/* 豊中PICOバナー */}
-      <PicoBanner />
-
       {/* PICOイベント */}
       <PicoEvents />
+
+      {/* カルチャー＆ブックカフェ PICOの店舗紹介 */}
+      <PicoBanner />
 
       {/* コラボレーションバナー */}
       <CollaborationBanner />

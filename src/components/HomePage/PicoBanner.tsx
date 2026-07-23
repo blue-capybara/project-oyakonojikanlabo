@@ -6,6 +6,12 @@ const PicoBanner: React.FC = () => {
   return (
     <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-8 h-8 flex items-center justify-center">
+            <i className="ri-store-3-line text-2xl text-primary"></i>
+          </div>
+          <h2 className="text-3xl font-bold">カルチャー＆ブックカフェ PICO のご紹介</h2>
+        </div>
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="flex flex-col sm:flex-row">
             <div className="w-full sm:w-1/2">
