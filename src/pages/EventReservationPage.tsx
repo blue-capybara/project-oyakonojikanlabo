@@ -5,6 +5,16 @@ import type { User } from '@supabase/supabase-js';
 import Layout from '../components/Layout/Layout';
 import { supabase } from '../lib/supabaseClient';
 import { getFeatureFlag } from '../config/featureFlags';
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  compactOccurrences,
+  formatEventOccurrence,
+  getDisplayOccurrence,
+  isEventScheduleReservable,
+  normalizeEventScheduleStatus,
+  type EventScheduleFields,
+  type EventScheduleStatus,
+} from '../lib/eventSchedule';
 import { withBase } from '../utils/paths';
 import { sendEventReserveEvent } from '../lib/ga';
 
@@ -54,7 +64,7 @@ interface EventDetailExt {
   timeSchedule?: (EventTimeScheduleEntry | null)[] | null;
 }
 
-interface EventNode {
+interface EventNode extends EventScheduleFields {
   id: string;
   slug?: string | null;
   title?: string | null;
@@ -94,7 +104,8 @@ interface ReservationEvent {
   dateOptions?: string[];
   primarySlot?: EventSlot;
   reservationOpen?: boolean | null;
-  status: 'current' | 'upcoming' | 'past';
+  status: EventScheduleStatus;
+  scheduleReservable: boolean;
 }
 
 interface ReservationRow {
@@ -121,6 +132,7 @@ const GET_EVENT_DETAIL = gql`
       slug
       title
       content
+      ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
       eventCpt {
         summary
         eventType
@@ -178,63 +190,16 @@ const selectPrimarySlot = (slots?: EventSlot[] | null) => {
   return slots.find((slot) => slot.date) ?? slots[0];
 };
 
-const combineDateTime = (date?: string | null, time?: string | null) => {
-  if (!date) return null;
-  const normalizedTime = time ? (time.length === 5 ? `${time}:00` : time) : '00:00:00';
-  const parsed = new Date(`${date}T${normalizedTime}`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-};
-
-const determineSlotStatus = (slot?: EventSlot): ReservationEvent['status'] => {
-  const now = new Date();
-  if (!slot?.date) {
-    return 'upcoming';
-  }
-
-  const start = combineDateTime(slot.date, slot.startTime);
-  const end = combineDateTime(slot.date, slot.endTime) ?? start;
-
-  if (start && end) {
-    if (now >= start && now <= end) return 'current';
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  if (start) {
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  return 'upcoming';
-};
-
-const determineAggregateStatus = (slots?: EventSlot[] | null): ReservationEvent['status'] => {
-  if (!slots || slots.length === 0) {
-    return 'upcoming';
-  }
-
-  let hasUpcoming = false;
-
-  for (const slot of slots) {
-    const slotStatus = determineSlotStatus(slot);
-    if (slotStatus === 'current') {
-      return 'current';
-    }
-    if (slotStatus === 'upcoming') {
-      hasUpcoming = true;
-    }
-  }
-
-  return hasUpcoming ? 'upcoming' : 'past';
-};
-
 const formatDateLabel = (date?: string | null) => {
   if (!date) return '';
-  const parsed = new Date(date);
+  const parsed = new Date(`${date.split('T')[0]}T12:00:00+09:00`);
   if (Number.isNaN(parsed.getTime())) return '';
   return parsed.toLocaleDateString('ja-JP', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     weekday: 'short',
+    timeZone: 'Asia/Tokyo',
   });
 };
 
@@ -272,7 +237,7 @@ const createTimeSlots = (slots?: EventSlot[] | null): TimeSlotOption[] => {
 };
 
 const formatSchedule = (slot?: EventSlot) => {
-  if (!slot) return '日程未定';
+  if (!slot) return '開催予定・日程調整中';
 
   const { date, startTime, endTime } = slot;
   let dateLabel = date ?? '';
@@ -431,6 +396,7 @@ const formatReservationDateTime = (value?: string | null) => {
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'Asia/Tokyo',
   });
 };
 
@@ -460,20 +426,27 @@ const reservationStatusBadgeClass = (status?: string | null) => {
 
 const formatReservationEvent = (node: EventNode): ReservationEvent => {
   const eventCpt = node.eventCpt ?? {};
-  const primarySlot = selectPrimarySlot(eventCpt.singleSlots);
+  const reservationOccurrences = compactOccurrences(node.reservationOccurrences);
+  const reservationSlots = reservationOccurrences.map((occurrence) => ({
+    date: occurrence.date,
+    startTime: occurrence.startTime,
+    endTime: occurrence.endTime,
+  }));
+  const primarySlot = selectPrimarySlot(reservationSlots);
+  const displaySchedule = formatEventOccurrence(getDisplayOccurrence(node));
   const summaryHtml = eventCpt.summary ?? undefined;
   const detailHtml = node.eventDetailExt?.detailBody ?? node.content ?? undefined;
   const summaryText = [summaryHtml, detailHtml, node.content]
     .map((value) => (value ? stripHtml(value) : ''))
     .find((text) => text.length > 0);
-  const dateOptions = buildDateOptions(eventCpt.singleSlots);
-  const status = determineAggregateStatus(eventCpt.singleSlots);
+  const dateOptions = buildDateOptions(reservationSlots);
+  const status = normalizeEventScheduleStatus(node.computedScheduleStatus);
 
   return {
     id: node.id,
     slug: node.slug ?? node.id,
     title: node.title ?? 'イベント情報',
-    date: formatSchedule(primarySlot),
+    date: displaySchedule.fullLabel,
     location: buildLocationLabel(eventCpt, node.eventRegions),
     region: node.eventRegions?.nodes?.[0]?.name ?? '地域未定',
     image: eventCpt.mainImage?.node?.sourceUrl ?? '',
@@ -485,12 +458,13 @@ const formatReservationEvent = (node: EventNode): ReservationEvent => {
     mapUrl: eventCpt.venueMapsUrl ?? undefined,
     schedule:
       buildTimeScheduleEntries(node.eventDetailExt?.timeSchedule) ??
-      createScheduleEntries(eventCpt.singleSlots),
-    timeSlots: createTimeSlots(eventCpt.singleSlots),
+      createScheduleEntries(reservationSlots),
+    timeSlots: createTimeSlots(reservationSlots),
     dateOptions,
     primarySlot,
     reservationOpen: eventCpt.reservationOpen ?? null,
     status,
+    scheduleReservable: isEventScheduleReservable(node),
   };
 };
 
@@ -528,8 +502,9 @@ const buildFallbackEvent = (slug: string): ReservationEvent => ({
     '2025年6月8日（日） 15:30〜16:00',
   ],
   primarySlot: { date: '2025-06-08', startTime: '14:00', endTime: '14:30' },
-  reservationOpen: true,
-  status: 'upcoming',
+  reservationOpen: false,
+  status: 'past',
+  scheduleReservable: false,
 });
 
 const generateReservationReference = () => {
@@ -783,7 +758,7 @@ const EventReservationPage: React.FC = () => {
       return;
     }
 
-    if (event.reservationOpen === false || event.status === 'past') {
+    if (event.reservationOpen === false || !event.scheduleReservable) {
       setReservationError('このイベントの申込受付は終了しました。');
       return;
     }
@@ -820,6 +795,11 @@ const EventReservationPage: React.FC = () => {
     setIsSubmitting(true);
 
     const slotOption = event.timeSlots.find((option) => option.label === selectedTimeSlot);
+    if (!slotOption) {
+      setReservationError('予約する開催日時を選択してください。');
+      setIsSubmitting(false);
+      return;
+    }
     const slotDate = slotOption?.slot?.date ?? event.primarySlot?.date ?? null;
 
     const toIsoString = (dateValue?: string | null, timeValue?: string | null) => {
@@ -829,7 +809,7 @@ const EventReservationPage: React.FC = () => {
           ? `${timeValue}:00`
           : timeValue
         : '00:00:00';
-      const parsed = new Date(`${dateValue}T${normalizedTime}`);
+      const parsed = new Date(`${dateValue}T${normalizedTime}+09:00`);
       if (Number.isNaN(parsed.getTime())) {
         return null;
       }
@@ -928,7 +908,14 @@ const EventReservationPage: React.FC = () => {
   const displayedReservationQuantity = completedReservation?.quantity ?? quantity;
   const displayedEventTitle = completedReservation?.event_title ?? event?.title ?? 'イベント情報';
   const isReservationClosed = Boolean(
-    event && (event.reservationOpen === false || event.status === 'past'),
+    event && (event.reservationOpen === false || !event.scheduleReservable),
+  );
+  const isScheduleUndated = event?.status === 'undated';
+  const isReservationPending = Boolean(
+    event &&
+    event.status === 'upcoming' &&
+    event.reservationOpen !== false &&
+    !event.scheduleReservable,
   );
 
   if (loading) {
@@ -1093,9 +1080,19 @@ const EventReservationPage: React.FC = () => {
                 <i className="ri-close-circle-line"></i>
               </div>
               <div>
-                <p className="font-medium">このイベントの申込受付は終了しました。</p>
+                <p className="font-medium">
+                  {isScheduleUndated
+                    ? 'このイベントは開催日を調整中です。'
+                    : isReservationPending
+                      ? 'このイベントはまだ予約受付期間前です。'
+                      : 'このイベントの申込受付は終了しました。'}
+                </p>
                 <p className="text-sm">
-                  イベント詳細ページは引き続きご覧いただけます。最新情報は詳細ページをご確認ください。
+                  {isScheduleUndated
+                    ? '日程が決まり次第、予約できる開催回をご案内します。'
+                    : isReservationPending
+                      ? '開催日が90日以内になると、予約できる開催回をご案内します。'
+                      : 'イベント詳細ページは引き続きご覧いただけます。最新情報は詳細ページをご確認ください。'}
                 </p>
               </div>
             </div>
@@ -1107,9 +1104,19 @@ const EventReservationPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               {isReservationClosed ? (
                 <div className="p-6 md:p-8 space-y-4">
-                  <h2 className="text-xl font-bold">申込受付は終了しました</h2>
+                  <h2 className="text-xl font-bold">
+                    {isScheduleUndated
+                      ? '開催予定・日程調整中'
+                      : isReservationPending
+                        ? '予約受付前です'
+                        : '申込受付は終了しました'}
+                  </h2>
                   <p className="text-gray-700 leading-relaxed">
-                    このイベントは終了済み、または現在は申込受付を停止しています。ページはそのまま公開していますが、この画面から新規申込はできません。
+                    {isScheduleUndated
+                      ? '開催日は現在調整中です。日程が決まるまで、この画面から新規申込はできません。'
+                      : isReservationPending
+                        ? '予約画面には今日から90日先までの開催回を表示します。受付期間に入るまでお待ちください。'
+                        : 'このイベントは終了済み、または現在は申込受付を停止しています。ページはそのまま公開していますが、この画面から新規申込はできません。'}
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <button

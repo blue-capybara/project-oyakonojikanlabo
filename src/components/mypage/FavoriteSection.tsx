@@ -4,6 +4,13 @@ import { Link } from 'react-router-dom';
 import { gql, request } from 'graphql-request';
 import { supabase } from '../../lib/supabaseClient';
 import type { FavoriteTargetType } from '../../hooks/useFavorite';
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  formatEventOccurrence,
+  getDisplayOccurrence,
+  isEventScheduleReservable,
+  type EventScheduleFields,
+} from '../../lib/eventSchedule';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 
@@ -37,17 +44,13 @@ const GET_POST_SUMMARY_BY_ID = gql`
 const EVENT_SUMMARY_FIELDS = `
   slug
   title
+  ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
   eventCpt {
     reservationOpen
     mainImage {
       node {
         sourceUrl
       }
-    }
-    singleSlots {
-      date
-      startTime
-      endTime
     }
     venueRef {
       nodes {
@@ -126,30 +129,27 @@ interface PostSummaryResponse {
 }
 
 interface EventSummaryResponse {
-  event: {
-    slug?: string | null;
-    title?: string | null;
-    eventCpt?: {
-      reservationOpen?: boolean | null;
-      mainImage?: {
-        node?: { sourceUrl?: string | null } | null;
-      } | null;
-      singleSlots?: Array<{
-        date?: string | null;
-        startTime?: string | null;
-        endTime?: string | null;
-      }> | null;
-      venueRef?: {
-        nodes?: Array<{
-          __typename?: string | null;
-          title?: string | null;
-        }> | null;
-      } | null;
-    } | null;
-    eventRegions?: {
-      nodes?: Array<{ name?: string | null }> | null;
-    } | null;
-  } | null;
+  event:
+    | (EventScheduleFields & {
+        slug?: string | null;
+        title?: string | null;
+        eventCpt?: {
+          reservationOpen?: boolean | null;
+          mainImage?: {
+            node?: { sourceUrl?: string | null } | null;
+          } | null;
+          venueRef?: {
+            nodes?: Array<{
+              __typename?: string | null;
+              title?: string | null;
+            }> | null;
+          } | null;
+        } | null;
+        eventRegions?: {
+          nodes?: Array<{ name?: string | null }> | null;
+        } | null;
+      })
+    | null;
 }
 
 const DEFAULT_IMAGE = '/default.jpg';
@@ -171,48 +171,6 @@ const formatDateLabel = (iso: string | null | undefined) => {
     month: 'long',
     day: 'numeric',
   });
-};
-
-type EventSlot = {
-  date?: string | null;
-  startTime?: string | null;
-  endTime?: string | null;
-};
-
-const selectPrimarySlot = (slots?: EventSlot[] | null) => {
-  if (!slots || slots.length === 0) return undefined;
-  return slots.find((slot) => slot?.date) ?? slots[0];
-};
-
-const formatSchedule = (slot?: EventSlot) => {
-  if (!slot) return '日程未定';
-
-  const { date, startTime, endTime } = slot;
-  let dateLabel = date ?? '';
-
-  if (date) {
-    const parsed = new Date(date);
-    if (!Number.isNaN(parsed.getTime())) {
-      dateLabel = parsed.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'short',
-      });
-    }
-  }
-
-  const normalize = (time?: string | null) => {
-    if (!time) return '';
-    return time.length >= 5 ? time.slice(0, 5) : time;
-  };
-
-  const start = normalize(startTime);
-  const end = normalize(endTime);
-
-  const timeLabel = start && end ? `${start}〜${end}` : start ? start : end ? end : '';
-
-  return [dateLabel, timeLabel].filter(Boolean).join(' ');
 };
 
 const buildLocationLabel = (
@@ -374,14 +332,14 @@ const FavoriteSection: React.FC = () => {
           if (!summary || !summary.slug) {
             return null;
           }
-          const primarySlot = selectPrimarySlot(summary.eventCpt?.singleSlots ?? []);
           return {
             slug: summary.slug,
             title: summary.title ?? 'タイトル未設定',
-            dateLabel: formatSchedule(primarySlot),
+            dateLabel: formatEventOccurrence(getDisplayOccurrence(summary)).fullLabel,
             location: buildLocationLabel(summary.eventCpt, summary.eventRegions),
             image: summary.eventCpt?.mainImage?.node?.sourceUrl ?? DEFAULT_IMAGE,
-            reservationOpen: Boolean(summary.eventCpt?.reservationOpen),
+            reservationOpen:
+              Boolean(summary.eventCpt?.reservationOpen) && isEventScheduleReservable(summary),
             createdAt: entry.created_at,
           } as FavoriteEvent;
         }),

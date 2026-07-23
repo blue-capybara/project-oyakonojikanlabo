@@ -1,0 +1,70 @@
+# イベント日程フロントエンド契約
+
+## 概要
+
+イベントの日程・状態は、ブラウザで`singleSlots`を再計算せず、CMSが返す次の
+WPGraphQLフィールドを使用します。
+
+- `computedScheduleStatus`
+- `currentOccurrence`
+- `nextOccurrence`
+- `reservationOccurrences`
+
+共通の型、表示書式、並び替えは`src/lib/eventSchedule.ts`に集約しています。
+
+## 画面ごとの扱い
+
+### PICO「開催中・今後」
+
+- `computedScheduleStatus = past`を除外します。
+- イベントとスクールを分け、それぞれ最大6件表示します。
+- `eventCpt.picoDisplayOrder`の手動順位を優先します。
+- 手動順位未設定分は、次回開催日の近い順、日程未定、次回予定のない開催中の順です。
+- 各種別の先頭をイチオシ表示に使用します。
+
+### 通常のイベント・スクール一覧
+
+- PICO手動順位は参照しません。
+- `nextOccurrence`の近い順にします。
+- 未来の次回がない場合は、日程未定、開催中、終了済みの順です。
+
+### 詳細画面
+
+- 一覧に表示する代表日程は`nextOccurrence`を優先します。
+- 現在開催中で未来の次回もある場合は、状態を「開催中」、日程を未来の次回として表示できます。
+- 日程未定は「開催予定・日程調整中」と表示し、予約導線を無効にします。
+- 終了済み詳細は公開を継続します。単発の過去日程がある場合は履歴として表示します。
+
+### 予約画面
+
+- 選択肢は`reservationOccurrences`だけを使用します。
+- CMS側で今日から90日先、最大20開催分、終了時刻前に制限済みです。
+- 日程未定、終了済み、予約停止中は新規予約できません。
+- 次回開催が90日より先の場合は「予約受付前」と表示します。
+- 保存する日時は`Asia/Tokyo`の開催日時からISO 8601へ変換します。
+
+## デプロイ順
+
+フロントエンドは追加されたGraphQLフィールドを問い合わせるため、次の順序を守ります。
+
+1. CMSプラグインをバックアップ済みステージングへ反映
+2. ACF管理画面から`acf-import/event-field-groups.json`をインポート
+3. ステージングのGraphQLで追加フィールドと`picoDisplayOrder`を確認
+4. フロントエンドをステージングへ反映
+5. PICO、イベント一覧、詳細、予約、スクールを確認
+6. 同じ順序で本番反映
+
+CMS更新前にフロントエンドだけを反映すると、GraphQLの未知フィールドエラーになり、
+イベント情報を取得できません。
+
+## 確認コマンド
+
+```bash
+npx tsc --noEmit
+npx eslint src/lib/eventSchedule.ts src/lib/eventSchedule.test.ts
+npm test
+npm run build
+```
+
+`npm run build`のpostbuildはCMSの保護されたライフサイクルAPIが`401`を返す環境でも
+警告を表示して`.htaccess`生成を継続します。Viteのビルド成否とは分けて確認します。

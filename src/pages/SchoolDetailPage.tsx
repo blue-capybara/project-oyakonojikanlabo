@@ -5,6 +5,14 @@ import Layout from '../components/Layout/Layout';
 import useFavorite from '../hooks/useFavorite';
 import { getFeatureFlag } from '../config/featureFlags';
 import useSwipe from '../hooks/useSwipe';
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  compactOccurrences,
+  isEventScheduleReservable,
+  normalizeEventScheduleStatus,
+  type EventScheduleFields,
+  type EventScheduleStatus,
+} from '../lib/eventSchedule';
 import { withBase } from '../utils/paths';
 
 const GRAPHQL_ENDPOINT = 'https://cms.oyakonojikanlabo.jp/graphql';
@@ -94,7 +102,7 @@ interface GraphqlEventDetailExt {
   } | null;
 }
 
-interface GraphqlEventNode {
+interface GraphqlEventNode extends EventScheduleFields {
   id: string;
   slug?: string | null;
   title?: string | null;
@@ -197,6 +205,8 @@ interface SchoolEventDetail {
   recommendations: RecommendationItem[];
   curriculum: CurriculumItem[];
   reservationOpen?: boolean | null;
+  status: EventScheduleStatus;
+  scheduleReservable: boolean;
 }
 
 interface ArtistProfile {
@@ -281,49 +291,6 @@ const buildSlots = (slots?: (GraphqlSlot | null)[] | null): NormalizedSlot[] => 
     })
     .filter((slot): slot is NormalizedSlot => slot !== null);
   return normalized.sort((a, b) => a.date.getTime() - b.date.getTime());
-};
-
-const combineSlotDateTime = (isoDate: string, time?: string) => {
-  const normalizedTime = time ? `${time}:00` : '00:00:00';
-  const parsed = new Date(`${isoDate}T${normalizedTime}`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-};
-
-const determineSlotTimingStatus = (slot: NormalizedSlot): 'current' | 'upcoming' | 'past' => {
-  const now = new Date();
-  const start = combineSlotDateTime(slot.isoDate, slot.startTime);
-  const end = combineSlotDateTime(slot.isoDate, slot.endTime) ?? start;
-
-  if (start && end) {
-    if (now >= start && now <= end) return 'current';
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  if (start) {
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  return 'upcoming';
-};
-
-const determineSlotsTimingStatus = (slots: NormalizedSlot[]): 'current' | 'upcoming' | 'past' => {
-  if (slots.length === 0) {
-    return 'upcoming';
-  }
-
-  let hasUpcoming = false;
-
-  for (const slot of slots) {
-    const slotStatus = determineSlotTimingStatus(slot);
-    if (slotStatus === 'current') {
-      return 'current';
-    }
-    if (slotStatus === 'upcoming') {
-      hasUpcoming = true;
-    }
-  }
-
-  return hasUpcoming ? 'upcoming' : 'past';
 };
 
 const buildLocationLabel = (
@@ -434,9 +401,17 @@ const transformSchoolEventDetail = (node: GraphqlEventNode | null): SchoolEventD
   if (!node || !node.slug || !node.title) return null;
   if (!isSchoolEvent(node.eventCpt?.eventType)) return null;
 
-  const slots = buildSlots(node.eventCpt?.singleSlots);
+  const status = normalizeEventScheduleStatus(node.computedScheduleStatus);
+  const reservationOccurrences = compactOccurrences(node.reservationOccurrences);
+  const slots = buildSlots(
+    reservationOccurrences.length > 0
+      ? reservationOccurrences
+      : status === 'past'
+        ? node.eventCpt?.singleSlots
+        : [],
+  );
   const scheduleLines =
-    slots.length > 0 ? slots.map((slot) => formatScheduleLine(slot)) : ['日程調整中'];
+    slots.length > 0 ? slots.map((slot) => formatScheduleLine(slot)) : ['開催予定・日程調整中'];
   const galleryNodes =
     node.eventDetailExt?.gallery?.nodes?.filter((img): img is GraphqlImageNode =>
       Boolean(img?.sourceUrl),
@@ -509,6 +484,8 @@ const transformSchoolEventDetail = (node: GraphqlEventNode | null): SchoolEventD
     recommendations,
     curriculum,
     reservationOpen: node.eventCpt?.reservationOpen ?? null,
+    status,
+    scheduleReservable: isEventScheduleReservable(node),
   };
 };
 
@@ -600,6 +577,7 @@ const GET_SCHOOL_EVENT_DETAIL = gql`
       slug
       title
       content
+      ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
       eventCpt {
         summary
         eventType
@@ -966,7 +944,7 @@ const SchoolDetailPage: React.FC = () => {
     const safeIndex = Math.min(activeGalleryIndex, galleryCount - 1);
     return galleryImages[safeIndex] ?? galleryImages[0];
   }, [activeGalleryIndex, galleryCount, galleryImages, eventData?.title]);
-  const scheduleLines = eventData?.scheduleLines ?? ['日程調整中'];
+  const scheduleLines = eventData?.scheduleLines ?? ['開催予定・日程調整中'];
   const locationLabel = eventData?.locationLabel ?? '豊中PICO カルチャースクール';
   const priceLabel = eventData?.priceLabel ?? '参加費：お問い合わせください';
   const capacityLabel = eventData?.capacityLabel ?? '定員：お問い合わせください';
@@ -985,9 +963,15 @@ const SchoolDetailPage: React.FC = () => {
   const contactEmail = eventData?.contact?.email;
   const reservationUrl =
     eventData?.contact?.reservationOverrideUrl ?? eventData?.contact?.formUrl ?? '';
-  const reservationStatus = determineSlotsTimingStatus(eventData?.slots ?? []);
   const isReservationClosed = Boolean(
-    eventData && (eventData.reservationOpen === false || reservationStatus === 'past'),
+    eventData && (eventData.reservationOpen === false || !eventData.scheduleReservable),
+  );
+  const isScheduleUndated = eventData?.status === 'undated';
+  const isReservationPending = Boolean(
+    eventData &&
+    eventData.status === 'upcoming' &&
+    eventData.reservationOpen !== false &&
+    !eventData.scheduleReservable,
   );
   const mapUrl = eventData?.mapUrl ?? 'https://maps.app.goo.gl/TzUQQmCq7pUzkBRJ6';
   const benefits = eventData?.benefits ?? [];
@@ -1087,7 +1071,11 @@ const SchoolDetailPage: React.FC = () => {
           className={`${className} cursor-not-allowed bg-gray-300 text-white hover:bg-gray-300`}
           aria-disabled="true"
         >
-          申込終了
+          {isScheduleUndated
+            ? '開催予定・日程調整中'
+            : isReservationPending
+              ? '予約受付前'
+              : '申込終了'}
         </span>
       );
     }

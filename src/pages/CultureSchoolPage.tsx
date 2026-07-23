@@ -2,6 +2,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { gql, request } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  compactOccurrences,
+  formatEventOccurrence,
+  getDisplayOccurrence,
+  isEventScheduleReservable,
+  normalizeEventScheduleStatus,
+  type EventScheduleFields,
+  type EventScheduleStatus,
+} from '../lib/eventSchedule';
 import { withBase } from '../utils/paths';
 
 type CategoryKey =
@@ -79,7 +89,7 @@ interface GraphqlRegionNode {
   name?: string | null;
 }
 
-interface GraphqlEventNode {
+interface GraphqlEventNode extends EventScheduleFields {
   id: string;
   slug?: string | null;
   title?: string | null;
@@ -282,12 +292,12 @@ const TIME_BUCKETS: { key: WeeklyTimeBucket; label: string; rangeLabel: string }
   { key: 'evening', label: '夜間', rangeLabel: '18:00-21:00' },
 ];
 
-const STATUS_BADGES: Record<'current' | 'upcoming' | 'past', { label: string; className: string }> =
-  {
-    current: { label: '開催中', className: 'bg-sky-100 text-sky-800' },
-    upcoming: { label: '受付中', className: 'bg-emerald-100 text-emerald-800' },
-    past: { label: '終了', className: 'bg-gray-100 text-gray-600' },
-  };
+const STATUS_BADGES: Record<EventScheduleStatus, { label: string; className: string }> = {
+  current: { label: '開催中', className: 'bg-sky-100 text-sky-800' },
+  upcoming: { label: '受付中', className: 'bg-emerald-100 text-emerald-800' },
+  undated: { label: '開催予定・日程調整中', className: 'bg-amber-100 text-amber-800' },
+  past: { label: '終了', className: 'bg-gray-100 text-gray-600' },
+};
 
 const DISPLAY_BADGE_MAP: Record<string, { label: string; className: string }> = {
   open: { label: '予約受付中', className: 'bg-emerald-100 text-emerald-800' },
@@ -348,6 +358,7 @@ const GET_SCHOOL_EVENTS = gql`
         slug
         title
         link
+        ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
         eventCpt {
           summary
           eventType
@@ -489,69 +500,6 @@ const buildSlots = (slots?: (GraphqlSlot | null)[] | null): NormalizedSlot[] => 
   return normalized.sort((a, b) => a.date.getTime() - b.date.getTime());
 };
 
-const combineSlotDateTime = (isoDate: string, time?: string | null) => {
-  const normalizedTime = time ? `${time}:00` : '00:00:00';
-  const parsed = new Date(`${isoDate}T${normalizedTime}`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-};
-
-const determineSlotTimingStatus = (slot: NormalizedSlot): 'current' | 'upcoming' | 'past' => {
-  const now = new Date();
-  const start = combineSlotDateTime(slot.isoDate, slot.startTimeLabel);
-  const end = combineSlotDateTime(slot.isoDate, slot.endTimeLabel) ?? start;
-
-  if (start && end) {
-    if (now >= start && now <= end) return 'current';
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  if (start) {
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  return 'upcoming';
-};
-
-const determineSlotsTimingStatus = (slots: NormalizedSlot[]): 'current' | 'upcoming' | 'past' => {
-  if (slots.length === 0) {
-    return 'upcoming';
-  }
-
-  let hasUpcoming = false;
-
-  for (const slot of slots) {
-    const slotStatus = determineSlotTimingStatus(slot);
-    if (slotStatus === 'current') {
-      return 'current';
-    }
-    if (slotStatus === 'upcoming') {
-      hasUpcoming = true;
-    }
-  }
-
-  return hasUpcoming ? 'upcoming' : 'past';
-};
-
-const buildScheduleParts = (slot?: NormalizedSlot) => {
-  if (!slot) {
-    return {
-      dateLabel: '日程調整中',
-      timeLabel: '',
-      fullLabel: '日程調整中',
-      sortOrder: Number.MIN_SAFE_INTEGER,
-    };
-  }
-  const dateLabel = slot.dateLabel;
-  const timeLabel = slot.timeRangeLabel ?? slot.startTimeLabel ?? '';
-  const fullLabel = timeLabel ? `${dateLabel} ${timeLabel}` : dateLabel;
-  return {
-    dateLabel,
-    timeLabel,
-    fullLabel,
-    sortOrder: slot.date.getTime(),
-  };
-};
-
 const formatPriceLabel = (price?: number | null, priceType?: string | null) => {
   if (priceType === 'free' || price === 0) {
     return '参加費：無料';
@@ -593,10 +541,10 @@ const buildLocationLabel = (
 
 const deriveStatusBadge = (
   eventCpt: GraphqlEventCpt | null | undefined,
-  slotStatus: 'current' | 'upcoming' | 'past',
+  scheduleStatus: EventScheduleStatus,
 ) => {
-  if (slotStatus === 'past') {
-    return STATUS_BADGES.past;
+  if (scheduleStatus === 'past' || scheduleStatus === 'undated') {
+    return STATUS_BADGES[scheduleStatus];
   }
   if (eventCpt?.reservationOpen === false) {
     return DISPLAY_BADGE_MAP.closed;
@@ -604,7 +552,7 @@ const deriveStatusBadge = (
   if (eventCpt?.waitlistEnabled) {
     return DISPLAY_BADGE_MAP.wait;
   }
-  return STATUS_BADGES[slotStatus];
+  return STATUS_BADGES[scheduleStatus];
 };
 
 const deriveCategoryTags = (node: GraphqlEventNode, slots: NormalizedSlot[]): CategoryKey[] => {
@@ -742,7 +690,7 @@ const CultureSchoolPage: React.FC = () => {
         const formatted = nodes
           .map((node) => transformSchoolEvent(node))
           .filter((event): event is SchoolEventDisplay => Boolean(event))
-          .sort((a, b) => b.sortOrder - a.sortOrder);
+          .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title, 'ja'));
 
         setEvents(formatted);
         setCursor(data.events?.pageInfo?.endCursor ?? null);
@@ -802,7 +750,9 @@ const CultureSchoolPage: React.FC = () => {
         const map = new Map<string, SchoolEventDisplay>();
         prev.forEach((item) => map.set(item.slug, item));
         formatted.forEach((item) => map.set(item.slug, item));
-        return Array.from(map.values()).sort((a, b) => b.sortOrder - a.sortOrder);
+        return Array.from(map.values()).sort(
+          (a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title, 'ja'),
+        );
       });
       setCursor(data.events?.pageInfo?.endCursor ?? null);
       setHasNextPage(Boolean(data.events?.pageInfo?.hasNextPage));
@@ -1513,20 +1463,28 @@ const transformSchoolEvent = (node: GraphqlEventNode | null): SchoolEventDisplay
     return null;
   }
 
-  const slots = buildSlots(node.eventCpt?.singleSlots);
-  const primarySlot = slots[0];
-  const scheduleParts = buildScheduleParts(primarySlot);
-  const slotStatus = determineSlotsTimingStatus(slots);
-  const statusBadge = deriveStatusBadge(node.eventCpt, slotStatus);
+  const scheduleStatus = normalizeEventScheduleStatus(node.computedScheduleStatus);
+  const reservationOccurrences = compactOccurrences(node.reservationOccurrences);
+  const slots = buildSlots(
+    reservationOccurrences.length > 0
+      ? reservationOccurrences
+      : scheduleStatus === 'past'
+        ? node.eventCpt?.singleSlots
+        : [],
+  );
+  const scheduleParts = formatEventOccurrence(getDisplayOccurrence(node));
+  const statusBadge = deriveStatusBadge(node.eventCpt, scheduleStatus);
   const descriptionSource =
     stripHtml(node.eventCpt?.summary) || stripHtml(node.eventDetailExt?.detailBody) || '';
   const description = descriptionSource || '詳細はスクールページをご覧ください。';
 
   const detailUrl = `/school-detail/${node.slug}`;
-  const isReservationClosed = node.eventCpt?.reservationOpen === false || slotStatus === 'past';
+  const isReservationClosed =
+    node.eventCpt?.reservationOpen === false || !isEventScheduleReservable(node);
   const reservationUrl = isReservationClosed
     ? undefined
-    : node.eventDetailExt?.contact?.reservationOverrideUrl ?? node.eventDetailExt?.contact?.formUrl;
+    : (node.eventDetailExt?.contact?.reservationOverrideUrl ??
+      node.eventDetailExt?.contact?.formUrl);
   const image = node.eventCpt?.mainImage?.node?.sourceUrl ?? EVENT_IMAGE_FALLBACK;
 
   return {
@@ -1548,7 +1506,7 @@ const transformSchoolEvent = (node: GraphqlEventNode | null): SchoolEventDisplay
     detailUrl,
     reservationUrl,
     slots,
-    sortOrder: scheduleParts.sortOrder,
+    sortOrder: scheduleParts.sortValue,
   };
 };
 

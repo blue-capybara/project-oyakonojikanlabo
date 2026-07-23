@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { gql, request } from 'graphql-request';
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  comparePicoEventSchedule,
+  formatEventOccurrence,
+  getDisplayOccurrence,
+  isEventScheduleReservable,
+  isPastEventSchedule,
+  type EventScheduleFields,
+} from '../../lib/eventSchedule';
 import { withBase } from '../../utils/paths';
-
-interface EventSlot {
-  date?: string | null;
-  startTime?: string | null;
-  endTime?: string | null;
-}
 
 interface EventCpt {
   summary?: string | null;
   eventType?: string | null;
   reservationOpen?: boolean | null;
+  picoDisplayOrder?: number | null;
   mainImage?: {
     node?: {
       sourceUrl?: string | null;
     } | null;
   } | null;
-  singleSlots?: EventSlot[] | null;
   venueRef?: {
     nodes?: Array<{
       __typename?: string | null;
@@ -28,7 +31,7 @@ interface EventCpt {
   } | null;
 }
 
-interface EventNode {
+interface EventNode extends EventScheduleFields {
   id: string;
   slug?: string | null;
   title?: string | null;
@@ -39,8 +42,10 @@ interface EventNode {
 }
 
 interface EventsResponse {
-  events?: {
-    nodes?: EventNode[] | null;
+  eventCategory?: {
+    events?: {
+      nodes?: EventNode[] | null;
+    } | null;
   } | null;
 }
 
@@ -75,45 +80,44 @@ const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 
 const GET_PICO_EVENTS = gql`
   query GetPicoEvents {
-    events(first: 6, where: { orderby: { field: DATE, order: DESC } }) {
-      nodes {
-        id
-        slug
-        title
-        eventCpt {
-          summary
-          eventType
-          reservationOpen
-          mainImage {
-            node {
-              sourceUrl
+    eventCategory(id: "event-pico", idType: SLUG) {
+      events(first: 100, where: { orderby: { field: DATE, order: DESC } }) {
+        nodes {
+          id
+          slug
+          title
+          ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
+          eventCpt {
+            summary
+            eventType
+            reservationOpen
+            picoDisplayOrder
+            mainImage {
+              node {
+                sourceUrl
+              }
+            }
+            venueRef {
+              nodes {
+                __typename
+                ... on Space {
+                  title
+                  slug
+                }
+                ... on Page {
+                  title
+                }
+                ... on Post {
+                  title
+                }
+              }
             }
           }
-          singleSlots {
-            date
-            startTime
-            endTime
-          }
-          venueRef {
+          eventCategories {
             nodes {
-              __typename
-              ... on Space {
-                title
-                slug
-              }
-              ... on Page {
-                title
-              }
-              ... on Post {
-                title
-              }
+              slug
+              name
             }
-          }
-        }
-        eventCategories {
-          nodes {
-            slug
-            name
           }
         }
       }
@@ -130,44 +134,9 @@ const stripHtml = (html?: string | null) => {
     .trim();
 };
 
-const selectPrimarySlot = (slots?: EventSlot[] | null) => {
-  if (!slots || slots.length === 0) return undefined;
-  return slots.find((slot) => slot.date) ?? slots[0];
-};
-
 const resolveCategory = (eventType?: string | null) => {
   if (!eventType) return fallbackCategory;
   return EVENT_TYPE_META[eventType] ?? fallbackCategory;
-};
-
-const formatSchedule = (slot?: EventSlot) => {
-  if (!slot) return '日程未定';
-
-  const { date, startTime, endTime } = slot;
-  let dateLabel = date ?? '';
-
-  if (date) {
-    const parsed = new Date(date);
-    if (!Number.isNaN(parsed.getTime())) {
-      dateLabel = parsed.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'short',
-      });
-    }
-  }
-
-  const normalizeTime = (time?: string | null) => {
-    if (!time) return '';
-    return time.length >= 5 ? time.slice(0, 5) : time;
-  };
-
-  const startLabel = normalizeTime(startTime);
-  const endLabel = normalizeTime(endTime);
-  const timeLabel = startLabel ? `${startLabel}${endLabel ? `〜${endLabel}` : ''}` : endLabel;
-
-  return [dateLabel, timeLabel].filter(Boolean).join(' ');
 };
 
 const buildFallbackEvents = (): PicoEventCard[] => [
@@ -210,7 +179,7 @@ const PicoEvents: React.FC = () => {
         setError(null);
 
         const data = await request<EventsResponse>(endpoint, GET_PICO_EVENTS);
-        const nodes = data.events?.nodes ?? [];
+        const nodes = data.eventCategory?.events?.nodes ?? [];
 
         const formatted: PicoEventCard[] = nodes
           .filter((node): node is EventNode & { slug: string; title: string } =>
@@ -219,22 +188,27 @@ const PicoEvents: React.FC = () => {
           .filter((node) =>
             node.eventCategories?.nodes?.some((term) => term?.slug === 'event-pico'),
           )
+          .filter((node) => node.eventCpt?.eventType !== 'school')
+          .filter((node) => !isPastEventSchedule(node))
+          .sort(comparePicoEventSchedule)
+          .slice(0, 6)
           .map((node) => {
             const eventCpt = node.eventCpt ?? {};
-            const slot = selectPrimarySlot(eventCpt.singleSlots);
             const category = resolveCategory(eventCpt.eventType);
+            const reservationOpen =
+              Boolean(eventCpt.reservationOpen) && isEventScheduleReservable(node);
 
             return {
               id: node.id,
               slug: node.slug ?? '',
               title: node.title ?? '',
-              scheduleLabel: formatSchedule(slot),
+              scheduleLabel: formatEventOccurrence(getDisplayOccurrence(node)).fullLabel,
               summary: stripHtml(eventCpt.summary),
               image: eventCpt.mainImage?.node?.sourceUrl ?? '/default.jpg',
-              reservationOpen: Boolean(eventCpt.reservationOpen),
+              reservationOpen,
               tags: [
                 { id: 'category', label: category.label, className: category.className },
-                ...(eventCpt.reservationOpen
+                ...(reservationOpen
                   ? [
                       {
                         id: 'reservation',

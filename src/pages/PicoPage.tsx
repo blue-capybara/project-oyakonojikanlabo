@@ -3,13 +3,18 @@ import { Link } from 'react-router-dom';
 import { gql, request } from 'graphql-request';
 import Layout from '../components/Layout/Layout';
 import { getFeatureFlag } from '../config/featureFlags';
+import {
+  EVENT_OCCURRENCE_GRAPHQL_FIELDS,
+  comparePicoEventSchedule,
+  formatEventOccurrence,
+  getDisplayOccurrence,
+  isEventScheduleReservable,
+  isPastEventSchedule,
+  normalizeEventScheduleStatus,
+  type EventScheduleFields,
+  type EventScheduleStatus,
+} from '../lib/eventSchedule';
 import { withBase } from '../utils/paths';
-
-interface PicoEventSlot {
-  date?: string | null;
-  startTime?: string | null;
-  endTime?: string | null;
-}
 
 interface PicoVenueRefNode {
   __typename?: string | null;
@@ -24,12 +29,12 @@ interface PicoEventCpt {
   capacity?: number | string | null;
   reservationOpen?: boolean | null;
   waitlistEnabled?: boolean | null;
+  picoDisplayOrder?: number | null;
   mainImage?: {
     node?: {
       sourceUrl?: string | null;
     } | null;
   } | null;
-  singleSlots?: PicoEventSlot[] | null;
   venueRef?: {
     nodes?: Array<PicoVenueRefNode | null> | null;
   } | null;
@@ -43,7 +48,7 @@ interface PicoEventRegionNode {
   } | null;
 }
 
-interface PicoEventNode {
+interface PicoEventNode extends EventScheduleFields {
   id: string;
   slug?: string | null;
   title?: string | null;
@@ -94,13 +99,13 @@ interface PicoEventDisplay {
   statusClassName: string;
   ctaUrl: string;
   ctaLabel: string;
-  sortOrder: number;
   eventType: PicoEventType;
 }
 
 const GRAPHQL_ENDPOINT = 'https://cms.oyakonojikanlabo.jp/graphql';
 const PICO_CATEGORY_SLUG = 'event-pico';
-const MAX_PICO_EVENTS = 6;
+const MAX_PICO_EVENTS = 100;
+const MAX_PICO_EVENTS_PER_TYPE = 6;
 const EVENT_IMAGE_FALLBACK = withBase('images/readdy/30e5f268453d5644679393e8b3b473c7.jpeg');
 
 const CATEGORY_BADGES: Record<string, { label: string; className: string }> = {
@@ -112,12 +117,12 @@ const CATEGORY_BADGES: Record<string, { label: string; className: string }> = {
   default: { label: 'イベント', className: 'bg-gray-100 text-gray-800' },
 };
 
-const STATUS_BADGES: Record<'current' | 'upcoming' | 'past', { label: string; className: string }> =
-  {
-    current: { label: '開催中', className: 'bg-sky-100 text-sky-800' },
-    upcoming: { label: '開催予定', className: 'bg-green-100 text-green-800' },
-    past: { label: '開催終了', className: 'bg-gray-100 text-gray-700' },
-  };
+const STATUS_BADGES: Record<EventScheduleStatus, { label: string; className: string }> = {
+  current: { label: '開催中', className: 'bg-sky-100 text-sky-800' },
+  upcoming: { label: '開催予定', className: 'bg-green-100 text-green-800' },
+  undated: { label: '開催予定・日程調整中', className: 'bg-amber-100 text-amber-800' },
+  past: { label: '開催終了', className: 'bg-gray-100 text-gray-700' },
+};
 
 const DISPLAY_BADGE_MAP: Record<string, { label: string; className: string }> = {
   open: { label: '予約受付中', className: 'bg-green-100 text-green-800' },
@@ -136,6 +141,7 @@ const GET_PICO_EVENTS = gql`
           slug
           title
           link
+          ${EVENT_OCCURRENCE_GRAPHQL_FIELDS}
           eventCategories {
             nodes {
               name
@@ -162,15 +168,11 @@ const GET_PICO_EVENTS = gql`
             capacity
             reservationOpen
             waitlistEnabled
+            picoDisplayOrder
             mainImage {
               node {
                 sourceUrl
               }
-            }
-            singleSlots {
-              date
-              startTime
-              endTime
             }
             venueRef {
               nodes {
@@ -205,102 +207,6 @@ const isRenderableEvent = (
   node: PicoEventNode | null,
 ): node is PicoEventNode & { slug: string; title: string } =>
   Boolean(node && node.slug && node.title);
-
-const selectPrimarySlot = (slots?: PicoEventSlot[] | null) => {
-  if (!slots || slots.length === 0) return undefined;
-  return slots.find((slot) => slot?.date) ?? slots[0] ?? undefined;
-};
-
-const normalizeTime = (time?: string | null) => {
-  if (!time) return '';
-  if (time.length >= 5) return time.slice(0, 5);
-  return time;
-};
-
-const combineDateTime = (date?: string | null, time?: string | null) => {
-  if (!date) return null;
-  const normalizedTime = time ? (time.length === 5 ? `${time}:00` : time) : '00:00:00';
-  const parsed = new Date(`${date.split('T')[0]}T${normalizedTime}`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-};
-
-const buildScheduleParts = (slot?: PicoEventSlot) => {
-  if (!slot) {
-    return {
-      dateLabel: '日程未定',
-      timeLabel: '',
-      fullLabel: '日程未定',
-      sortOrder: Number.MIN_SAFE_INTEGER,
-    };
-  }
-
-  const { date, startTime, endTime } = slot;
-  let dateLabel = '日程未定';
-
-  if (date) {
-    const parsed = new Date(date);
-    if (!Number.isNaN(parsed.getTime())) {
-      dateLabel = parsed.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'short',
-      });
-    }
-  }
-
-  const startLabel = normalizeTime(startTime);
-  const endLabel = normalizeTime(endTime);
-  const timeLabel = startLabel ? `${startLabel}${endLabel ? `〜${endLabel}` : ''}` : endLabel;
-  const fullLabel = timeLabel ? `${dateLabel} ${timeLabel}` : dateLabel;
-  const sortOrder = (() => {
-    if (!date) return Number.MIN_SAFE_INTEGER;
-    const parsed = new Date(date);
-    return Number.isNaN(parsed.getTime()) ? Number.MIN_SAFE_INTEGER : parsed.getTime();
-  })();
-
-  return { dateLabel, timeLabel, fullLabel, sortOrder };
-};
-
-const determineSlotStatus = (slot?: PicoEventSlot): 'current' | 'upcoming' | 'past' => {
-  if (!slot?.date) return 'upcoming';
-  const now = new Date();
-  const start = combineDateTime(slot.date, slot.startTime);
-  const end = combineDateTime(slot.date, slot.endTime) ?? start;
-
-  if (start && end) {
-    if (now >= start && now <= end) return 'current';
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  if (start) {
-    return now < start ? 'upcoming' : 'past';
-  }
-
-  return 'upcoming';
-};
-
-const determineAggregateSlotStatus = (
-  slots?: PicoEventSlot[] | null,
-): 'current' | 'upcoming' | 'past' => {
-  if (!slots || slots.length === 0) {
-    return 'upcoming';
-  }
-
-  let hasUpcoming = false;
-
-  for (const slot of slots) {
-    const slotStatus = determineSlotStatus(slot);
-    if (slotStatus === 'current') {
-      return 'current';
-    }
-    if (slotStatus === 'upcoming') {
-      hasUpcoming = true;
-    }
-  }
-
-  return hasUpcoming ? 'upcoming' : 'past';
-};
 
 const stripHtml = (html?: string | null) => {
   if (!html) return '';
@@ -374,10 +280,10 @@ const mapCategoryBadge = (slug?: string | null) => {
 
 const deriveReservationBadge = (
   eventCpt: PicoEventCpt | null | undefined,
-  slotStatus: 'current' | 'upcoming' | 'past',
+  scheduleStatus: EventScheduleStatus,
 ) => {
-  if (slotStatus === 'past') {
-    return STATUS_BADGES.past;
+  if (scheduleStatus === 'past' || scheduleStatus === 'undated') {
+    return STATUS_BADGES[scheduleStatus];
   }
   if (eventCpt?.reservationOpen === false) {
     return DISPLAY_BADGE_MAP.closed;
@@ -385,7 +291,7 @@ const deriveReservationBadge = (
   if (eventCpt?.waitlistEnabled) {
     return DISPLAY_BADGE_MAP.wait;
   }
-  return STATUS_BADGES[slotStatus];
+  return STATUS_BADGES[scheduleStatus];
 };
 
 const buildDetailPath = (slug: string, eventType: PicoEventType) =>
@@ -403,16 +309,16 @@ const transformEventNode = (
 ): PicoEventDisplay => {
   const eventCpt = node.eventCpt ?? null;
   const eventType = normalizeEventType(eventCpt?.eventType);
-  const primarySlot = selectPrimarySlot(eventCpt?.singleSlots);
-  const scheduleParts = buildScheduleParts(primarySlot);
-  const slotStatus = determineAggregateSlotStatus(eventCpt?.singleSlots);
-  const statusBadge = deriveReservationBadge(eventCpt, slotStatus);
+  const scheduleParts = formatEventOccurrence(getDisplayOccurrence(node));
+  const scheduleStatus = normalizeEventScheduleStatus(node.computedScheduleStatus);
+  const statusBadge = deriveReservationBadge(eventCpt, scheduleStatus);
   const categorySlug =
     node.eventCategories?.nodes?.find((item) => item?.slug)?.slug ?? PICO_CATEGORY_SLUG;
   const categoryBadge = mapCategoryBadge(categorySlug);
   const descriptionSource = eventCpt?.summary ?? node.eventDetailExt?.detailBody ?? '';
   const detailPath = buildDetailPath(node.slug, eventType);
-  const isReservationClosed = eventCpt?.reservationOpen === false || slotStatus === 'past';
+  const isReservationClosed =
+    eventCpt?.reservationOpen === false || !isEventScheduleReservable(node);
 
   return {
     id: node.id,
@@ -434,7 +340,6 @@ const transformEventNode = (
     statusClassName: statusBadge.className,
     ctaUrl: isReservationClosed ? detailPath : mapContactUrl(node, eventType),
     ctaLabel: isReservationClosed ? '詳細を見る' : eventType === 'school' ? '申し込む' : '予約する',
-    sortOrder: scheduleParts.sortOrder,
     eventType,
   };
 };
@@ -672,8 +577,9 @@ const PicoPage: React.FC = () => {
         const nodes = data.eventCategory?.events?.nodes ?? [];
         const formatted = nodes
           .filter(isRenderableEvent)
-          .map(transformEventNode)
-          .sort((a, b) => b.sortOrder - a.sortOrder);
+          .filter((node) => !isPastEventSchedule(node))
+          .sort(comparePicoEventSchedule)
+          .map(transformEventNode);
 
         setPicoEvents(formatted);
       } catch (error) {
@@ -736,8 +642,12 @@ const PicoPage: React.FC = () => {
     }
   };
 
-  const regularEvents = picoEvents.filter((item) => item.eventType !== 'school');
-  const schoolEvents = picoEvents.filter((item) => item.eventType === 'school');
+  const regularEvents = picoEvents
+    .filter((item) => item.eventType !== 'school')
+    .slice(0, MAX_PICO_EVENTS_PER_TYPE);
+  const schoolEvents = picoEvents
+    .filter((item) => item.eventType === 'school')
+    .slice(0, MAX_PICO_EVENTS_PER_TYPE);
   const featuredEvent = regularEvents[0];
   const secondaryEvents = regularEvents.slice(1);
   const featuredSchoolEvent = schoolEvents[0];
