@@ -17,6 +17,7 @@ interface EventCpt {
   eventType?: string | null;
   reservationOpen?: boolean | null;
   picoDisplayOrder?: number | null;
+  singleSlots?: EventSlot[] | null;
   mainImage?: {
     node?: {
       sourceUrl?: string | null;
@@ -29,6 +30,12 @@ interface EventCpt {
       slug?: string | null;
     }> | null;
   } | null;
+}
+
+interface EventSlot {
+  date?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
 }
 
 interface EventNode extends EventScheduleFields {
@@ -92,6 +99,11 @@ const GET_PICO_EVENTS = gql`
             eventType
             reservationOpen
             picoDisplayOrder
+            singleSlots {
+              date
+              startTime
+              endTime
+            }
             mainImage {
               node {
                 sourceUrl
@@ -137,6 +149,46 @@ const stripHtml = (html?: string | null) => {
 const resolveCategory = (eventType?: string | null) => {
   if (!eventType) return fallbackCategory;
   return EVENT_TYPE_META[eventType] ?? fallbackCategory;
+};
+
+const PAST_DATE_FORMATTER = new Intl.DateTimeFormat('ja-JP', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  weekday: 'short',
+  timeZone: 'Asia/Tokyo',
+});
+
+const formatPastSingleSlot = (slots?: EventSlot[] | null) => {
+  const latestSlot = [...(slots ?? [])]
+    .filter((slot) => Boolean(slot.date))
+    .sort((left, right) => (right.date ?? '').localeCompare(left.date ?? ''))[0];
+  if (!latestSlot?.date) return '開催終了';
+
+  const date = new Date(`${latestSlot.date.split('T')[0]}T12:00:00+09:00`);
+  const dateLabel = Number.isNaN(date.getTime())
+    ? latestSlot.date
+    : PAST_DATE_FORMATTER.format(date);
+  const startTime = latestSlot.startTime?.slice(0, 5) ?? '';
+  const endTime = latestSlot.endTime?.slice(0, 5) ?? '';
+  const timeLabel = startTime
+    ? `${startTime}${endTime ? `〜${endTime}` : ''}`
+    : endTime
+      ? `〜${endTime}`
+      : '';
+
+  return [dateLabel, timeLabel].filter(Boolean).join(' ');
+};
+
+const formatPicoSchedule = (node: EventNode) => {
+  const occurrence = getDisplayOccurrence(node);
+  if (occurrence) {
+    return formatEventOccurrence(occurrence).fullLabel;
+  }
+  if (isPastEventSchedule(node)) {
+    return formatPastSingleSlot(node.eventCpt?.singleSlots);
+  }
+  return formatEventOccurrence(null).fullLabel;
 };
 
 const buildFallbackEvents = (): PicoEventCard[] => [
@@ -189,12 +241,12 @@ const PicoEvents: React.FC = () => {
             node.eventCategories?.nodes?.some((term) => term?.slug === 'event-pico'),
           )
           .filter((node) => node.eventCpt?.eventType !== 'school')
-          .filter((node) => !isPastEventSchedule(node))
           .sort(comparePicoEventSchedule)
           .slice(0, 6)
           .map((node) => {
             const eventCpt = node.eventCpt ?? {};
             const category = resolveCategory(eventCpt.eventType);
+            const isPast = isPastEventSchedule(node);
             const reservationOpen =
               Boolean(eventCpt.reservationOpen) && isEventScheduleReservable(node);
 
@@ -202,21 +254,29 @@ const PicoEvents: React.FC = () => {
               id: node.id,
               slug: node.slug ?? '',
               title: node.title ?? '',
-              scheduleLabel: formatEventOccurrence(getDisplayOccurrence(node)).fullLabel,
+              scheduleLabel: formatPicoSchedule(node),
               summary: stripHtml(eventCpt.summary),
               image: eventCpt.mainImage?.node?.sourceUrl ?? '/default.jpg',
               reservationOpen,
               tags: [
                 { id: 'category', label: category.label, className: category.className },
-                ...(reservationOpen
+                ...(isPast
                   ? [
                       {
-                        id: 'reservation',
-                        label: '予約受付中',
-                        className: 'bg-emerald-100 text-emerald-700',
+                        id: 'status',
+                        label: '開催終了',
+                        className: 'bg-gray-100 text-gray-700',
                       },
                     ]
-                  : []),
+                  : reservationOpen
+                    ? [
+                        {
+                          id: 'reservation',
+                          label: '予約受付中',
+                          className: 'bg-emerald-100 text-emerald-700',
+                        },
+                      ]
+                    : []),
               ],
             };
           });

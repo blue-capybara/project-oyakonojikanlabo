@@ -94,6 +94,34 @@ describe('eventSchedule', () => {
     ]);
   });
 
+  it('トップPICOでは手動順位を最優先し、未設定の開催中・今後を終了済みより上にする', () => {
+    const events: SchedulableEvent[] = [
+      {
+        id: 'past-unset',
+        title: '終了済み・未設定',
+        computedScheduleStatus: 'past',
+      },
+      {
+        id: 'active-unset',
+        title: '開催中・今後・未設定',
+        computedScheduleStatus: 'upcoming',
+        nextOccurrence: occurrence('2026-08-01'),
+      },
+      {
+        id: 'past-manual',
+        title: '終了済み・手動1位',
+        computedScheduleStatus: 'past',
+        eventCpt: { picoDisplayOrder: 1 },
+      },
+    ];
+
+    expect(events.sort(comparePicoEventSchedule).map((event) => event.id)).toEqual([
+      'past-manual',
+      'active-unset',
+      'past-unset',
+    ]);
+  });
+
   it('日程未定は指定文言を返し、予約可能にしない', () => {
     expect(formatEventOccurrence(null).fullLabel).toBe('開催予定・日程調整中');
     expect(normalizeEventScheduleStatus('unknown')).toBe('undated');
