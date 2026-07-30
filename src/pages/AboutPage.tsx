@@ -512,11 +512,11 @@ const AboutPage: React.FC = () => {
                       </div>
                       <div className="flex items-start">
                         <div className="w-24 font-medium text-gray-700">設立</div>
-                        <div className="flex-1 text-gray-600">2015年6月</div>
+                        <div className="flex-1 text-gray-600">2005年(平成17年) 2月21日</div>
                       </div>
                       <div className="flex items-start">
                         <div className="w-24 font-medium text-gray-700">資本金</div>
-                        <div className="flex-1 text-gray-600">2,000万円</div>
+                        <div className="flex-1 text-gray-600">10,000千円</div>
                       </div>
                     </div>
 
@@ -527,17 +527,14 @@ const AboutPage: React.FC = () => {
                       </div>
                       <div className="flex items-start">
                         <div className="w-24 font-medium text-gray-700">従業員数</div>
-                        <div className="flex-1 text-gray-600">45名</div>
+                        <div className="flex-1 text-gray-600">34名</div>
                       </div>
                       <div className="flex items-start">
-                        <div className="w-24 font-medium text-gray-700">問い合わせ</div>
+                        <div className="w-24 font-medium text-gray-700">連絡先</div>
                         <div className="flex-1">
-                          <a
-                            href="mailto:info@liveenterprise.co.jp"
-                            className="text-primary hover:underline"
-                          >
-                            info@liveenterprise.co.jp
-                          </a>
+                          <Link to="/contact" className="text-primary hover:underline">
+                            こちらからお問い合わせください
+                          </Link>
                         </div>
                       </div>
                     </div>
