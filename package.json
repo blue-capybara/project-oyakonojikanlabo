@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:prod": "BUILD_OUT_DIR=dist/prod vite build --mode production && BUILD_OUT_DIR=dist/prod APP_ENV=production SITE_URL=https://oyakonojikanlabo.jp node scripts/generate-sitemap.mjs && BUILD_OUT_DIR=dist/prod node scripts/postbuild.mjs",
+    "build:prod": "BUILD_OUT_DIR=dist/prod vite build --mode production && BUILD_OUT_DIR=dist/prod SITE_URL=https://oyakonojikanlabo.jp node scripts/generate-post-cache.mjs && BUILD_OUT_DIR=dist/prod APP_ENV=production SITE_URL=https://oyakonojikanlabo.jp node scripts/generate-sitemap.mjs && BUILD_OUT_DIR=dist/prod node scripts/postbuild.mjs",
     "build:stg": "BUILD_OUT_DIR=dist/stg vite build --mode stg && BUILD_OUT_DIR=dist/stg node scripts/postbuild.mjs",
     "postbuild": "node scripts/generate-sitemap.mjs && node scripts/postbuild.mjs",
     "import:soft404": "node scripts/import-soft404-csv.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs",
+    "post-cache": "node scripts/generate-post-cache.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{js,ts,json,md}\"",

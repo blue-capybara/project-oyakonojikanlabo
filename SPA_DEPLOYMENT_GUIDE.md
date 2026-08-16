@@ -17,8 +17,15 @@ npm run build:prod
 
 - `build:stg`: 出力先は `dist/stg/` です。`.htaccess` のコピーのみ実行します。
 - `build:prod`: 出力先は `dist/prod/` です。sitemap 生成と `.htaccess` コピーまで実行します。
+- `build:prod` は公開中の記事をCMSから取得し、`post-pages/` の静的HTMLと `post-cache/` のJSONも生成します。記事URLへの直接アクセスでは静的HTMLを配信し、React内の遷移では静的JSONを優先します。
 - `stg` ビルドでは `import.meta.env.MODE === 'stg'` になるため、既存の `noindex` 判定をそのまま利用できます。
 - `npm run build` は互換性のため従来通り `dist/` に出力します。環境別ビルドを並列実行したい場合は `build:stg` と `build:prod` を使ってください。
+
+### 記事キャッシュの更新
+
+記事本文、店舗リスト、商品リストは本番ビルド時点の内容です。WordPressで記事を公開・更新・非公開にしたときは、必ず `npm run build:prod` とデプロイを再実行してください。CMS更新を起点にデプロイWebhookを呼べる場合は、この処理を自動化してください。
+
+URLライフサイクルルールを取得する本番ビルドでは、従来どおり `URL_LIFECYCLE_API_TOKEN` が必要です。未設定時はルール取得が401になり、生成済みの301/410ルールを成果物へ含められません。
 
 ### 1. 開発環境での解決
 

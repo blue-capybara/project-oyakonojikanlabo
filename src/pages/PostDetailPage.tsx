@@ -15,6 +15,7 @@ import GonePage from './GonePage';
 import NotFoundPage from './NotFoundPage';
 import { resolveUrlLifecycleFromGraphQL } from '../lib/urlLifecycle';
 import { measureFrontendOperation } from '../lib/frontendPerformance';
+import { fetchStaticPostCache, readEmbeddedPostCache } from '../lib/postCache';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 const relatedEndpoint = `${new URL(endpoint).origin}/wp-json/okjl/v1`;
@@ -179,8 +180,9 @@ const buildRelatedPostPath = (relatedPost: RelatedPost) => {
 const PostDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
-  const [post, setPost] = useState<PostData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const initialPost = slug ? readEmbeddedPostCache<PostData>(slug) : null;
+  const [post, setPost] = useState<PostData | null>(initialPost);
+  const [loading, setLoading] = useState(!initialPost);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [gone, setGone] = useState(false);
@@ -292,12 +294,30 @@ const PostDetailPage: React.FC = () => {
       return;
     }
 
+    const controller = new AbortController();
+
     const fetchPost = async () => {
       try {
         setLoading(true);
         setError(null);
         setNotFound(false);
         setGone(false);
+
+        // 直接アクセス時はHTMLへ埋め込んだ記事データを、SPA内遷移時は
+        // 本番ビルドで生成した同一オリジンJSONを優先し、CMSの同期処理を待たない。
+        const embeddedPost = readEmbeddedPostCache<PostData>(slug);
+        const cachedPost =
+          embeddedPost ??
+          (await measureFrontendOperation(
+            'post_static_cache_request',
+            () => fetchStaticPostCache<PostData>(slug, controller.signal),
+            { content_type: 'post' },
+          ));
+
+        if (cachedPost) {
+          setPost(cachedPost);
+          return;
+        }
 
         // 記事と URL ライフサイクルを同じクエリで取得し、CMSが付与する
         // extensions も併用して、本文取得と301/404/410判定を1リクエストで完結させます。
@@ -346,16 +366,25 @@ const PostDetailPage: React.FC = () => {
           setGone(false);
         }
       } catch (error) {
+        if (controller.signal.aborted) {
+          return;
+        }
         console.error('記事取得エラー:', error);
         setError('記事の読み込み中にエラーが発生しました');
         setNotFound(false); // 通信エラーなどは 404 と区別し、SEO 計測しない
         setGone(false);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchPost();
+
+    return () => {
+      controller.abort();
+    };
   }, [location.pathname, slug]);
 
   useEffect(() => {

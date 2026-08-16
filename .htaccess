@@ -5,6 +5,9 @@ RewriteEngine On
 <IfModule mod_headers.c>
   RewriteRule ^(?:.*/)?assets/.+-[A-Za-z0-9_-]{8}\.(?:css|js|mjs|woff|woff2|png|jpe?g|gif|webp|avif|svg)$ - [E=OJL_HASHED_ASSET:1]
   Header always set Cache-Control "public, max-age=31536000, immutable" env=OJL_HASHED_ASSET
+  Header always set Cache-Control "public, max-age=300, stale-while-revalidate=86400" env=OJL_POST_CACHE
+  Header always set Cache-Control "public, max-age=300, stale-while-revalidate=86400" env=OJL_PRERENDERED_POST
+  Header always set Cache-Control "public, max-age=300, stale-while-revalidate=86400" env=REDIRECT_OJL_PRERENDERED_POST
 </IfModule>
 
 # 410ページ自体は通常配信（ErrorDocument 内部参照時のループ回避）
@@ -16,6 +19,14 @@ ErrorDocument 410 /410.html
 # BEGIN OJL URL LIFECYCLE
 # このブロックは scripts/postbuild.mjs により自動更新されます。
 # END OJL URL LIFECYCLE
+
+# 本番ビルド時に生成した記事JSONは、SPA内遷移時のCMS GraphQL待ちを避ける。
+RewriteRule ^post-cache/[^/]+\.json$ - [E=OJL_POST_CACHE:1]
+
+# 公開記事への直接アクセスでは、本文・SEOメタを含む静的HTMLを内部配信する。
+# 対応ファイルがないURLだけ、従来のSPA/URLライフサイクル判定へフォールバックする。
+RewriteCond %{DOCUMENT_ROOT}/post-pages/$1.html -f
+RewriteRule ^([^/]+)/?$ post-pages/$1.html [E=OJL_PRERENDERED_POST:1,L]
 
 # Serve existing files and directories as-is
 RewriteCond %{REQUEST_FILENAME} -f [OR]
