@@ -12,16 +12,20 @@ const PAGE_SIZE = 20;
 const SCHEMA_VERSION = 1;
 const RESERVED_SINGLE_SEGMENT_PATHS = new Set([
   'about',
+  'and-the-institute-of-time-for-parents',
   'archive',
   'contact',
   'contact-pico',
   'contact-us',
   'company-profile',
   'culture-school',
+  'digital-honor-award-memorial-campaign',
   'event',
   'login',
+  'monzukuri-bu',
   'mypage',
   'notationbased',
+  'our-products-lineup',
   'pico',
   'preview',
   'privacy',
@@ -82,6 +86,8 @@ const stripHtml = (value = '') =>
     .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
     .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
+    .replace(/\s*\[&hellip;\]\s*/gi, '…')
+    .replace(/&hellip;/gi, '…')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
     .replace(/&quot;/gi, '"')

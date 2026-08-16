@@ -5,10 +5,13 @@ RewriteEngine On
 <IfModule mod_headers.c>
   RewriteRule ^(?:.*/)?assets/.+-[A-Za-z0-9_-]{8}\.(?:css|js|mjs|woff|woff2|png|jpe?g|gif|webp|avif|svg)$ - [E=OJL_HASHED_ASSET:1]
   Header always set Cache-Control "public, max-age=31536000, immutable" env=OJL_HASHED_ASSET
-  Header always set Cache-Control "public, max-age=300, stale-while-revalidate=86400" env=OJL_POST_CACHE
-  Header always set Cache-Control "public, max-age=300, stale-while-revalidate=86400" env=OJL_PRERENDERED_POST
-  Header always set Cache-Control "public, max-age=300, stale-while-revalidate=86400" env=REDIRECT_OJL_PRERENDERED_POST
+  Header always set Cache-Control "public, max-age=60, must-revalidate" env=OJL_POST_CACHE
+  Header always set Cache-Control "public, max-age=60, must-revalidate" env=OJL_PRERENDERED_POST
+  Header always set Cache-Control "public, max-age=60, must-revalidate" env=REDIRECT_OJL_PRERENDERED_POST
 </IfModule>
+
+# 存在しない記事URLはHTTP 404のままSPAの404画面を表示する。
+ErrorDocument 404 /index.html
 
 # 410ページ自体は通常配信（ErrorDocument 内部参照時のループ回避）
 RewriteRule ^410\.html$ - [L]
@@ -32,6 +35,12 @@ RewriteRule ^([^/]+)/?$ post-pages/$1.html [E=OJL_PRERENDERED_POST:1,L]
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
+
+# Reactが担当する既知の単一階層ルートはSPAへ渡す。
+RewriteRule ^(?:about|and-the-institute-of-time-for-parents|archive|company-profile|contact|contact-pico|contact-us|culture-school|digital-honor-award-memorial-campaign|event|login|monzukuri-bu|mypage|notationbased|our-products-lineup|pico|preview|privacy|privacy-policy|search|signup)/?$ index.html [L]
+
+# 単一階層の公開記事は上のpost-pages判定で解決済み。残りはサーバー側404にする。
+RewriteRule ^[^/]+/?$ - [R=404,L]
 
 # Fallback to the SPA entry point for all other requests
 RewriteRule ^ index.html [L]
