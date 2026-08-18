@@ -114,6 +114,12 @@ const fetchLifecycleRules = async () => {
     console.log(`postbuild: fetched lifecycle rules from ${endpoint} (plain text)`);
     return plainText;
   } catch (error) {
+    if (process.env.URL_LIFECYCLE_REQUIRED === 'true') {
+      throw new Error(`URLライフサイクルルールの取得に失敗しました: ${endpoint}`, {
+        cause: error,
+      });
+    }
+
     console.warn(`postbuild: failed to fetch lifecycle rules from ${endpoint}`, error);
     return '';
   }

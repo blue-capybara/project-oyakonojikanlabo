@@ -31,6 +31,12 @@ URLライフサイクルルールを取得する本番ビルドでは、従来�
 
 公開記事に一致しない単一階層URLは、`.htaccess` がHTTP 404で `index.html` を返し、Reactの404画面を表示します。記事HTMLとJSONは60秒だけキャッシュし、期限後はETagまたはLast-Modifiedで再検証します。内容ハッシュ付きのJS/CSSは従来どおり長期キャッシュします。
 
+### フェーズ1.5の自動更新
+
+WordPress更新、`main`へのマージ、GitHubからの手動実行は、`.github/workflows/production-deploy.yml`の共通処理を呼び出します。本番ビルド、成果物検査、SSH／rsync同期、公開確認までを同じ手順で実行します。
+
+`/lp/`は別管理です。`.htaccess`のリライト除外と`deploy/rsync-excludes.txt`の同期除外を両方適用し、自動デプロイでは更新も削除もしません。必要なGitHub Secrets、本番マーカー、初回適用順は[フェーズ1.5 自動ビルド・デプロイ](docs/PHASE_1_5_AUTO_DEPLOY.md)を参照してください。
+
 ### 1. 開発環境での解決
 
 Viteの設定で`historyApiFallback`を有効にしました：
