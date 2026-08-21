@@ -144,5 +144,6 @@ jobs:
             echo "- トリガー: \`$EVENT_NAME\`"
             echo "- 理由: $reason"
             echo "- 対象コミット: \`$(git rev-parse HEAD)\`"
-            echo '- `/lp/` は同期・削除対象から除外'
+            echo '- `/lp/` と未管理ディレクトリは同期・削除対象から除外'
+            echo '- 削除同期は `assets/`、`fonts/`、`icons/`、`images/`、`post-cache/`、`post-pages/` の内部だけで実行'
           } >> "$GITHUB_STEP_SUMMARY"

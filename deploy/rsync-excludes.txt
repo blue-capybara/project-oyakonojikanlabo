@@ -7,3 +7,4 @@
 /.well-known/***
 /.ojl-deploy-root
 /.htpasswd*
+.DS_Store
