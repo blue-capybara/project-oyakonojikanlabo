@@ -2,10 +2,13 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  MANAGED_DIRECTORIES,
+  buildManagedDirectoryRsyncArgs,
   buildRemotePreflightCommand,
-  buildRsyncArgs,
+  buildRootFileRsyncArgs,
   readDeployConfig,
   validateExcludeRules,
+  validateSourceDirectories,
 } from './deploy-production.mjs';
 
 const validEnv = {
@@ -32,14 +35,38 @@ describe('本番デプロイ設定', () => {
     );
   });
 
-  it('削除同期と除外ファイルを必ず使用する', () => {
+  it('ルート直下は削除せず、ファイルだけを同期する', () => {
     const config = readDeployConfig({ ...validEnv, DEPLOY_DRY_RUN: 'true' }, '/workspace');
-    const args = buildRsyncArgs(config);
+    const args = buildRootFileRsyncArgs(config);
+
+    assert(!args.includes('--delete-delay'));
+    assert(args.includes('--dry-run'));
+    assert(args.includes('--exclude=*/'));
+    assert(args.includes('--exclude-from=/workspace/deploy/rsync-excludes.txt'));
+    assert.equal(args.at(-1), 'deploy-user@example.com:/home/deploy/public_html/');
+  });
+
+  it('削除同期を管理対象ディレクトリの内部だけに限定する', () => {
+    const config = readDeployConfig({ ...validEnv, DEPLOY_DRY_RUN: 'true' }, '/workspace');
+    const args = buildManagedDirectoryRsyncArgs(config, 'post-pages');
 
     assert(args.includes('--delete-delay'));
     assert(args.includes('--dry-run'));
-    assert(args.includes('--exclude-from=/workspace/deploy/rsync-excludes.txt'));
-    assert.equal(args.at(-1), 'deploy-user@example.com:/home/deploy/public_html/');
+    assert.equal(args.at(-2), '/workspace/dist/prod/post-pages/');
+    assert.equal(args.at(-1), 'deploy-user@example.com:/home/deploy/public_html/post-pages/');
+    assert.throws(
+      () => buildManagedDirectoryRsyncArgs(config, 'subdomain.example.jp'),
+      /管理対象外のディレクトリ/,
+    );
+  });
+
+  it('別管理ディレクトリを管理対象に含めず、未知の生成先は停止する', () => {
+    assert(!MANAGED_DIRECTORIES.includes('lp'));
+    assert.doesNotThrow(() => validateSourceDirectories([...MANAGED_DIRECTORIES, 'lp']));
+    assert.throws(
+      () => validateSourceDirectories([...MANAGED_DIRECTORIES, 'subdomain.example.jp']),
+      /未登録のディレクトリ/,
+    );
   });
 
   it('本番ルートのマーカーと別管理LPを同期前後に確認する', () => {

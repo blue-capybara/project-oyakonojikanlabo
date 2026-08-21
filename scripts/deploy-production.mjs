@@ -1,4 +1,4 @@
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { spawn } from 'node:child_process';
@@ -6,6 +6,15 @@ import { pathToFileURL } from 'node:url';
 
 const DEPLOY_MARKER_FILE = '.ojl-deploy-root';
 const DEPLOY_MARKER_VALUE = 'oyakonojikanlabo.jp';
+export const MANAGED_DIRECTORIES = Object.freeze([
+  'assets',
+  'fonts',
+  'icons',
+  'images',
+  'post-cache',
+  'post-pages',
+]);
+const PROTECTED_SOURCE_DIRECTORIES = new Set(['lp']);
 
 const required = (env, name) => {
   const value = String(env[name] ?? '').trim();
@@ -79,16 +88,15 @@ export const buildRemotePreflightCommand = ({ remotePath }) => {
   ].join(' && ');
 };
 
-export const buildRsyncArgs = (config) => {
+const buildCommonRsyncArgs = (config) => {
   const sshCommand = `ssh -p ${config.port} -o BatchMode=yes -o StrictHostKeyChecking=yes`;
   const args = [
     '--archive',
     '--compress',
-    '--delete-delay',
     '--delay-updates',
     '--human-readable',
     '--itemize-changes',
-    `--exclude-from=${config.excludeFile}`,
+    '--exclude=.DS_Store',
     '-e',
     sshCommand,
   ];
@@ -97,8 +105,43 @@ export const buildRsyncArgs = (config) => {
     args.push('--dry-run');
   }
 
-  args.push(`${config.sourceDir}/`, `${remoteTarget(config)}:${config.remotePath}/`);
   return args;
+};
+
+// public_html直下ではファイルだけを更新し、未知のディレクトリは削除しない。
+export const buildRootFileRsyncArgs = (config) => [
+  ...buildCommonRsyncArgs(config),
+  '--exclude=*/',
+  `--exclude-from=${config.excludeFile}`,
+  `${config.sourceDir}/`,
+  `${remoteTarget(config)}:${config.remotePath}/`,
+];
+
+// 削除同期は、このプロジェクトが所有するディレクトリの内部だけに限定する。
+export const buildManagedDirectoryRsyncArgs = (config, directory) => {
+  if (!MANAGED_DIRECTORIES.includes(directory)) {
+    throw new Error(`管理対象外のディレクトリは削除同期できません: ${directory}`);
+  }
+
+  return [
+    ...buildCommonRsyncArgs(config),
+    '--delete-delay',
+    `${config.sourceDir}/${directory}/`,
+    `${remoteTarget(config)}:${config.remotePath}/${directory}/`,
+  ];
+};
+
+export const validateSourceDirectories = (directories) => {
+  const unknown = directories.filter(
+    (directory) =>
+      !MANAGED_DIRECTORIES.includes(directory) && !PROTECTED_SOURCE_DIRECTORIES.has(directory),
+  );
+
+  if (unknown.length > 0) {
+    throw new Error(
+      `生成物に未登録のディレクトリがあります。管理対象か保護対象かを明示してください: ${unknown.join(', ')}`,
+    );
+  }
 };
 
 export const validateExcludeRules = (content) => {
@@ -134,14 +177,32 @@ export async function deployProduction(env = process.env) {
   await Promise.all([access(config.sourceDir), access(config.excludeFile)]);
   validateExcludeRules(await readFile(config.excludeFile, 'utf8'));
 
+  const sourceEntries = await readdir(config.sourceDir, { withFileTypes: true });
+  validateSourceDirectories(
+    sourceEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name),
+  );
+  await Promise.all(
+    MANAGED_DIRECTORIES.map((directory) => access(path.join(config.sourceDir, directory))),
+  );
+
   const target = remoteTarget(config);
   const preflight = buildRemotePreflightCommand(config);
 
   console.log('deploy: 本番デプロイ先と /lp/ 保護条件を確認します');
   await run('ssh', [...sshBaseArgs(config), target, preflight]);
 
-  console.log(config.dryRun ? 'deploy: dry-runを実行します' : 'deploy: 本番同期を実行します');
-  await run('rsync', buildRsyncArgs(config));
+  console.log(
+    config.dryRun
+      ? 'deploy: 管理対象ディレクトリだけでdry-runを実行します'
+      : 'deploy: 管理対象ディレクトリだけを本番同期します',
+  );
+  for (const directory of MANAGED_DIRECTORIES) {
+    console.log(`deploy: ${directory}/ を同期します`);
+    await run('rsync', buildManagedDirectoryRsyncArgs(config, directory));
+  }
+
+  console.log('deploy: ルート直下のファイルを更新します（未管理ディレクトリは保持します）');
+  await run('rsync', buildRootFileRsyncArgs(config));
 
   console.log('deploy: 同期後のデプロイ先を再確認します');
   await run('ssh', [...sshBaseArgs(config), target, preflight]);

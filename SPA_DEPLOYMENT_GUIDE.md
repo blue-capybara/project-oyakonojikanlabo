@@ -35,7 +35,7 @@ URLライフサイクルルールを取得する本番ビルドでは、従来�
 
 WordPress更新、`main`へのマージ、GitHubからの手動実行は、`.github/workflows/production-deploy.yml`の共通処理を呼び出します。本番ビルド、成果物検査、SSH／rsync同期、公開確認までを同じ手順で実行します。
 
-`/lp/`は別管理です。`.htaccess`のリライト除外と`deploy/rsync-excludes.txt`の同期除外を両方適用し、自動デプロイでは更新も削除もしません。必要なGitHub Secrets、本番マーカー、初回適用順は[フェーズ1.5 自動ビルド・デプロイ](docs/PHASE_1_5_AUTO_DEPLOY.md)を参照してください。
+`/lp/`は別管理です。`.htaccess`のリライト除外と同期対象からの除外を両方適用し、自動デプロイでは更新も削除もしません。また、`public_html`直下はファイルだけを更新し、削除同期をこのプロジェクトが管理するディレクトリ内部に限定するため、別サブドメインのWordPressデータなども保持します。必要なGitHub Secrets、本番マーカー、初回適用順は[フェーズ1.5 自動ビルド・デプロイ](docs/PHASE_1_5_AUTO_DEPLOY.md)を参照してください。
 
 ### 1. 開発環境での解決
 
