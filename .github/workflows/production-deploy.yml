@@ -1,0 +1,148 @@
+name: 本番ビルド・デプロイ
+
+on:
+  push:
+    branches:
+      - main
+  repository_dispatch:
+    types:
+      - wordpress_content_changed
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 実行理由
+        required: true
+        default: 手動で本番を再生成
+        type: string
+      dry_run:
+        description: サーバーを変更せず同期内容だけ確認する
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: 本番成果物を生成して同期
+    if: ${{ vars.PRODUCTION_DEPLOY_ENABLED == 'true' || (github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+
+    steps:
+      - name: mainブランチを取得
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+
+      - name: Node.jsを準備
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 必須設定を確認
+        env:
+          URL_LIFECYCLE_API_TOKEN: ${{ secrets.URL_LIFECYCLE_API_TOKEN }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+        run: |
+          missing=0
+          for variable_name in \
+            URL_LIFECYCLE_API_TOKEN \
+            DEPLOY_HOST \
+            DEPLOY_USER \
+            DEPLOY_PATH \
+            DEPLOY_SSH_PRIVATE_KEY \
+            DEPLOY_SSH_KNOWN_HOSTS
+          do
+            if [ -z "${!variable_name}" ]; then
+              echo "::error::${variable_name} がGitHubのproduction環境に設定されていません"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: 依存パッケージをインストール
+        run: npm ci
+
+      - name: 既存テストを実行
+        run: npm test
+
+      - name: TypeScriptを検査
+        run: npx tsc --noEmit
+
+      - name: 本番成果物を生成
+        env:
+          URL_LIFECYCLE_API_TOKEN: ${{ secrets.URL_LIFECYCLE_API_TOKEN }}
+          URL_LIFECYCLE_REQUIRED: 'true'
+        run: npm run build:prod
+
+      - name: 本番成果物を検査
+        run: npm run validate:prod
+
+      - name: SSHを準備
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$DEPLOY_SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+      - name: 本番サーバーへ同期
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+        run: npm run deploy:prod
+
+      - name: 公開結果を確認
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
+        run: |
+          curl --fail --silent --show-error --location --retry 3 --max-time 30 \
+            https://oyakonojikanlabo.jp/ > /dev/null
+          curl --fail --silent --show-error --location --retry 3 --max-time 30 \
+            https://oyakonojikanlabo.jp/sitemap.xml > /dev/null
+
+          post_json="$(find dist/prod/post-cache -type f -name '*.json' -print -quit)"
+          post_slug="$(basename "$post_json" .json)"
+          curl --fail --silent --show-error --location --retry 3 --max-time 30 \
+            "https://oyakonojikanlabo.jp/${post_slug}" \
+            | grep -F 'data-prerendered-article="true"' > /dev/null
+
+      - name: 実行内容を記録
+        if: always()
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_REASON: ${{ inputs.reason }}
+          WORDPRESS_REASON: ${{ github.event.client_payload.reason }}
+        run: |
+          reason="$EVENT_NAME"
+          if [ -n "$MANUAL_REASON" ]; then
+            reason="$MANUAL_REASON"
+          elif [ -n "$WORDPRESS_REASON" ]; then
+            reason="$WORDPRESS_REASON"
+          fi
+
+          {
+            echo '## 本番ビルド・デプロイ'
+            echo
+            echo "- トリガー: \`$EVENT_NAME\`"
+            echo "- 理由: $reason"
+            echo "- 対象コミット: \`$(git rev-parse HEAD)\`"
+            echo '- `/lp/` は同期・削除対象から除外'
+          } >> "$GITHUB_STEP_SUMMARY"

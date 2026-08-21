@@ -8,6 +8,8 @@
     "build": "vite build",
     "build:prod": "BUILD_OUT_DIR=dist/prod vite build --mode production && BUILD_OUT_DIR=dist/prod SITE_URL=https://oyakonojikanlabo.jp node scripts/generate-post-cache.mjs && BUILD_OUT_DIR=dist/prod APP_ENV=production SITE_URL=https://oyakonojikanlabo.jp node scripts/generate-sitemap.mjs && BUILD_OUT_DIR=dist/prod node scripts/postbuild.mjs",
     "build:stg": "BUILD_OUT_DIR=dist/stg vite build --mode stg && BUILD_OUT_DIR=dist/stg node scripts/postbuild.mjs",
+    "validate:prod": "node scripts/validate-production-build.mjs",
+    "deploy:prod": "node scripts/deploy-production.mjs",
     "postbuild": "node scripts/generate-sitemap.mjs && node scripts/postbuild.mjs",
     "import:soft404": "node scripts/import-soft404-csv.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs",
@@ -17,7 +19,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{js,ts,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"*.{js,ts,json,md}\"",
     "prepare": "husky",
-    "test": "vitest run",
+    "test": "vitest run && node --test scripts/deploy-production.test.mjs",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
