@@ -22,6 +22,8 @@ const validateRootFiles = async () => {
   await Promise.all(requiredFiles.map((name) => access(path.join(outDir, name))));
 
   const htaccess = await readFile(path.join(outDir, '.htaccess'), 'utf8');
+  assert(htaccess.includes('# BEGIN OJL FRONTEND'), '.htaccessにOJL管理開始マーカーがありません');
+  assert(htaccess.includes('# END OJL FRONTEND'), '.htaccessにOJL管理終了マーカーがありません');
   assert(
     htaccess.includes('# BEGIN OJL URL LIFECYCLE'),
     '.htaccessにURLライフサイクルがありません',
@@ -29,9 +31,7 @@ const validateRootFiles = async () => {
   assert(!htaccess.includes('# (no lifecycle rules)'), '.htaccessの301/410ルールが空です');
   assert(htaccess.includes('RewriteRule ^lp(?:/|$) - [L]'), '.htaccessに/lp/除外がありません');
   assert(
-    htaccess.includes(
-      'SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowWPLoginFromCloudJP',
-    ),
+    htaccess.includes('SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowRestApi'),
     '.htaccessにXServer向けURLライフサイクルAPI例外がありません',
   );
 };

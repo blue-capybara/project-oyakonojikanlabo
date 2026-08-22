@@ -1,5 +1,8 @@
-# XServerのクラウドアクセス制限を、トークン保護されたURLライフサイクルAPIだけ回避する。
-SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowWPLoginFromCloudJP
+# BEGIN OJL FRONTEND
+# このブロックは本番デプロイで自動更新します。XServerが追加する設定はブロック外に保持します。
+
+# XServerのREST API国外アクセス制限を、トークン保護されたURLライフサイクルAPIだけ回避する。
+SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowRestApi
 
 RewriteEngine On
 
@@ -50,3 +53,5 @@ RewriteRule ^[^/]+/?$ - [R=404,L]
 
 # Fallback to the SPA entry point for all other requests
 RewriteRule ^ index.html [L]
+
+# END OJL FRONTEND
