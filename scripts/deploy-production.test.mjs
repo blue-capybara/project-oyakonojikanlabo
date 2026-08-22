@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  HTACCESS_BEGIN_MARKER,
+  HTACCESS_END_MARKER,
   MANAGED_DIRECTORIES,
+  buildHtaccessRsyncArgs,
   buildManagedDirectoryRsyncArgs,
   buildRemotePreflightCommand,
   buildRootFileRsyncArgs,
+  mergeHtaccess,
   readDeployConfig,
   validateExcludeRules,
   validateSourceDirectories,
@@ -42,8 +46,18 @@ describe('本番デプロイ設定', () => {
     assert(!args.includes('--delete-delay'));
     assert(args.includes('--dry-run'));
     assert(args.includes('--exclude=*/'));
+    assert(args.includes('--exclude=.htaccess'));
     assert(args.includes('--exclude-from=/workspace/deploy/rsync-excludes.txt'));
     assert.equal(args.at(-1), 'deploy-user@example.com:/home/deploy/public_html/');
+  });
+
+  it('.htaccessだけを独立して同期する', () => {
+    const config = readDeployConfig({ ...validEnv, DEPLOY_DRY_RUN: 'true' }, '/workspace');
+    const args = buildHtaccessRsyncArgs(config, '/tmp/ojl-deploy/.htaccess');
+
+    assert(args.includes('--dry-run'));
+    assert.equal(args.at(-2), '/tmp/ojl-deploy/.htaccess');
+    assert.equal(args.at(-1), 'deploy-user@example.com:/home/deploy/public_html/.htaccess');
   });
 
   it('削除同期を管理対象ディレクトリの内部だけに限定する', () => {
@@ -81,5 +95,66 @@ describe('本番デプロイ設定', () => {
   it('除外設定からLP保護を削除できない', () => {
     assert.doesNotThrow(() => validateExcludeRules('/lp\n/lp/***\n/.ojl-deploy-root\n'));
     assert.throws(() => validateExcludeRules('/.ojl-deploy-root\n'), /rsync除外設定に \/lp\//);
+  });
+});
+
+describe('.htaccessの安全な統合', () => {
+  const generated = `${HTACCESS_BEGIN_MARKER}
+SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowRestApi
+RewriteRule ^new$ index.html [L]
+${HTACCESS_END_MARKER}
+`;
+
+  it('OJL管理部分だけを差し替え、XServer設定を前後とも保持する', () => {
+    const remote = `SetEnvIf Request_URI ".*" WpLoginNoLimit
+
+${HTACCESS_BEGIN_MARKER}
+RewriteRule ^old$ index.html [L]
+${HTACCESS_END_MARKER}
+
+SetEnvIf Request_URI ".*" AllowRestApi
+`;
+    const merged = mergeHtaccess(remote, generated);
+
+    assert(merged.includes('SetEnvIf Request_URI ".*" WpLoginNoLimit'));
+    assert(merged.includes('SetEnvIf Request_URI ".*" AllowRestApi'));
+    assert(
+      merged.includes('SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowRestApi'),
+    );
+    assert(merged.includes('RewriteRule ^new$ index.html [L]'));
+    assert(!merged.includes('RewriteRule ^old$ index.html [L]'));
+  });
+
+  it('初回移行時は旧ファイルからXServerの環境変数だけを救出する', () => {
+    const remote = `#####wpsecurity_login#####
+SetEnvIf Request_URI ".*" WpLoginNoLimit
+#####end:wpsecurity_login#####
+SetEnvIf Request_URI ".*" AllowXmlrpc
+SetEnvIf Request_URI ".*" AllowRestApi
+SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowWPLoginFromCloudJP
+RewriteRule ^old$ index.html [L]
+`;
+    const merged = mergeHtaccess(remote, generated);
+
+    assert(merged.includes('SetEnvIf Request_URI ".*" WpLoginNoLimit'));
+    assert(merged.includes('#####wpsecurity_login#####'));
+    assert(merged.includes('#####end:wpsecurity_login#####'));
+    assert(merged.includes('SetEnvIf Request_URI ".*" AllowXmlrpc'));
+    assert(merged.includes('SetEnvIf Request_URI ".*" AllowRestApi'));
+    assert(!merged.includes('RewriteRule ^old$ index.html [L]'));
+    assert(!merged.includes('AllowWPLoginFromCloudJP'));
+    assert.equal((merged.match(/AllowRestApi/g) ?? []).length, 2);
+  });
+
+  it('壊れた管理マーカーでは本番ファイルを生成しない', () => {
+    assert.throws(
+      () =>
+        mergeHtaccess(`${HTACCESS_BEGIN_MARKER}\nRewriteRule ^old$ index.html [L]\n`, generated),
+      /本番\.htaccessのOJL管理マーカーが不正/,
+    );
+    assert.throws(
+      () => mergeHtaccess('', 'RewriteRule ^new$ index.html [L]\n'),
+      /生成した\.htaccessにOJL管理マーカーがありません/,
+    );
   });
 });

@@ -31,7 +31,8 @@ GitHubから再実行 ─ workflow_dispatch ─┘
 `public_html`全体に対する削除同期は行いません。次の方式で、このプロジェクトの生成物と別管理データを分離します。
 
 - `.htaccess`の先頭で`/lp/`をURLライフサイクル・記事・SPAリライトから除外
-- XServerのクラウドアクセス制限は、トークン保護された`/wp-json/ojl/v1/htaccess-rules`だけを`.htaccess`で例外化
+- XServerのREST API国外アクセス制限は、`AllowRestApi`を対象パスに限定し、トークン保護された`/wp-json/ojl/v1/htaccess-rules`だけを`.htaccess`で例外化
+- `.htaccess`全体は上書きせず、`# BEGIN OJL FRONTEND`から`# END OJL FRONTEND`までだけを更新してXServerのセキュリティ設定を保持
 - `deploy/rsync-excludes.txt`で`/lp/`を同期・削除から除外
 - ルート直下はファイルだけを更新し、ディレクトリは削除しない
 - 削除同期は`assets/`、`fonts/`、`icons/`、`images/`、`post-cache/`、`post-pages/`の内部だけで行う
@@ -39,7 +40,7 @@ GitHubから再実行 ─ workflow_dispatch ─┘
 
 これにより、不要になった記事HTML、JSON、ハッシュ付きアセットは削除しながら、`/lp/`や別サブドメインのWordPressデータなど、管理対象外のディレクトリには触れません。`--delete-excluded`は使用しません。
 
-XServer向け例外を初めて本番へ反映する際は、ビルド前のAPI取得を通すため、上記の`SetEnvIf`行を本番`.htaccess`へ先に手動追加するか、XServerのクラウドアクセス制限を一時解除してください。反映後は自動生成される`.htaccess`へ同じ例外が残ります。
+XServer向け例外を初めて本番へ反映する際は、ビルド前のAPI取得を通すため、上記の`SetEnvIf`行を本番`.htaccess`へ先に手動追加するか、XServerのクラウドアクセス制限を一時解除してください。反映後は自動生成される`.htaccess`へ同じ例外が残ります。初回移行では、既存`.htaccess`にXServerが追加した`SetEnvIf`行を取り込んだうえでOJL管理マーカーを設置し、2回目以降はマーカー外をそのまま保持します。
 
 ## GitHub production環境
 
