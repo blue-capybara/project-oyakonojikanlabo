@@ -1,3 +1,6 @@
+# XServerのクラウドアクセス制限を、トークン保護されたURLライフサイクルAPIだけ回避する。
+SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowWPLoginFromCloudJP
+
 RewriteEngine On
 
 # /lp/ は別管理のため、URLライフサイクル・記事・SPAの全リライト対象から除外する。
