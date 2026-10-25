@@ -16,6 +16,8 @@ import NotFoundPage from './NotFoundPage';
 import { resolveUrlLifecycleFromGraphQL } from '../lib/urlLifecycle';
 import { measureFrontendOperation } from '../lib/frontendPerformance';
 import { fetchStaticPostCache, readEmbeddedPostCache } from '../lib/postCache';
+import { SERIES_NAVIGATION_FIELDS, SeriesNavigationData } from '../lib/series';
+import SeriesArticleNavigation from '../components/series/SeriesArticleNavigation';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 const relatedEndpoint = `${new URL(endpoint).origin}/wp-json/okjl/v1`;
@@ -27,6 +29,7 @@ interface PostTag {
 }
 
 interface PostData {
+  seriesNavigation?: SeriesNavigationData | null;
   databaseId: number;
   title: string;
   date: string;
@@ -100,6 +103,7 @@ const GET_POST_BY_SLUG = gql`
       excerpt
       customCss
       customJs
+      ${SERIES_NAVIGATION_FIELDS}
       featuredImage {
         node {
           sourceUrl
@@ -556,6 +560,7 @@ const PostDetailPage: React.FC = () => {
 
       {/* 記事本文 */}
       <ArticleBodyContainer>
+        <SeriesArticleNavigation navigation={post.seriesNavigation} />
         {showMembershipFeatures && favoriteError && (
           <p className="mb-4 text-sm text-red-500" role="alert">
             {favoriteError}
@@ -573,6 +578,12 @@ const PostDetailPage: React.FC = () => {
           <p className="text-gray-500">この記事の内容は現在表示できません。</p>
         )}
       </ArticleBodyContainer>
+
+      {post.seriesNavigation && (
+        <div className="mx-auto max-w-3xl px-4 pb-6">
+          <SeriesArticleNavigation navigation={post.seriesNavigation} footer />
+        </div>
+      )}
 
       <section className="pb-10 bg-gray-50">
         <div className="container mx-auto px-4">

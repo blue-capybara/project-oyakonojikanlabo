@@ -1,18 +1,24 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
 const SITE_ORIGIN = 'https://oyakonojikanlabo.jp';
-const GRAPHQL_ENDPOINT = process.env.WP_GRAPHQL_ENDPOINT ?? 'https://cms.oyakonojikanlabo.jp/graphql';
+const GRAPHQL_ENDPOINT =
+  process.env.WP_GRAPHQL_ENDPOINT ?? 'https://cms.oyakonojikanlabo.jp/graphql';
 const PAGE_SIZE = 100;
-const OUTPUT_PATH = path.join(process.cwd(), process.env.BUILD_OUT_DIR ?? 'dist', 'sitemap.xml');
+const OUTPUT_PATH = path.resolve(process.cwd(), process.env.BUILD_OUT_DIR ?? 'dist', 'sitemap.xml');
 
 // SEO: ステージング URL がインデックスされると重複コンテンツ判定を受けるため、本番と判定できない環境では生成をスキップする。
 function isProduction() {
   if (process.env.SITEMAP_FORCE === 'true') return true;
   if (process.env.SITEMAP_SKIP === 'true') return false;
 
-  const envFlag = (process.env.APP_ENV ?? process.env.SITE_ENV ?? process.env.NODE_ENV ?? '').toLowerCase();
+  const envFlag = (
+    process.env.APP_ENV ??
+    process.env.SITE_ENV ??
+    process.env.NODE_ENV ??
+    ''
+  ).toLowerCase();
   const vercelEnv = (process.env.VERCEL_ENV ?? '').toLowerCase();
   const netlifyContext = (process.env.CONTEXT ?? '').toLowerCase();
   const deployTarget = (process.env.DEPLOY_TARGET ?? '').toLowerCase();
@@ -145,17 +151,29 @@ async function main() {
     })),
   ];
 
+  // 同じ全件ビルドで実際に生成した連載だけを登録します。未公開・削除済みのURLを残しません。
+  try {
+    const seriesIndex = JSON.parse(
+      await readFile(path.join(path.dirname(OUTPUT_PATH), 'series-index.json'), 'utf8'),
+    );
+    urls.push(
+      ...seriesIndex.series.map(({ slug }) => ({
+        loc: buildLoc(`/series/${encodeURIComponent(slug)}`),
+        lastmod: formatLastmod(seriesIndex.generatedAt),
+      })),
+    );
+  } catch (error) {
+    // 従来の単独sitemap/buildコマンドでは、連載キャッシュ未生成を許容します。
+    // 本番成果物ではvalidate-production-buildがキャッシュ一式の存在を検証します。
+    if (error.code !== 'ENOENT') throw error;
+  }
+
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ...urls.map((item) => {
       const lastmod = item.lastmod ? `    <lastmod>${item.lastmod}</lastmod>` : null;
-      return [
-        '  <url>',
-        `    <loc>${escapeXml(item.loc)}</loc>`,
-        lastmod,
-        '  </url>',
-      ]
+      return ['  <url>', `    <loc>${escapeXml(item.loc)}</loc>`, lastmod, '  </url>']
         .filter(Boolean)
         .join('\n');
     }),

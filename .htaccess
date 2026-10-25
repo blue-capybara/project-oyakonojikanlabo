@@ -34,6 +34,15 @@ ErrorDocument 410 /410.html
 
 # 本番ビルド時に生成した記事JSONは、SPA内遷移時のCMS GraphQL待ちを避ける。
 RewriteRule ^post-cache/[^/]+\.json$ - [E=OJL_POST_CACHE:1]
+RewriteRule ^series-cache/[^/]+\.json$ - [E=OJL_POST_CACHE:1]
+RewriteRule ^series-index\.json$ - [E=OJL_POST_CACHE:1]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^series-cache/ - [R=404,L]
+
+# 連載専用のHTMLを配信し、一覧・不存在・未公開の連載はHTTP 404にする。
+RewriteCond %{DOCUMENT_ROOT}/series-pages/$1.html -f
+RewriteRule ^series/([^/]+)/?$ series-pages/$1.html [E=OJL_PRERENDERED_POST:1,L]
+RewriteRule ^series(?:/|$) - [R=404,L]
 
 # 公開記事への直接アクセスでは、本文・SEOメタを含む静的HTMLを内部配信する。
 # 対応ファイルがないURLだけ、従来のSPA/URLライフサイクル判定へフォールバックする。

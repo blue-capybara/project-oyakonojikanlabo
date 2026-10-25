@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FeaturePostEntry, useFeaturePosts } from './useFeaturePosts';
 import { withBase } from '../../utils/paths';
+import { SeriesData, seriesPath } from '../../lib/series';
 
 type FeatureSectionProps = {
   posts?: FeaturePostEntry[];
@@ -19,11 +20,41 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
   });
 
   const resolvedPosts = posts ?? featurePosts;
-  const visiblePosts = resolvedPosts.slice(0, 4);
+  const [series, setSeries] = React.useState<SeriesData[]>([]);
+  React.useEffect(() => {
+    const controller = new AbortController();
+    fetch('/series-index.json', { signal: controller.signal })
+      .then(async (response) =>
+        response.ok && response.headers.get('content-type')?.includes('application/json')
+          ? response.json()
+          : null,
+      )
+      .then((cache) => {
+        if (!controller.signal.aborted)
+          setSeries(cache?.schemaVersion === 1 ? (cache.series ?? []) : []);
+      })
+      .catch(() => {
+        /* 既存の特集・スライダーは連載JSONの取得失敗で止めません。 */
+      });
+    return () => controller.abort();
+  }, []);
+  // 掲載指定の連載を新しい順に先頭へ置き、通常の特集の並び順を維持して最大4件にします。
+  const visiblePosts = [
+    ...series
+      .filter((item) => item.showInFeatured)
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .map((item) => ({
+        featureId: `series-${item.databaseId}`,
+        post: item,
+        path: seriesPath(item.slug),
+        series: true,
+      })),
+    ...resolvedPosts.map((item) => ({ ...item, path: `/${item.post.slug}`, series: false })),
+  ].slice(0, 4);
   const isLoading = loadingOverride ?? loading;
   const isError = errorOverride ?? Boolean(error);
 
-  if (isLoading) {
+  if (isLoading && !series.length) {
     return (
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 text-center text-gray-500">
@@ -33,7 +64,7 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
     );
   }
 
-  if (isError) {
+  if (isError && !series.length) {
     return (
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 text-center text-red-600">
@@ -43,7 +74,7 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
     );
   }
 
-  if (!resolvedPosts.length) {
+  if (!visiblePosts.length) {
     return (
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 text-center text-gray-500">
@@ -58,10 +89,10 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
       <div className="container mx-auto px-4">
         <h2 className="mb-6 text-center text-3xl font-bold">注目の特集</h2>
         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-          {visiblePosts.map(({ featureId, post }) => (
+          {visiblePosts.map(({ featureId, post, path, series: isSeries }) => (
             <Link
               key={featureId}
-              to={`/${post.slug}`}
+              to={path}
               className="group flex min-h-24 items-center gap-4 border-b border-gray-200 p-3 transition-colors duration-200 last:border-b-0 hover:bg-primary/5 focus-visible:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary sm:min-h-28 sm:gap-6 sm:p-4"
             >
               <div className="h-20 w-28 shrink-0 overflow-hidden rounded-md bg-gray-100 sm:h-24 sm:w-40">
@@ -76,6 +107,7 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
               </div>
               <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between sm:gap-6">
                 <h3 className="line-clamp-2 text-base font-bold leading-snug text-gray-900 group-hover:text-primary sm:line-clamp-1 sm:text-lg">
+                  {isSeries && <span className="mr-2 text-xs text-primary">連載</span>}
                   {post.title}
                 </h3>
                 <time

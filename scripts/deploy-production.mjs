@@ -16,6 +16,8 @@ export const MANAGED_DIRECTORIES = Object.freeze([
   'images',
   'post-cache',
   'post-pages',
+  'series-cache',
+  'series-pages',
 ]);
 const PROTECTED_SOURCE_DIRECTORIES = new Set(['lp']);
 

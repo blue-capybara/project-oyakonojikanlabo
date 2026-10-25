@@ -14,6 +14,7 @@ import './index.css';
 const AuthConversionTracker = lazy(() => import('./analytics/AuthConversionTracker'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const PostDetailPage = lazy(() => import('./pages/PostDetailPage'));
+const SeriesDetailPage = lazy(() => import('./pages/SeriesDetailPage'));
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage'));
 const EventReservationPage = lazy(() => import('./pages/EventReservationPage'));
 const ArchivePage = lazy(() => import('./pages/ArchivePage'));
@@ -109,6 +110,8 @@ function App() {
             <Route path="/event/:slug/reserve" element={<EventReservationPage />} />
             <Route path="/event/:slug" element={<EventDetailPage />} />
             {/* WordPress post はプレフィックス無しのスラッグ。SEO的に正規URLとし、衝突回避のため最後にマッチさせる */}
+            <Route path="/series/:slug" element={<SeriesDetailPage />} />
+            <Route path="/series" element={<NotFoundPage />} />
             <Route path="/:slug" element={<PostDetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

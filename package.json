@@ -19,7 +19,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{js,ts,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"*.{js,ts,json,md}\"",
     "prepare": "husky",
-    "test": "vitest run && node --test scripts/deploy-production.test.mjs",
+    "test": "vitest run && node --test scripts/deploy-production.test.mjs scripts/series-build.test.mjs",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },

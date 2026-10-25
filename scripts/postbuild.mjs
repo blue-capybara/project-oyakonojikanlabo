@@ -129,7 +129,7 @@ async function main() {
   const projectRoot = process.cwd();
   const source = path.join(projectRoot, '.htaccess');
   const outDir = process.env.BUILD_OUT_DIR ?? 'dist';
-  const distDir = path.join(projectRoot, outDir);
+  const distDir = path.resolve(projectRoot, outDir);
   const destination = path.join(distDir, '.htaccess');
 
   try {

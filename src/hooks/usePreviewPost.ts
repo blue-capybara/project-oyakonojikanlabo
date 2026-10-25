@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { SeriesData, SeriesNavigationData } from '../lib/series';
 
 export type PreviewPost = {
+  type?: 'series' | 'post';
+  series?: SeriesData;
+  seriesNavigation?: SeriesNavigationData | null;
   id: number;
   title: string;
   content: string;
@@ -39,7 +43,11 @@ const INITIAL_STATE: State = {
  * - VITE_WP_PREVIEW_AUTH_USER
  * - VITE_WP_PREVIEW_AUTH_PASSWORD
  */
-export const usePreviewPost = (postId: string | null) => {
+export const usePreviewPost = (
+  postId: string | null,
+  signed = false,
+  token: string | null = null,
+) => {
   const [state, setState] = useState<State>(INITIAL_STATE);
 
   const previewApiBase = import.meta.env.VITE_WP_PREVIEW_API_BASE;
@@ -57,6 +65,43 @@ export const usePreviewPost = (postId: string | null) => {
     if (!postId) {
       setState({ data: null, loading: false, error: null });
       return;
+    }
+
+    if (signed) {
+      if (!token) {
+        setState({
+          data: null,
+          loading: false,
+          error: '管理画面から有効なプレビューリンクを開き直してください。',
+        });
+        return;
+      }
+      const controller = new AbortController();
+      const cms =
+        import.meta.env.VITE_WP_GRAPHQL_ENDPOINT || 'https://cms.oyakonojikanlabo.jp/graphql';
+      setState({ data: null, loading: true, error: null });
+      fetch(`${new URL(cms).origin}/wp-json/ojl/v1/series-preview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        signal: controller.signal,
+        body: JSON.stringify({ id: Number(postId), token }),
+      })
+        .then(async (response) => {
+          if (!response.ok)
+            throw new Error(
+              'プレビューの期限が切れたか、閲覧権限がありません。管理画面から開き直してください。',
+            );
+          return response.json();
+        })
+        .then((data: PreviewPost) => {
+          if (!controller.signal.aborted) setState({ data, loading: false, error: null });
+        })
+        .catch((error: Error) => {
+          if (!controller.signal.aborted)
+            setState({ data: null, loading: false, error: error.message });
+        });
+      return () => controller.abort();
     }
 
     // 必須の環境変数がそろっているかを事前チェック
@@ -151,7 +196,7 @@ export const usePreviewPost = (postId: string | null) => {
 
     fetchPost();
     return () => controller.abort();
-  }, [postId, sanitizedBase, previewAuthUser, previewAuthPassword]);
+  }, [postId, sanitizedBase, previewAuthUser, previewAuthPassword, signed, token]);
 
   return state;
 };

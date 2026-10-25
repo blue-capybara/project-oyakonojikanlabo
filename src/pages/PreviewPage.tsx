@@ -1,5 +1,8 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import SeriesDetail from '../components/series/SeriesDetail';
+import SeriesArticleNavigation from '../components/series/SeriesArticleNavigation';
 import Layout from '../components/Layout/Layout';
 import Breadcrumb from '../components/Breadcrumb';
 import WordPressContent from '../components/Post/WordPressContent';
@@ -14,7 +17,13 @@ import { shouldNoIndex } from '../utils/seo';
 const PreviewPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const postId = searchParams.get('p');
-  const { data, loading, error } = usePreviewPost(postId);
+  const location = useLocation();
+  const token = new URLSearchParams(location.hash.slice(1)).get('token');
+  const { data, loading, error } = usePreviewPost(
+    postId,
+    searchParams.get('series_preview') === '1',
+    token,
+  );
   const noindex = shouldNoIndex({ force: true });
 
   const isInvalid = !postId;
@@ -25,8 +34,22 @@ const PreviewPage: React.FC = () => {
     data?.featured_image?.source_url ??
     null;
 
+  if (data?.type === 'series' && data.series && !loading && !error) {
+    return (
+      <Layout>
+        <Helmet>
+          <meta name="referrer" content="no-referrer" />
+        </Helmet>
+        <SeriesDetail series={data.series} preview />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
+      <Helmet>
+        <meta name="referrer" content="no-referrer" />
+      </Helmet>
       <Seo
         title={data?.title ?? 'プレビュー'}
         description={data?.excerpt ?? undefined}
@@ -141,11 +164,13 @@ const PreviewPage: React.FC = () => {
                       これはプレビュー表示です。公開前の記事内容を確認できます。
                     </div>
 
+                    <SeriesArticleNavigation navigation={data.seriesNavigation} />
                     {data.content ? (
                       <WordPressContent html={data.content} className="post-content" />
                     ) : (
                       <p className="text-gray-500">この記事の内容は現在表示できません。</p>
                     )}
+                    <SeriesArticleNavigation navigation={data.seriesNavigation} footer />
                   </div>
                 </div>
               </section>

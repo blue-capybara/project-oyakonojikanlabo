@@ -70,16 +70,66 @@ const validatePostPairs = async () => {
     assert(cache.post?.title, `${slug}のJSONに記事タイトルがありません`);
     assert(cache.post?.content, `${slug}のJSONに記事本文がありません`);
     assert(html.includes('data-prerendered-article="true"'), `${slug}のHTMLに記事本文がありません`);
-    assert(html.includes('<link rel="canonical"'), `${slug}のHTMLにcanonicalがありません`);
+    assert(/<link\b[^>]*rel="canonical"/.test(html), `${slug}のHTMLにcanonicalがありません`);
     assert(html.includes('id="ojl-post-cache"'), `${slug}のHTMLに埋め込みJSONがありません`);
   }
 
   console.log(`validate: ${htmlFiles.length}件の記事HTML/JSONを確認しました`);
 };
 
+const validateSeriesPairs = async () => {
+  const manifest = JSON.parse(await readFile(path.join(outDir, 'series-index.json'), 'utf8'));
+  assert(
+    manifest.schemaVersion === 1 && Array.isArray(manifest.series),
+    '連載一覧JSONの形式が不正です',
+  );
+  const [htmlFiles, jsonFiles] = await Promise.all([
+    listFiles(path.join(outDir, 'series-pages'), '.html'),
+    listFiles(path.join(outDir, 'series-cache'), '.json'),
+  ]);
+  assert(
+    htmlFiles.length === manifest.series.length && jsonFiles.length === manifest.series.length,
+    '連載HTML・JSON・一覧の件数が一致しません',
+  );
+  for (const item of manifest.series) {
+    const [raw, html] = await Promise.all([
+      readFile(path.join(outDir, 'series-cache', `${item.slug}.json`), 'utf8'),
+      readFile(path.join(outDir, 'series-pages', `${item.slug}.html`), 'utf8'),
+    ]);
+    const cache = JSON.parse(raw);
+    assert(
+      cache.schemaVersion === 1 && cache.series.databaseId === item.databaseId,
+      '連載キャッシュの対応が不正です',
+    );
+    assert(
+      cache.series.publishedCount === cache.series.episodes.length,
+      '連載の公開回数が一致しません',
+    );
+    assert(
+      html.includes('data-prerendered-series="true"') && html.includes('id="ojl-series-cache"'),
+      '連載HTMLの本文・埋め込みJSONがありません',
+    );
+    assert(
+      html.includes('rel="canonical"') && html.includes('CreativeWorkSeries'),
+      '連載HTMLにSEOメタがありません',
+    );
+    assert(
+      !raw.includes('previewPath') && !raw.includes('#token='),
+      '公開キャッシュにプレビュー情報が含まれています',
+    );
+  }
+  const htaccess = await readFile(path.join(outDir, '.htaccess'), 'utf8');
+  assert(
+    htaccess.includes('RewriteRule ^series(?:/|$) - [R=404,L]'),
+    '連載の不存在・一覧URLの404処理がありません',
+  );
+  console.log(`validate: ${manifest.series.length}件の連載HTML/JSONを確認しました`);
+};
+
 async function main() {
   await Promise.all([validateRootFiles(), validateAssetReferences()]);
   await validatePostPairs();
+  await validateSeriesPairs();
   console.log(`validate: 本番成果物の確認が完了しました (${outDir})`);
 }
 

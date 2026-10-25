@@ -1,6 +1,7 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
 
 const SITE_ORIGIN = process.env.SITE_URL ?? 'https://oyakonojikanlabo.jp';
 const GRAPHQL_ENDPOINT =
@@ -8,6 +9,8 @@ const GRAPHQL_ENDPOINT =
 const OUT_DIR = path.resolve(process.cwd(), process.env.BUILD_OUT_DIR ?? 'dist');
 const POST_CACHE_DIR = path.join(OUT_DIR, 'post-cache');
 const POST_PAGE_DIR = path.join(OUT_DIR, 'post-pages');
+const SERIES_CACHE_DIR = path.join(OUT_DIR, 'series-cache');
+const SERIES_PAGE_DIR = path.join(OUT_DIR, 'series-pages');
 const PAGE_SIZE = 20;
 const SCHEMA_VERSION = 1;
 const RESERVED_SINGLE_SEGMENT_PATHS = new Set([
@@ -32,6 +35,7 @@ const RESERVED_SINGLE_SEGMENT_PATHS = new Set([
   'privacy-policy',
   'search',
   'signup',
+  'series',
 ]);
 
 const POSTS_QUERY = `
@@ -51,6 +55,7 @@ const POSTS_QUERY = `
         excerpt
         customCss
         customJs
+        seriesNavigation { episodeNumber series { databaseId slug title } }
         featuredImage {
           node {
             sourceUrl
@@ -68,6 +73,21 @@ const POSTS_QUERY = `
             slug
           }
         }
+      }
+    }
+  }
+`;
+
+const SERIES_QUERY = `
+  query CachedSeries($after: String, $pageSize: Int!) {
+    ojlSeriesCollection(first: $pageSize, after: $after, where: { status: PUBLISH }) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        databaseId slug title date modified content excerpt
+        featuredImage { node { sourceUrl } }
+        seriesStatus totalEpisodes showInFeatured publishedCount
+        episodes { databaseId episodeNumber title path publishedAt imageUrl }
+        upcomingEpisodes { episodeNumber scheduledAt }
       }
     }
   }
@@ -131,7 +151,7 @@ const formatDateJa = (value) => {
   }).format(date);
 };
 
-const fetchGraphQL = async (variables, attempt = 1) => {
+const fetchGraphQL = async (variables, query = POSTS_QUERY, key = 'posts', attempt = 1) => {
   try {
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',
@@ -139,7 +159,7 @@ const fetchGraphQL = async (variables, attempt = 1) => {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query: POSTS_QUERY, variables }),
+      body: JSON.stringify({ query, variables }),
       signal: AbortSignal.timeout(60_000),
     });
 
@@ -152,9 +172,9 @@ const fetchGraphQL = async (variables, attempt = 1) => {
       throw new Error(payload.errors.map((error) => error.message).join('; '));
     }
 
-    const posts = payload.data?.posts;
+    const posts = payload.data?.[key];
     if (!posts || !Array.isArray(posts.nodes)) {
-      throw new Error('posts connection is missing');
+      throw new Error(`${key} connection is missing`);
     }
 
     return posts;
@@ -162,24 +182,122 @@ const fetchGraphQL = async (variables, attempt = 1) => {
     if (attempt >= 3) throw error;
     const delay = attempt * 750;
     await new Promise((resolve) => setTimeout(resolve, delay));
-    return fetchGraphQL(variables, attempt + 1);
+    return fetchGraphQL(variables, query, key, attempt + 1);
   }
 };
 
-const fetchAllPosts = async () => {
+const fetchAllPosts = async (query = POSTS_QUERY, key = 'posts') => {
   const posts = [];
   let after = null;
 
   while (true) {
-    const connection = await fetchGraphQL({ after, pageSize: PAGE_SIZE });
+    const connection = await fetchGraphQL({ after, pageSize: PAGE_SIZE }, query, key);
     posts.push(...connection.nodes);
-    console.log(`post-cache: fetched ${posts.length} post(s)`);
+    console.log(`post-cache: fetched ${posts.length} ${key}`);
 
     if (!connection.pageInfo?.hasNextPage) break;
     after = connection.pageInfo.endCursor;
   }
 
   return posts;
+};
+
+const decodedSlug = (value) => {
+  try {
+    return decodeURIComponent(normalizeSlug(value));
+  } catch {
+    return '';
+  }
+};
+export const seriesPath = (slug) => `/series/${encodeURIComponent(decodedSlug(slug))}`;
+
+/** 公開GraphQLから受け取った項目だけを採用し、記事との対応を全件スナップショットで確認します。 */
+export const normalizeSeries = (rows, posts) => {
+  const byId = new Map(posts.map((post) => [post.databaseId, post]));
+  return rows
+    .filter(
+      (row) =>
+        ['ongoing', 'completed'].includes(row.seriesStatus) &&
+        row.publishedCount !== null &&
+        isSafeSlug(decodedSlug(row.slug)),
+    )
+    .map((row) => {
+      const episodes = (row.episodes ?? [])
+        .filter((episode) => {
+          const post = byId.get(episode.databaseId);
+          return (
+            post &&
+            post.seriesNavigation?.series?.databaseId === row.databaseId &&
+            post.seriesNavigation.episodeNumber === episode.episodeNumber
+          );
+        })
+        .map((episode) => ({
+          databaseId: episode.databaseId,
+          episodeNumber: episode.episodeNumber,
+          title: episode.title,
+          path: episode.path,
+          publishedAt: episode.publishedAt,
+          imageUrl: episode.imageUrl ?? null,
+        }))
+        .sort((a, b) => a.episodeNumber - b.episodeNumber);
+      return {
+        databaseId: row.databaseId,
+        slug: decodedSlug(row.slug),
+        title: row.title,
+        content: row.content ?? '',
+        excerpt: row.excerpt ?? '',
+        date: row.date,
+        modified: row.modified,
+        featuredImage: row.featuredImage ?? null,
+        seriesStatus: row.seriesStatus,
+        totalEpisodes: row.totalEpisodes ?? null,
+        showInFeatured: row.showInFeatured === true,
+        publishedCount: episodes.length,
+        episodes,
+        upcomingEpisodes: (row.upcomingEpisodes ?? []).map(({ episodeNumber, scheduledAt }) => ({
+          episodeNumber,
+          scheduledAt,
+        })),
+      };
+    });
+};
+
+export const attachSeriesNavigation = (posts, series) =>
+  posts.map((post) => {
+    const navigation = post.seriesNavigation;
+    const parent = series.find((item) => item.databaseId === navigation?.series?.databaseId);
+    const number = navigation?.episodeNumber;
+    if (
+      !parent ||
+      !parent.episodes.some(
+        (episode) => episode.databaseId === post.databaseId && episode.episodeNumber === number,
+      )
+    ) {
+      return { ...post, seriesNavigation: null };
+    }
+    return {
+      ...post,
+      seriesNavigation: {
+        episodeNumber: number,
+        series: { databaseId: parent.databaseId, slug: parent.slug, title: parent.title },
+        previous: parent.episodes.find((episode) => episode.episodeNumber === number - 1) ?? null,
+        next: parent.episodes.find((episode) => episode.episodeNumber === number + 1) ?? null,
+      },
+    };
+  });
+
+const seriesNavigationHtml = (navigation, footer = false) => {
+  if (!navigation?.series) return '';
+  const links = footer
+    ? [navigation.previous, navigation.next]
+        .filter(Boolean)
+        .map(
+          (episode) =>
+            `<p><a href="${escapeHtml(episode.path)}">第${episode.episodeNumber}回 ${escapeHtml(episode.title)}</a></p>`,
+        )
+        .join('')
+    : '';
+  return `<nav aria-label="連載"><a href="${escapeHtml(seriesPath(navigation.series.slug))}">${escapeHtml(navigation.series.title)}</a> · 第${navigation.episodeNumber}回${links}</nav>`;
 };
 
 const buildSnapshotBody = (post) => {
@@ -195,16 +313,21 @@ const buildSnapshotBody = (post) => {
       <article>
         ${image}
         <header class="ojl-prerender__header">
+          ${seriesNavigationHtml(post.seriesNavigation)}
           <h1>${escapeHtml(post.title)}</h1>
           ${dateText ? `<p class="ojl-prerender__date">${escapeHtml(dateText)}</p>` : ''}
         </header>
         <div class="ojl-prerender__content">${content}</div>
+        ${seriesNavigationHtml(post.seriesNavigation, true)}
       </article>
     </main>`;
 };
 
-const injectIntoIndex = (indexHtml, post, envelope) => {
-  const canonicalUrl = new URL(`/${encodeURIComponent(post.slug)}`, SITE_ORIGIN).toString();
+export const injectIntoIndex = (indexHtml, post, envelope, series = false) => {
+  const canonicalUrl = new URL(
+    series ? seriesPath(post.slug) : `/${encodeURIComponent(post.slug)}`,
+    SITE_ORIGIN,
+  ).toString();
   const description = stripHtml(post.excerpt || post.content).slice(0, 180);
   const title = `${post.title}｜親子の時間研究所`;
   const heroUrl = post.featuredImage?.node?.sourceUrl ?? '';
@@ -212,7 +335,7 @@ const injectIntoIndex = (indexHtml, post, envelope) => {
   const seoMarkup = `
   <meta name="description" content="${escapeHtml(description)}" />
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
-  <meta property="og:type" content="article" />
+  <meta property="og:type" content="${series ? 'website' : 'article'}" />
   <meta property="og:title" content="${escapeHtml(post.title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
@@ -225,7 +348,26 @@ const injectIntoIndex = (indexHtml, post, envelope) => {
   </style>`;
 
   let html = indexHtml.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
-  html = html.replace('</head>', `${seoMarkup}\n</head>`);
+  const structuredData = series
+    ? `<script type="application/ld+json">${serializeForHtml({
+        '@context': 'https://schema.org',
+        '@type': 'CreativeWorkSeries',
+        name: post.title,
+        url: canonicalUrl,
+        ...(heroUrl ? { image: heroUrl } : {}),
+        hasPart: post.episodes.map((episode) => ({
+          '@type': 'Article',
+          name: episode.title,
+          position: episode.episodeNumber,
+          url: new URL(episode.path, SITE_ORIGIN).toString(),
+        })),
+      })}</script>`
+    : '';
+  // Reactへの切り替え・SPA遷移で、前ページのcanonicalやOGPをHelmetが置き換えられるようにします。
+  html = html.replace(
+    '</head>',
+    `${seoMarkup.replace(/<(meta|link) /g, '<$1 data-rh="true" ')}\n${structuredData.replace('<script ', '<script data-rh="true" ')}\n</head>`,
+  );
 
   const rootStart = html.indexOf('  <div id="root">');
   const rootEndMarker = '  <script>\n    if (window.performance';
@@ -234,21 +376,73 @@ const injectIntoIndex = (indexHtml, post, envelope) => {
     throw new Error('built index root markers were not found');
   }
 
-  const embeddedData = `  <script id="ojl-post-cache" type="application/json">${serializeForHtml(envelope)}</script>\n`;
-  html = `${html.slice(0, rootStart)}  <div id="root">${buildSnapshotBody(post)}\n  </div>\n${embeddedData}${html.slice(rootEnd)}`;
+  const embeddedData = `  <script id="ojl-${series ? 'series' : 'post'}-cache" type="application/json">${serializeForHtml(envelope)}</script>\n`;
+  html = `${html.slice(0, rootStart)}  <div id="root">${series ? buildSeriesSnapshot(post) : buildSnapshotBody(post)}\n  </div>\n${embeddedData}${html.slice(rootEnd)}`;
 
   return html;
+};
+
+const buildSeriesSnapshot = (series) => {
+  const first = series.episodes.find((episode) => episode.episodeNumber === 1);
+  return `<main class="ojl-prerender" data-prerendered-series="true">
+    ${series.featuredImage?.node?.sourceUrl ? `<img src="${escapeHtml(series.featuredImage.node.sourceUrl)}" alt="" style="max-width:100%;height:auto">` : ''}
+    <h1>${escapeHtml(series.title)}</h1>
+    <p>${series.seriesStatus === 'completed' ? '完結' : '連載中'}${series.totalEpisodes ? ` · 全${series.totalEpisodes}回` : ''} · ${series.publishedCount}回公開</p>
+    <div class="ojl-prerender__content">${stripExecutableScripts(series.content)}</div>
+    ${first ? `<p><a href="${escapeHtml(first.path)}">第1回から読む</a></p>` : '<p>記事の公開を準備しています。</p>'}
+    <h2>連載の記事</h2><ol>${series.episodes.map((episode) => `<li><a href="${escapeHtml(episode.path)}">第${episode.episodeNumber}回 ${escapeHtml(episode.title)}</a>${episode.imageUrl ? `<img src="${escapeHtml(episode.imageUrl)}" alt="" loading="lazy" style="max-width:160px;height:auto">` : ''}<time datetime="${escapeHtml(episode.publishedAt)}">${escapeHtml(formatDateJa(episode.publishedAt))}</time></li>`).join('')}</ol>
+    ${series.upcomingEpisodes.map((episode) => `<p>第${episode.episodeNumber}回：${escapeHtml(formatDateJa(episode.scheduledAt))} 公開予定</p>`).join('')}
+  </main>`;
 };
 
 async function main() {
   const indexPath = path.join(OUT_DIR, 'index.html');
   const indexHtml = await readFile(indexPath, 'utf8');
-  const posts = await fetchAllPosts();
+  const [rawPosts, rawSeries] = await Promise.all([
+    fetchAllPosts(),
+    fetchAllPosts(SERIES_QUERY, 'ojlSeriesCollection'),
+  ]);
+  const publicPosts = rawPosts.filter(
+    (post) =>
+      isSafeSlug(normalizeSlug(post.slug)) &&
+      !RESERVED_SINGLE_SEGMENT_PATHS.has(normalizeSlug(post.slug).toLowerCase()),
+  );
+  const series = normalizeSeries(rawSeries, publicPosts);
+  const posts = attachSeriesNavigation(publicPosts, series);
 
   await rm(POST_CACHE_DIR, { recursive: true, force: true });
   await rm(POST_PAGE_DIR, { recursive: true, force: true });
   await mkdir(POST_CACHE_DIR, { recursive: true });
   await mkdir(POST_PAGE_DIR, { recursive: true });
+  for (const directory of [SERIES_CACHE_DIR, SERIES_PAGE_DIR]) {
+    await rm(directory, { recursive: true, force: true });
+    await mkdir(directory, { recursive: true });
+  }
+  for (const item of series) {
+    const envelope = {
+      schemaVersion: 1,
+      slug: item.slug,
+      path: seriesPath(item.slug),
+      generatedAt: new Date().toISOString(),
+      series: item,
+    };
+    await writeFile(
+      path.join(SERIES_CACHE_DIR, `${item.slug}.json`),
+      JSON.stringify(envelope) + '\n',
+    );
+    await writeFile(
+      path.join(SERIES_PAGE_DIR, `${item.slug}.html`),
+      injectIntoIndex(indexHtml, item, envelope, true),
+    );
+  }
+  await writeFile(
+    path.join(OUT_DIR, 'series-index.json'),
+    JSON.stringify({
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      series: series.map(({ content, episodes, upcomingEpisodes, ...summary }) => summary),
+    }) + '\n',
+  );
 
   let generated = 0;
   for (const post of posts) {
@@ -291,7 +485,8 @@ async function main() {
   console.log(`post-cache: generated ${generated} HTML/JSON pair(s) into ${OUT_DIR}`);
 }
 
-main().catch((error) => {
-  console.error('post-cache: failed', error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href)
+  main().catch((error) => {
+    console.error('post-cache: failed', error);
+    process.exitCode = 1;
+  });
