@@ -4,7 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { describe, expect, it, vi } from 'vitest';
 import SeriesDetail from './SeriesDetail';
 import SeriesArticleNavigation from './SeriesArticleNavigation';
-import type { SeriesData } from '../../lib/series';
+import type { SeriesData, SeriesNavigationData } from '../../lib/series';
 
 vi.mock('../Post/WordPressContent', () => ({
   default: ({ html }: { html: string }) => <div>{html}</div>,
@@ -85,11 +85,88 @@ describe('連載の読者向けUI', () => {
         footer
       />,
     );
-    expect(screen.getByRole('navigation')).toHaveTextContent('第1回');
+    expect(screen.getByRole('heading', { name: 'この連載のほかの記事を読む' })).toBeInTheDocument();
+    expect(screen.queryByText('第1回')).not.toBeInTheDocument();
     expect(screen.queryByText(/次の回/)).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /連載の紹介/ })).toHaveAttribute(
       'href',
       '/series/parent-time',
     );
+  });
+});
+
+describe('記事の連載ナビゲーション', () => {
+  const navigation: SeriesNavigationData = {
+    episodeNumber: 3,
+    series,
+    previous: { ...series.episodes[0], episodeNumber: 2, title: '前の記事', path: '/previous' },
+    next: { ...series.episodes[0], episodeNumber: 4, title: '次の記事', path: '/next' },
+  };
+
+  it('冒頭では所属ラベル・連載へのリンク・現在の回番号だけを表示する', () => {
+    render(<SeriesArticleNavigation navigation={navigation} />, { wrapper });
+    expect(screen.getByRole('navigation', { name: 'この記事の連載' })).toBeInTheDocument();
+    expect(screen.getByText('連載')).toBeInTheDocument();
+    expect(screen.getByText('第3回')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: series.title })).toHaveAttribute(
+      'href',
+      '/series/parent-time',
+    );
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+  });
+
+  it('末尾では連載名・現在の回番号を繰り返さず、前後の記事名と回番号を表示する', () => {
+    render(<SeriesArticleNavigation navigation={navigation} footer />, { wrapper });
+    expect(screen.getByRole('heading', { name: 'この連載のほかの記事を読む' })).toBeInTheDocument();
+    expect(screen.queryByText(series.title)).not.toBeInTheDocument();
+    expect(screen.queryByText('第3回')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '前の回 · 第2回 前の記事' })).toHaveAttribute(
+      'href',
+      '/previous',
+    );
+    expect(screen.getByRole('link', { name: '次の回 · 第4回 次の記事' })).toHaveAttribute(
+      'href',
+      '/next',
+    );
+    expect(screen.getByRole('link', { name: '連載の紹介・すべての回を見る' })).toHaveAttribute(
+      'href',
+      '/series/parent-time',
+    );
+  });
+
+  it('公開済みの前の回しかなければ、次の回の情報は表示しない', () => {
+    render(<SeriesArticleNavigation navigation={{ ...navigation, next: null }} footer />, {
+      wrapper,
+    });
+    expect(screen.getAllByRole('link')).toHaveLength(2);
+    expect(screen.queryByText(/次の回/)).not.toBeInTheDocument();
+    expect(screen.queryByText('次の記事')).not.toBeInTheDocument();
+  });
+
+  it('前後の公開済み記事がない場合、末尾のリンクは連載詳細への1件だけにする', () => {
+    render(
+      <SeriesArticleNavigation navigation={{ ...navigation, previous: null, next: null }} footer />,
+      { wrapper },
+    );
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+    expect(screen.queryByText(/前の回|次の回/)).not.toBeInTheDocument();
+  });
+
+  it('プレビューでは署名付きの連載リンクを冒頭・末尾とも維持する', () => {
+    const previewPath = '/preview?p=1&series_preview=1#token=local-fixture';
+    const previewNavigation = { ...navigation, series: { ...series, previewPath } };
+    render(
+      <>
+        <SeriesArticleNavigation navigation={previewNavigation} />
+        <SeriesArticleNavigation navigation={previewNavigation} footer />
+      </>,
+      { wrapper },
+    );
+    expect(screen.getByRole('link', { name: series.title })).toHaveAttribute('href', previewPath);
+    expect(screen.getByRole('link', { name: '連載の紹介・すべての回を見る' })).toHaveAttribute(
+      'href',
+      previewPath,
+    );
+    expect(screen.getAllByText('第3回')).toHaveLength(1);
   });
 });
