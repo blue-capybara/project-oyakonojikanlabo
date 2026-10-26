@@ -68,6 +68,43 @@ test('公開記事を回番号順にそろえ、予告から正式タイトル�
   assert.equal(navigation[0].seriesNavigation.next, null);
 });
 
+test('記事の静的目次も全回と予告を表示し、本文内指定・重複抑止・未所属を扱う', () => {
+  const posts = [post(1, 1), post(3, 3)];
+  const rows = normalizeSeries(
+    [
+      series([
+        [1, 1],
+        [3, 3],
+      ]),
+    ],
+    posts,
+  );
+  const [item] = attachSeriesNavigation(posts, rows);
+  item.content =
+    '<p>本文</p><div data-ojl-series-navigation></div><p>LINE案内</p><div data-ojl-series-navigation></div><p>店舗</p>';
+  const index =
+    '<html><head><title>既定</title></head>\n  <div id="root">元</div>\n  <script>\n    if (window.performance) {}\n</script></html>';
+  const html = injectIntoIndex(index, item, {
+    schemaVersion: 1,
+    slug: item.slug,
+    path: '/' + item.slug,
+    generatedAt: '2026-01-01',
+    post: item,
+  });
+  assert.equal((html.match(/aria-label="連載の目次"/g) || []).length, 1);
+  const body = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+  assert(body.indexOf('aria-label="連載の目次"') < body.indexOf('LINE案内'));
+  assert(html.includes('aria-current="page"'));
+  assert(html.includes('記事3') && html.includes('公開予定'));
+  assert(!html.includes('漏れてはいけない') && !html.includes('/secret'));
+  const normal = injectIntoIndex(
+    index,
+    { ...item, seriesNavigation: null },
+    { schemaVersion: 1, post: { ...item, seriesNavigation: null } },
+  );
+  assert(!normal.includes('aria-label="連載の目次"'));
+});
+
 test('公開・非公開化を全件再生成へ反映し、過去記事の前後リンクも更新する', () => {
   const posts = [post(1, 1), post(2, 2)];
   const published = normalizeSeries(

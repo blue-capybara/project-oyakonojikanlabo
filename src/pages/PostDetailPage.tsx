@@ -18,6 +18,7 @@ import { measureFrontendOperation } from '../lib/frontendPerformance';
 import { fetchStaticPostCache, readEmbeddedPostCache } from '../lib/postCache';
 import { SERIES_NAVIGATION_FIELDS, SeriesNavigationData } from '../lib/series';
 import SeriesArticleNavigation from '../components/series/SeriesArticleNavigation';
+import { hasSeriesNavigationSlot } from '../lib/seriesToc.mjs';
 
 const endpoint = 'https://cms.oyakonojikanlabo.jp/graphql';
 const relatedEndpoint = `${new URL(endpoint).origin}/wp-json/okjl/v1`;
@@ -572,6 +573,15 @@ const PostDetailPage: React.FC = () => {
             html={post.content}
             customCss={post.customCss}
             customJs={post.customJs}
+            inlineSeriesNavigation={
+              post.seriesNavigation && hasSeriesNavigationSlot(post.content) ? (
+                <SeriesArticleNavigation
+                  navigation={post.seriesNavigation}
+                  currentPost={post}
+                  footer
+                />
+              ) : undefined
+            }
             className="post-content"
           />
         ) : (
@@ -579,9 +589,9 @@ const PostDetailPage: React.FC = () => {
         )}
       </ArticleBodyContainer>
 
-      {post.seriesNavigation && (
+      {post.seriesNavigation && !hasSeriesNavigationSlot(post.content ?? '') && (
         <div className="mx-auto max-w-3xl px-4 pb-6">
-          <SeriesArticleNavigation navigation={post.seriesNavigation} footer />
+          <SeriesArticleNavigation navigation={post.seriesNavigation} currentPost={post} footer />
         </div>
       )}
 

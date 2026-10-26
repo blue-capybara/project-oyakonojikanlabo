@@ -1,11 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { addUtmToLinkUrl } from '../../utils/utm';
+import { SERIES_NAVIGATION_SELECTOR, SERIES_NAVIGATION_SLOT } from '../../lib/seriesToc.mjs';
 
 interface WordPressContentProps {
   html: string;
   className?: string;
   customCss?: string | null;
   customJs?: string | null;
+  inlineSeriesNavigation?: React.ReactNode;
 }
 
 type ScriptWithShadowRoot = HTMLScriptElement & {
@@ -415,7 +417,9 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
   className,
   customCss,
   customJs,
+  inlineSeriesNavigation,
 }) => {
+  const hasInlineSeriesNavigation = !!inlineSeriesNavigation;
   const hostRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const scriptElementsRef = useRef<HTMLScriptElement[]>([]);
@@ -952,6 +956,15 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
 
         container.innerHTML = '';
         container.appendChild(template.content.cloneNode(true));
+        container.querySelectorAll(SERIES_NAVIGATION_SELECTOR).forEach((marker, index) => {
+          if (index === 0 && hasInlineSeriesNavigation) {
+            const slot = document.createElement('slot');
+            slot.name = SERIES_NAVIGATION_SLOT;
+            marker.replaceChildren(slot);
+          } else {
+            marker.remove();
+          }
+        });
         executeScripts(scripts, shadow);
 
         // カスタムCSS
@@ -1200,9 +1213,13 @@ const WordPressContent: React.FC<WordPressContentProps> = ({
       detachCopyHandlers.forEach((fn) => fn());
       cleanupCampaignSlots();
     };
-  }, [html, customCss, customJs]);
+  }, [html, customCss, customJs, hasInlineSeriesNavigation]);
 
-  return <div ref={hostRef} className={className} />;
+  return (
+    <div ref={hostRef} className={className}>
+      {inlineSeriesNavigation && <div slot={SERIES_NAVIGATION_SLOT}>{inlineSeriesNavigation}</div>}
+    </div>
+  );
 };
 
 export default WordPressContent;

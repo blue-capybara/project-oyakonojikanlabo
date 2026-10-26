@@ -81,12 +81,17 @@ describe('連載の読者向けUI', () => {
     expect(container).toBeEmptyDOMElement();
     rerender(
       <SeriesArticleNavigation
-        navigation={{ episodeNumber: 1, series, previous: null, next: null }}
+        navigation={{
+          episodeNumber: 1,
+          series: { ...series, episodes: undefined, upcomingEpisodes: [] },
+          previous: null,
+          next: null,
+        }}
         footer
       />,
     );
-    expect(screen.getByRole('heading', { name: 'この連載のほかの記事を読む' })).toBeInTheDocument();
-    expect(screen.queryByText('第1回')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: series.title })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /第1回/ })).not.toBeInTheDocument();
     expect(screen.queryByText(/次の回/)).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /連載の紹介/ })).toHaveAttribute(
       'href',
@@ -96,9 +101,31 @@ describe('連載の読者向けUI', () => {
 });
 
 describe('記事の連載ナビゲーション', () => {
+  it('目次は前後以外の公開回と予定日も表示し、現在と予告にはリンクを付けない', () => {
+    const { container } = render(
+      <SeriesArticleNavigation
+        footer
+        currentPost={{ title: '現在の記事' }}
+        navigation={{
+          episodeNumber: 2,
+          series: {
+            ...series,
+            upcomingEpisodes: [{ episodeNumber: 4, scheduledAt: '2026-11-01T15:00:00Z' }],
+          },
+        }}
+      />,
+      { wrapper },
+    );
+    expect(screen.getAllByRole('listitem')).toHaveLength(4);
+    expect(screen.getByRole('link', { name: /第1回/ })).toHaveAttribute('href', '/first');
+    expect(screen.getByRole('link', { name: /第3回/ })).toHaveAttribute('href', '/third');
+    expect(container.querySelector('[aria-current="page"]')).toHaveTextContent('現在の記事');
+    expect(container.querySelector('[aria-current="page"]')?.closest('a')).toBeNull();
+    expect(screen.getByText('11月2日').closest('a')).toBeNull();
+  });
   const navigation: SeriesNavigationData = {
     episodeNumber: 3,
-    series,
+    series: { ...series, episodes: undefined, upcomingEpisodes: [] },
     previous: { ...series.episodes[0], episodeNumber: 2, title: '前の記事', path: '/previous' },
     next: { ...series.episodes[0], episodeNumber: 4, title: '次の記事', path: '/next' },
   };
@@ -115,20 +142,24 @@ describe('記事の連載ナビゲーション', () => {
     expect(screen.getAllByRole('link')).toHaveLength(1);
   });
 
-  it('末尾では連載名・現在の回番号を繰り返さず、前後の記事名と回番号を表示する', () => {
-    render(<SeriesArticleNavigation navigation={navigation} footer />, { wrapper });
-    expect(screen.getByRole('heading', { name: 'この連載のほかの記事を読む' })).toBeInTheDocument();
-    expect(screen.queryByText(series.title)).not.toBeInTheDocument();
-    expect(screen.queryByText('第3回')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: '前の回 · 第2回 前の記事' })).toHaveAttribute(
+  it('末尾は連載名と公開済みの全回・公開予定を表示する', () => {
+    render(
+      <SeriesArticleNavigation
+        navigation={navigation}
+        currentPost={{ title: '現在の記事' }}
+        footer
+      />,
+      { wrapper },
+    );
+    expect(screen.getByRole('heading', { name: series.title })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: series.title })).toBeInTheDocument();
+    expect(screen.getByText('この記事')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /第2回\s+前の記事/ })).toHaveAttribute(
       'href',
       '/previous',
     );
-    expect(screen.getByRole('link', { name: '次の回 · 第4回 次の記事' })).toHaveAttribute(
-      'href',
-      '/next',
-    );
-    expect(screen.getByRole('link', { name: '連載の紹介・すべての回を見る' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /第4回\s+次の記事/ })).toHaveAttribute('href', '/next');
+    expect(screen.getByRole('link', { name: '連載の紹介を見る' })).toHaveAttribute(
       'href',
       '/series/parent-time',
     );
@@ -163,7 +194,7 @@ describe('記事の連載ナビゲーション', () => {
       { wrapper },
     );
     expect(screen.getByRole('link', { name: series.title })).toHaveAttribute('href', previewPath);
-    expect(screen.getByRole('link', { name: '連載の紹介・すべての回を見る' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: '連載の紹介を見る' })).toHaveAttribute(
       'href',
       previewPath,
     );

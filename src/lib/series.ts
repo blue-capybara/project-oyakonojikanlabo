@@ -27,7 +27,11 @@ export interface SeriesData {
 
 export interface SeriesNavigationData {
   episodeNumber: number;
-  series: Pick<SeriesData, 'databaseId' | 'slug' | 'title'> & { previewPath?: string };
+  series: Pick<SeriesData, 'databaseId' | 'slug' | 'title'> & {
+    previewPath?: string;
+    episodes?: SeriesEpisode[];
+    upcomingEpisodes?: SeriesData['upcomingEpisodes'];
+  };
   previous?: SeriesEpisode | null;
   next?: SeriesEpisode | null;
 }
@@ -43,7 +47,11 @@ export const SERIES_FIELDS = `
 export const SERIES_NAVIGATION_FIELDS = `
   seriesNavigation {
     episodeNumber
-    series { databaseId slug title }
+    series {
+      databaseId slug title
+      episodes { databaseId episodeNumber title path publishedAt imageUrl }
+      upcomingEpisodes { episodeNumber scheduledAt }
+    }
     previous { databaseId episodeNumber title path publishedAt imageUrl }
     next { databaseId episodeNumber title path publishedAt imageUrl }
   }

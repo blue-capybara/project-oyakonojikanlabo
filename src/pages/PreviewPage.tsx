@@ -9,6 +9,7 @@ import WordPressContent from '../components/Post/WordPressContent';
 import { usePreviewPost } from '../hooks/usePreviewPost';
 import Seo from '../components/seo/Seo';
 import { shouldNoIndex } from '../utils/seo';
+import { hasSeriesNavigationSlot } from '../lib/seriesToc.mjs';
 
 /**
  * 投稿詳細ページの見た目に寄せたプレビュー画面。
@@ -166,11 +167,29 @@ const PreviewPage: React.FC = () => {
 
                     <SeriesArticleNavigation navigation={data.seriesNavigation} />
                     {data.content ? (
-                      <WordPressContent html={data.content} className="post-content" />
+                      <WordPressContent
+                        html={data.content}
+                        className="post-content"
+                        inlineSeriesNavigation={
+                          data.seriesNavigation && hasSeriesNavigationSlot(data.content) ? (
+                            <SeriesArticleNavigation
+                              navigation={data.seriesNavigation}
+                              currentPost={data}
+                              footer
+                            />
+                          ) : undefined
+                        }
+                      />
                     ) : (
                       <p className="text-gray-500">この記事の内容は現在表示できません。</p>
                     )}
-                    <SeriesArticleNavigation navigation={data.seriesNavigation} footer />
+                    {!hasSeriesNavigationSlot(data.content ?? '') && (
+                      <SeriesArticleNavigation
+                        navigation={data.seriesNavigation}
+                        currentPost={data}
+                        footer
+                      />
+                    )}
                   </div>
                 </div>
               </section>

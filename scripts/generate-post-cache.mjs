@@ -1,6 +1,12 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import {
+  formatSeriesScheduledDate,
+  hasSeriesNavigationSlot,
+  replaceSeriesNavigationSlots,
+  seriesTocRows,
+} from '../src/lib/seriesToc.mjs';
 import { pathToFileURL } from 'node:url';
 
 const SITE_ORIGIN = process.env.SITE_URL ?? 'https://oyakonojikanlabo.jp';
@@ -279,31 +285,44 @@ export const attachSeriesNavigation = (posts, series) =>
       ...post,
       seriesNavigation: {
         episodeNumber: number,
-        series: { databaseId: parent.databaseId, slug: parent.slug, title: parent.title },
+        series: {
+          databaseId: parent.databaseId,
+          slug: parent.slug,
+          title: parent.title,
+          episodes: parent.episodes,
+          upcomingEpisodes: parent.upcomingEpisodes,
+        },
         previous: parent.episodes.find((episode) => episode.episodeNumber === number - 1) ?? null,
         next: parent.episodes.find((episode) => episode.episodeNumber === number + 1) ?? null,
       },
     };
   });
 
-const seriesNavigationHtml = (navigation, footer = false) => {
+const seriesNavigationHtml = (navigation, footer = false, currentPost) => {
   if (!navigation?.series) return '';
-  const links = footer
-    ? [navigation.previous, navigation.next]
-        .filter(Boolean)
-        .map(
-          (episode) =>
-            `<p><a href="${escapeHtml(episode.path)}">第${episode.episodeNumber}回 ${escapeHtml(episode.title)}</a></p>`,
-        )
-        .join('')
-    : '';
-  return `<nav aria-label="連載"><a href="${escapeHtml(seriesPath(navigation.series.slug))}">${escapeHtml(navigation.series.title)}</a> · 第${navigation.episodeNumber}回${links}</nav>`;
+  if (footer) {
+    const rows = seriesTocRows(navigation, currentPost)
+      .map((row) => {
+        if (row.type === 'upcoming')
+          return `<li>第${row.episodeNumber}回 <time datetime="${escapeHtml(row.scheduledAt)}">${escapeHtml(formatSeriesScheduledDate(row.scheduledAt))}</time>公開予定</li>`;
+        const title = `第${row.episodeNumber}回 ${escapeHtml(row.title)}`;
+        return row.current
+          ? `<li aria-current="page">${title} <span>この記事</span></li>`
+          : `<li><a href="${escapeHtml(row.path)}">▶ ${title}</a></li>`;
+      })
+      .join('');
+    return `<nav aria-label="連載の目次"><h2>${escapeHtml(navigation.series.title)}</h2><ol>${rows}</ol><a href="${escapeHtml(seriesPath(navigation.series.slug))}">連載の紹介を見る →</a></nav>`;
+  }
+  return `<nav aria-label="連載"><a href="${escapeHtml(seriesPath(navigation.series.slug))}">${escapeHtml(navigation.series.title)}</a> · 第${navigation.episodeNumber}回</nav>`;
 };
 
 const buildSnapshotBody = (post) => {
   const hero = post.featuredImage?.node ?? null;
   const dateText = formatDateJa(post.date);
-  const content = stripExecutableScripts(post.content ?? '');
+  const rawContent = stripExecutableScripts(post.content ?? '');
+  const footer = seriesNavigationHtml(post.seriesNavigation, true, post);
+  const inlineNavigation = hasSeriesNavigationSlot(rawContent);
+  const content = replaceSeriesNavigationSlots(rawContent, footer);
   const image = hero?.sourceUrl
     ? `<figure class="ojl-prerender__hero"><img src="${escapeHtml(hero.sourceUrl)}"${hero.srcSet ? ` srcset="${escapeHtml(hero.srcSet)}"` : ''}${hero.sizes ? ` sizes="${escapeHtml(hero.sizes)}"` : ''}${hero.mediaDetails?.width ? ` width="${Number(hero.mediaDetails.width)}"` : ''}${hero.mediaDetails?.height ? ` height="${Number(hero.mediaDetails.height)}"` : ''} alt="${escapeHtml(post.title)}" fetchpriority="high" decoding="async"></figure>`
     : '';
@@ -318,7 +337,7 @@ const buildSnapshotBody = (post) => {
           ${dateText ? `<p class="ojl-prerender__date">${escapeHtml(dateText)}</p>` : ''}
         </header>
         <div class="ojl-prerender__content">${content}</div>
-        ${seriesNavigationHtml(post.seriesNavigation, true)}
+        ${inlineNavigation ? '' : footer}
       </article>
     </main>`;
 };

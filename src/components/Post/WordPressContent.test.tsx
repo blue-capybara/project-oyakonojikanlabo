@@ -19,6 +19,26 @@ const getShadowRoot = (container: HTMLElement) => {
 };
 
 describe('WordPressContent', () => {
+  it('目次は最初の配置枠へ投影し、重複枠を除き、前後の案内を保持する', () => {
+    const marker = '<div data-ojl-series-navigation></div>';
+    const { container, rerender } = render(
+      <WordPressContent
+        className="post-content"
+        html={'<p>本文</p>' + marker + '<a href="https://line.me/test">LINE</a>' + marker}
+        inlineSeriesNavigation={<nav>連載の目次</nav>}
+      />,
+    );
+    const shadow = getShadowRoot(container);
+    expect(shadow.querySelectorAll('slot[name="ojl-series-navigation"]')).toHaveLength(1);
+    expect(shadow.querySelectorAll('[data-ojl-series-navigation]')).toHaveLength(1);
+    expect(shadow.querySelector('a')?.textContent).toBe('LINE');
+    expect(container.querySelector('[slot="ojl-series-navigation"] nav')?.textContent).toBe(
+      '連載の目次',
+    );
+    rerender(<WordPressContent className="post-content" html={marker + '<p>案内</p>'} />);
+    expect(getShadowRoot(container).querySelector('[data-ojl-series-navigation]')).toBeNull();
+    expect(container.querySelector('[slot]')).toBeNull();
+  });
   beforeEach(() => {
     window.localStorage.clear();
     window.sessionStorage.clear();
