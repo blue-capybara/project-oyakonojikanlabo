@@ -9,7 +9,8 @@ import PicoBanner from '../components/HomePage/PicoBanner';
 import PicoEvents from '../components/HomePage/PicoEvents';
 import CollaborationBanner from '../components/HomePage/CollaborationBanner';
 import FeatureSection from '../components/HomePage/FeatureSection';
-import { featureClient, useFeaturePosts } from '../components/HomePage/useFeaturePosts';
+import { featureClient } from '../components/HomePage/useFeaturePosts';
+import { useFeaturedContent } from '../components/HomePage/useFeaturedContent';
 import { getFeatureFlag } from '../config/featureFlags';
 import Seo from '../components/seo/Seo';
 import { withBase } from '../utils/paths';
@@ -51,11 +52,11 @@ const sanitizeExcerpt = (excerpt?: string | null, content?: string | null) => {
 };
 
 const HomePageContent: React.FC = () => {
-  const { featurePosts, loading, error } = useFeaturePosts();
+  const { items, loading, error } = useFeaturedContent();
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [showLoader, setShowLoader] = React.useState(false);
   const [isSearchPanelOpen, setIsSearchPanelOpen] = React.useState(false);
-  const mainSlides = React.useMemo(() => featurePosts.slice(0, 5), [featurePosts]);
+  const mainSlides = React.useMemo(() => items.slice(0, 5), [items]);
   // 現在はPICOイベントのみを受け付けているため非表示にしています。
   // PICO以外のイベント掲載を再開するときは、対応する環境変数をtrueにして復活させます。
   const showHomeGeneralEvents = getFeatureFlag('showHomeGeneralEvents');
@@ -130,7 +131,7 @@ const HomePageContent: React.FC = () => {
             <div className="order-2 mt-12 w-full text-white z-10 lg:order-1 lg:mt-0 lg:w-1/2">
               <div className="flex gap-2 mb-6">
                 <span className="inline-block bg-white/20 text-white px-4 py-1 text-xs rounded-full">
-                  特集
+                  {main?.series ? '連載' : '特集'}
                 </span>
                 {main?.post?.date && (
                   <span className="inline-block bg-white/20 text-white px-4 py-1 text-xs rounded-full">
@@ -139,7 +140,7 @@ const HomePageContent: React.FC = () => {
                 )}
               </div>
               {main ? (
-                <Link to={`/${main.post.slug}`} className="block text-white no-underline">
+                <Link to={main.path} className="block text-white no-underline">
                   <h2 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight animate-fade-in">
                     {main.post.title}
                   </h2>
@@ -153,10 +154,10 @@ const HomePageContent: React.FC = () => {
               <div className="flex flex-col lg:flex-row gap-4">
                 {main ? (
                   <Link
-                    to={`/${main.post.slug}`}
+                    to={main.path}
                     className="bg-white text-primary px-10 py-4 font-bold rounded-button whitespace-nowrap hover:bg-yellow-300 hover:text-white transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
                   >
-                    記事を読む
+                    {main.series ? '連載を読む' : '記事を読む'}
                   </Link>
                 ) : (
                   <span className="bg-white/30 text-white px-10 py-4 font-bold rounded-button whitespace-nowrap">
@@ -169,9 +170,9 @@ const HomePageContent: React.FC = () => {
               <div className="relative w-full max-w-xl mx-auto">
                 {main ? (
                   <Link
-                    to={`/${main.post.slug}`}
+                    to={main.path}
                     className="block relative aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white/10 no-underline"
-                    aria-label={`${main.post.title}の記事を読む`}
+                    aria-label={`${main.post.title}の${main.series ? '連載' : '記事'}を読む`}
                   >
                     {mainSlides.map((item, idx) => (
                       <img
@@ -261,11 +262,7 @@ const HomePageContent: React.FC = () => {
         </div>
       </section>
       {/* ヒーローと同じ取得結果を、一覧しやすい横長リストとして表示 */}
-      <FeatureSection
-        posts={featurePosts}
-        loadingOverride={loading}
-        errorOverride={Boolean(error)}
-      />
+      <FeatureSection items={items} loading={loading} error={Boolean(error)} />
 
       {/* 記事一覧セクション */}
       <ArticlesSection />

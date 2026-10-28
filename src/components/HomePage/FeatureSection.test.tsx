@@ -1,70 +1,36 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { afterEach, expect, it, vi } from 'vitest';
+import { expect, it } from 'vitest';
 import FeatureSection from './FeatureSection';
 
-vi.mock('./useFeaturePosts', () => ({
-  useFeaturePosts: () => ({ featurePosts: [], loading: false, error: null }),
-}));
-afterEach(() => {
-  vi.restoreAllMocks();
-});
-const posts = [1, 2, 3, 4].map((id) => ({
+const items = [0, 1, 2, 3, 4].map((id) => ({
   featureId: String(id),
-  post: { id: String(id), slug: `article-${id}`, title: `通常特集${id}`, date: '2026-01-01' },
+  post: { id: String(id), slug: `article-${id}`, title: `特集${id}`, date: '2026-01-01' },
+  path: id === 0 ? '/series/family' : `/article-${id}`,
+  series: id === 0,
 }));
 
-it('連載と通常特集を最大4件で混在させ、通常特集の相対順を維持する', async () => {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-    new Response(
-      JSON.stringify({
-        schemaVersion: 1,
-        series: [
-          {
-            databaseId: 10,
-            slug: 'family',
-            title: '親子連載',
-            date: '2026-02-01',
-            showInFeatured: true,
-          },
-          {
-            databaseId: 11,
-            slug: 'hidden',
-            title: '掲載しない連載',
-            date: '2026-03-01',
-            showInFeatured: false,
-          },
-        ],
-      }),
-      { headers: { 'content-type': 'application/json' } },
-    ),
-  );
+it('共通の表示対象から最大4件を順に表示し、連載詳細へリンクする', () => {
   render(
     <MemoryRouter>
-      <FeatureSection posts={posts} />
+      <FeatureSection items={items} />
     </MemoryRouter>,
   );
-  expect(await screen.findByRole('link', { name: /親子連載/ })).toHaveAttribute(
-    'href',
-    '/series/family',
-  );
-  const links = screen.getAllByRole('link');
-  expect(links).toHaveLength(4);
-  expect(links.map((link) => link.getAttribute('href'))).toEqual([
+  expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
     '/series/family',
     '/article-1',
     '/article-2',
     '/article-3',
   ]);
-  expect(screen.queryByText('掲載しない連載')).not.toBeInTheDocument();
+  expect(screen.getByText('連載')).toBeInTheDocument();
 });
 
-it('連載JSONの取得失敗でも既存特集4件を表示する', async () => {
-  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('検証用エラー'));
+it('通常特集の取得エラーがあっても取得済みの連載は表示する', () => {
   render(
     <MemoryRouter>
-      <FeatureSection posts={posts} />
+      <FeatureSection items={items.slice(0, 1)} error />
     </MemoryRouter>,
   );
-  await waitFor(() => expect(screen.getAllByRole('link')).toHaveLength(4));
+  expect(screen.getByRole('link')).toHaveAttribute('href', '/series/family');
+  expect(screen.queryByText(/取得に失敗/)).not.toBeInTheDocument();
 });

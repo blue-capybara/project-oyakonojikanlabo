@@ -1,60 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FeaturePostEntry, useFeaturePosts } from './useFeaturePosts';
+import type { FeaturedContentEntry } from './useFeaturedContent';
 import { withBase } from '../../utils/paths';
-import { SeriesData, seriesPath } from '../../lib/series';
 
 type FeatureSectionProps = {
-  posts?: FeaturePostEntry[];
-  loadingOverride?: boolean;
-  errorOverride?: boolean;
+  items: FeaturedContentEntry[];
+  loading?: boolean;
+  error?: boolean;
 };
 
-const FeatureSection: React.FC<FeatureSectionProps> = ({
-  posts,
-  loadingOverride,
-  errorOverride,
-}) => {
-  const { featurePosts, loading, error } = useFeaturePosts({
-    skip: Boolean(posts),
-  });
+const FeatureSection: React.FC<FeatureSectionProps> = ({ items, loading, error }) => {
+  const visiblePosts = items.slice(0, 4);
 
-  const resolvedPosts = posts ?? featurePosts;
-  const [series, setSeries] = React.useState<SeriesData[]>([]);
-  React.useEffect(() => {
-    const controller = new AbortController();
-    fetch('/series-index.json', { signal: controller.signal })
-      .then(async (response) =>
-        response.ok && response.headers.get('content-type')?.includes('application/json')
-          ? response.json()
-          : null,
-      )
-      .then((cache) => {
-        if (!controller.signal.aborted)
-          setSeries(cache?.schemaVersion === 1 ? (cache.series ?? []) : []);
-      })
-      .catch(() => {
-        /* 既存の特集・スライダーは連載JSONの取得失敗で止めません。 */
-      });
-    return () => controller.abort();
-  }, []);
-  // 掲載指定の連載を新しい順に先頭へ置き、通常の特集の並び順を維持して最大4件にします。
-  const visiblePosts = [
-    ...series
-      .filter((item) => item.showInFeatured)
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .map((item) => ({
-        featureId: `series-${item.databaseId}`,
-        post: item,
-        path: seriesPath(item.slug),
-        series: true,
-      })),
-    ...resolvedPosts.map((item) => ({ ...item, path: `/${item.post.slug}`, series: false })),
-  ].slice(0, 4);
-  const isLoading = loadingOverride ?? loading;
-  const isError = errorOverride ?? Boolean(error);
-
-  if (isLoading && !series.length) {
+  if (loading && !visiblePosts.length) {
     return (
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 text-center text-gray-500">
@@ -64,7 +22,7 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
     );
   }
 
-  if (isError && !series.length) {
+  if (error && !visiblePosts.length) {
     return (
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 text-center text-red-600">
