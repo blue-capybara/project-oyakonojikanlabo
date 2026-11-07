@@ -31,7 +31,7 @@ jobs:
   build-and-deploy:
     name: 本番成果物を生成して同期
     if: ${{ vars.PRODUCTION_DEPLOY_ENABLED == 'true' || (github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     environment: production
 
