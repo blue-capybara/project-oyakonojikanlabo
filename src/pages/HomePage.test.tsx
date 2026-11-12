@@ -1,11 +1,21 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import HomePage from './HomePage';
 
+const featureState = vi.hoisted(() => ({
+  loading: false,
+  error: null as Error | null,
+  empty: false,
+}));
+
 vi.mock('../components/HomePage/useFeaturePosts', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../components/HomePage/useFeaturePosts')>()),
-  useFeaturePosts: () => ({ featurePosts: posts, loading: false, error: null }),
+  useFeaturePosts: () => ({
+    featurePosts: featureState.empty ? [] : posts,
+    loading: featureState.loading,
+    error: featureState.error,
+  }),
 }));
 vi.mock('../components/Layout/Layout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <main>{children}</main>,
@@ -43,7 +53,47 @@ const renderHome = () => {
   };
 };
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  Object.assign(featureState, { loading: false, error: null, empty: false });
+});
+
+it('通常特集の通信が遅くても、取得済みの連載を全画面ローディングで隠さない', async () => {
+  Object.assign(featureState, { loading: true, empty: true });
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    new Response(JSON.stringify({ schemaVersion: 1, series: [series] }), {
+      headers: { 'content-type': 'application/json' },
+    }),
+  );
+  const result = render(
+    <MemoryRouter>
+      <HomePage />
+    </MemoryRouter>,
+  );
+  expect(await screen.findByRole('link', { name: '連載を読む' })).toHaveAttribute(
+    'href',
+    '/series/toyotakazuhiko',
+  );
+  await act(() => new Promise((resolve) => setTimeout(resolve, 400)));
+  expect(screen.queryByText('コンテンツを読み込み中です…')).not.toBeInTheDocument();
+  expect(result.container.querySelector('.backdrop-blur-sm')).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: '次へ' }));
+  expect(screen.getByRole('link', { name: '連載を読む' })).toBeInTheDocument();
+});
+
+it('特集を取得できなかった場合は、読み込み中の表示を残さない', async () => {
+  Object.assign(featureState, { error: new Error('通信エラー'), empty: true });
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('', { status: 404 }));
+  render(
+    <MemoryRouter>
+      <HomePage />
+    </MemoryRouter>,
+  );
+  expect(
+    await screen.findByRole('heading', { name: '特集を取得できませんでした' }),
+  ).toBeInTheDocument();
+  expect(screen.queryByText('特集記事を読み込み中です…')).not.toBeInTheDocument();
+});
 
 it('掲載連載を両枠の先頭に表示し、画像・紹介文・全リンク・カルーセルを連載に対応させる', async () => {
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
