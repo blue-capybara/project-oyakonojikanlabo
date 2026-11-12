@@ -22,6 +22,7 @@ import { withBase } from '../utils/paths';
 import GonePage from './GonePage';
 import NotFoundPage from './NotFoundPage';
 import { fetchUrlLifecycle } from '../lib/urlLifecycle';
+import { coverImageSize, type ResponsiveImage } from '../lib/responsiveImages';
 
 interface EventScheduleEntry {
   time: string;
@@ -41,10 +42,20 @@ interface EventArtist {
   url?: string;
 }
 
-interface ArtistMedia {
+interface ImageNode extends ResponsiveImage {
+  altText?: string | null;
+}
+
+interface ArtistMedia extends ResponsiveImage {
   url: string;
   alt?: string;
 }
+
+// 寸法が不明な画像は、切り抜き時の解像度不足を避けるため元URLを使います。
+const imageSrcSet = (image: ArtistMedia) =>
+  (image.mediaDetails?.width ?? 0) > 0 && (image.mediaDetails?.height ?? 0) > 0
+    ? (image.srcSet ?? undefined)
+    : undefined;
 
 interface ArtistSnsLink {
   label: string;
@@ -91,6 +102,7 @@ interface Event {
   location: string;
   region: string;
   image: string;
+  responsiveImage?: ImageNode | null;
   galleryImages?: ArtistMedia[];
   slotSchedules?: EventSlotSchedule[];
   status: EventScheduleStatus;
@@ -147,9 +159,7 @@ interface EventCpt {
   reservationOpen?: boolean | null;
   capacity?: string | number | null;
   mainImage?: {
-    node?: {
-      sourceUrl?: string | null;
-    } | null;
+    node?: ImageNode | null;
   } | null;
   singleSlots?: EventSlot[] | null;
   artists?: {
@@ -178,10 +188,7 @@ interface EventDetailExt {
   belongings?: Array<{ text?: string | null } | null> | null;
   timeSchedule?: (EventTimeScheduleEntry | null)[] | null;
   gallery?: {
-    nodes?: Array<{
-      sourceUrl?: string | null;
-      altText?: string | null;
-    } | null> | null;
+    nodes?: Array<ImageNode | null> | null;
   } | null;
 }
 
@@ -207,23 +214,14 @@ interface ArtistNode {
   title?: string | null;
   content?: string | null;
   featuredImage?: {
-    node?: {
-      sourceUrl?: string | null;
-      altText?: string | null;
-    } | null;
+    node?: ImageNode | null;
   } | null;
   artistInformation?: {
     profileImage?: {
-      node?: {
-        sourceUrl?: string | null;
-        altText?: string | null;
-      } | null;
+      node?: ImageNode | null;
     } | null;
     thumbnails?: {
-      nodes?: Array<{
-        sourceUrl?: string | null;
-        altText?: string | null;
-      } | null> | null;
+      nodes?: Array<ImageNode | null> | null;
     } | null;
     name?: string | null;
     title?: string | null;
@@ -240,10 +238,7 @@ interface ArtistNode {
       releaseDate?: string | null;
       isbn?: string | null;
       coverImage?: {
-        node?: {
-          sourceUrl?: string | null;
-          altText?: string | null;
-        } | null;
+        node?: ImageNode | null;
       } | null;
     } | null> | null;
     active?: boolean | null;
@@ -278,6 +273,8 @@ const GET_EVENT_DETAIL = gql`
         mainImage {
           node {
             sourceUrl
+            srcSet
+            mediaDetails { width height }
           }
         }
         singleSlots {
@@ -355,6 +352,8 @@ const GET_EVENT_DETAIL = gql`
         gallery {
           nodes {
             sourceUrl
+            srcSet
+            mediaDetails { width height }
             altText
           }
         }
@@ -378,6 +377,11 @@ const GET_ARTIST_DETAIL = gql`
       featuredImage {
         node {
           sourceUrl
+          srcSet
+          mediaDetails {
+            width
+            height
+          }
           altText
         }
       }
@@ -395,12 +399,22 @@ const GET_ARTIST_DETAIL = gql`
         profileImage {
           node {
             sourceUrl
+            srcSet
+            mediaDetails {
+              width
+              height
+            }
             altText
           }
         }
         thumbnails {
           nodes {
             sourceUrl
+            srcSet
+            mediaDetails {
+              width
+              height
+            }
             altText
           }
         }
@@ -412,6 +426,11 @@ const GET_ARTIST_DETAIL = gql`
           coverImage {
             node {
               sourceUrl
+              srcSet
+              mediaDetails {
+                width
+                height
+              }
               altText
             }
           }
@@ -543,10 +562,7 @@ const buildDateLines = (slots?: EventSlot[] | null): string[] | undefined => {
 
 const buildGalleryImages = (
   gallery?: {
-    nodes?: Array<{
-      sourceUrl?: string | null;
-      altText?: string | null;
-    } | null> | null;
+    nodes?: Array<ImageNode | null> | null;
   } | null,
 ): ArtistMedia[] | undefined => {
   const nodes = gallery?.nodes;
@@ -556,6 +572,7 @@ const buildGalleryImages = (
     .map((node) => {
       if (!node?.sourceUrl) return null;
       return {
+        ...node,
         url: node.sourceUrl,
         alt: node.altText ?? undefined,
       } as ArtistMedia;
@@ -894,6 +911,7 @@ const formatEvent = (node: EventNode): Event => {
     location: buildLocationLabel(eventCpt, node.eventRegions),
     region: node.eventRegions?.nodes?.[0]?.name ?? '地域未定',
     image: eventCpt.mainImage?.node?.sourceUrl ?? '',
+    responsiveImage: eventCpt.mainImage?.node,
     galleryImages,
     slotSchedules,
     status,
@@ -957,6 +975,7 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
 
   const infoMainImage = info?.profileImage?.node?.sourceUrl
     ? {
+        ...info.profileImage.node,
         url: info.profileImage.node.sourceUrl,
         alt: info.profileImage.node.altText ?? info?.name ?? node.title ?? undefined,
       }
@@ -966,6 +985,7 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
     ?.map((item) => {
       if (!item?.sourceUrl) return null;
       return {
+        ...item,
         url: item.sourceUrl,
         alt: item.altText ?? info?.name ?? node.title ?? undefined,
       } as ArtistMedia;
@@ -974,6 +994,7 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
 
   const fallbackImage = node.featuredImage?.node?.sourceUrl
     ? {
+        ...node.featuredImage.node,
         url: node.featuredImage.node.sourceUrl,
         alt: node.featuredImage.node.altText ?? node.title ?? undefined,
       }
@@ -1033,6 +1054,7 @@ const formatArtist = (node: ArtistNode): ArtistProfile => {
       const isbn = book.isbn?.trim();
       const coverImage = book.coverImage?.node?.sourceUrl
         ? {
+            ...book.coverImage.node,
             url: book.coverImage.node.sourceUrl,
             alt: book.coverImage.node.altText ?? title ?? undefined,
           }
@@ -1154,7 +1176,7 @@ const EventDetailPage: React.FC = () => {
     const candidates: ArtistMedia[] = [];
 
     if (event.image) {
-      candidates.push({ url: event.image, alt: title });
+      candidates.push({ ...event.responsiveImage, url: event.image, alt: title });
     }
 
     if (event.galleryImages && event.galleryImages.length > 0) {
@@ -1170,6 +1192,7 @@ const EventDetailPage: React.FC = () => {
       if (!normalized || seen.has(normalized)) return;
       seen.add(normalized);
       deduped.push({
+        ...image,
         url: normalized,
         alt: image.alt ?? title,
       });
@@ -1595,6 +1618,10 @@ const EventDetailPage: React.FC = () => {
             <img
               src={activeEventImage.url}
               alt={activeEventImage.alt ?? event.title ?? 'イベント画像'}
+              srcSet={imageSrcSet(activeEventImage)}
+              sizes={`(min-width: 1536px) ${coverImageSize(activeEventImage, 736, (736 * 4) / 3)}, (min-width: 1280px) ${coverImageSize(activeEventImage, 608, (608 * 4) / 3)}, (min-width: 1024px) ${coverImageSize(activeEventImage, 480, 640)}, (min-width: 768px) ${coverImageSize(activeEventImage, 352, (352 * 4) / 3)}, (min-width: 640px) ${coverImageSize(activeEventImage, 608, (608 * 4) / 3)}, ${coverImageSize(activeEventImage, 'calc(100vw - 32px)', 'calc((100vw - 32px) * 4 / 3)')}`}
+              {...{ fetchpriority: 'high' }}
+              decoding="async"
               className="h-full w-full object-cover object-center"
             />
             {hasMultipleEventImages && (
@@ -1640,6 +1667,9 @@ const EventDetailPage: React.FC = () => {
                   <img
                     src={image.url}
                     alt={image.alt ?? `${event.title ?? 'イベント'}のギャラリー画像`}
+                    srcSet={imageSrcSet(image)}
+                    sizes={coverImageSize(image, 80, 80)}
+                    decoding="async"
                     className="h-full w-full object-cover"
                     loading="lazy"
                   />
@@ -2334,6 +2364,10 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
                   <img
                     src={mainImage.url}
                     alt={mainImage.alt ?? `${profile.name}の写真`}
+                    srcSet={imageSrcSet(mainImage)}
+                    sizes={`(min-width: 1536px) ${coverImageSize(mainImage, 362, (362 * 4) / 3)}, (min-width: 1280px) ${coverImageSize(mainImage, 291, 388)}, (min-width: 1024px) ${coverImageSize(mainImage, 220, (220 * 4) / 3)}, (min-width: 768px) ${coverImageSize(mainImage, 388, (388 * 4) / 3)}, (min-width: 640px) ${coverImageSize(mainImage, 558, 744)}, ${coverImageSize(mainImage, 'calc(100vw - 82px)', 'calc((100vw - 82px) * 4 / 3)')}`}
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover object-top"
                   />
                 </div>
@@ -2362,6 +2396,10 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
                       <img
                         src={image.url}
                         alt={image.alt ?? `${profile.name}の作品サムネイル`}
+                        srcSet={imageSrcSet(image)}
+                        sizes={`(min-width: 1536px) ${coverImageSize(image, 82, 80)}, (min-width: 1280px) ${coverImageSize(image, 64, 80)}, (min-width: 1024px) ${coverImageSize(image, 46, 80)}, (min-width: 768px) ${coverImageSize(image, 88, 80)}, (min-width: 640px) ${coverImageSize(image, 131, 80)}, ${coverImageSize(image, 'calc((100vw - 106px) / 3)', 80)}`}
+                        loading="lazy"
+                        decoding="async"
                         className="h-20 w-full object-cover transition-transform duration-200 group-hover:scale-105"
                       />
                     </button>
@@ -2472,6 +2510,10 @@ const ArtistProfileSection: React.FC<ArtistProfileSectionProps> = ({
                               <img
                                 src={book.coverImage.url}
                                 alt={book.coverImage.alt ?? `${book.title ?? '関連書籍'}の表紙`}
+                                srcSet={imageSrcSet(book.coverImage)}
+                                sizes={coverImageSize(book.coverImage, 64, 80)}
+                                loading="lazy"
+                                decoding="async"
                                 className="h-full w-full object-cover"
                               />
                             </div>
