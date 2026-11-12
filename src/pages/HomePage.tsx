@@ -54,7 +54,6 @@ const sanitizeExcerpt = (excerpt?: string | null, content?: string | null) => {
 const HomePageContent: React.FC = () => {
   const { items, loading, error } = useFeaturedContent();
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [showLoader, setShowLoader] = React.useState(false);
   const [isSearchPanelOpen, setIsSearchPanelOpen] = React.useState(false);
   const mainSlides = React.useMemo(() => items.slice(0, 5), [items]);
   // 現在はPICOイベントのみを受け付けているため非表示にしています。
@@ -93,19 +92,6 @@ const HomePageContent: React.FC = () => {
     return () => clearInterval(timer);
   }, [mainSlides.length, isSearchPanelOpen]);
 
-  // ローディングが300ms以上続いたときだけ簡易オーバーレイを表示
-  React.useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    if (loading) {
-      timer = setTimeout(() => setShowLoader(true), 300);
-    } else {
-      setShowLoader(false);
-    }
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [loading]);
-
   const hasFeatures = mainSlides.length > 0;
   const main = hasFeatures ? mainSlides[currentIndex] : undefined;
   const description =
@@ -118,12 +104,6 @@ const HomePageContent: React.FC = () => {
         title="親子の時間研究所"
         description="親子の時間研究所（oyakonojikanlabo）は、親子で楽しめる学び・イベント・暮らしの情報を発信するメディアです。"
       />
-      {showLoader && (
-        <div className="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-none">
-          <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-          <p className="mt-3 text-primary/80 text-sm">コンテンツを読み込み中です…</p>
-        </div>
-      )}
       {/* メインビジュアル */}
       <section className="relative min-h-[720px] overflow-hidden bg-gradient-to-br from-primary/90 to-primary">
         <div className="container mx-auto px-4 relative">
@@ -147,7 +127,11 @@ const HomePageContent: React.FC = () => {
                 </Link>
               ) : (
                 <h2 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight animate-fade-in">
-                  特集記事を読み込み中です…
+                  {loading
+                    ? '特集記事を読み込み中です…'
+                    : error
+                      ? '特集を取得できませんでした'
+                      : '現在表示できる特集がありません'}
                 </h2>
               )}
               <p className="text-base lg:text-lg mb-8 leading-relaxed opacity-90">{description}</p>
