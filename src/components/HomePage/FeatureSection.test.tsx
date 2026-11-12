@@ -23,6 +23,9 @@ it('共通の表示対象から最大4件を順に表示し、連載詳細へリ
     '/article-3',
   ]);
   expect(screen.getByText('連載')).toBeInTheDocument();
+  expect(
+    screen.getAllByRole('img').every((image) => image.getAttribute('loading') === 'lazy'),
+  ).toBe(true);
 });
 
 it('通常特集の取得エラーがあっても取得済みの連載は表示する', () => {

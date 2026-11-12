@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import type { FeaturedContentEntry } from './useFeaturedContent';
 import { withBase } from '../../utils/paths';
+import { coverImageSize } from '../../lib/responsiveImages';
 
 type FeatureSectionProps = {
   items: FeaturedContentEntry[];
@@ -60,6 +61,10 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ items, loading, error }
                     withBase('images/readdy/921de84646a0d38dfa688f1d826685e6.jpeg')
                   }
                   alt={post.title}
+                  srcSet={post.featuredImage?.node?.srcSet ?? undefined}
+                  sizes={`(min-width: 640px) ${coverImageSize(post.featuredImage?.node, 160, 96)}, ${coverImageSize(post.featuredImage?.node, 112, 80)}`}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                 />
               </div>

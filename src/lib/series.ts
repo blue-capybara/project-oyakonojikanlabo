@@ -1,3 +1,5 @@
+import type { ResponsiveImage } from './responsiveImages';
+
 export interface SeriesEpisode {
   databaseId: number;
   episodeNumber: number;
@@ -16,7 +18,7 @@ export interface SeriesData {
   excerpt?: string | null;
   date: string;
   modified?: string;
-  featuredImage?: { node?: { sourceUrl?: string | null } | null } | null;
+  featuredImage?: { node?: ResponsiveImage | null } | null;
   seriesStatus: 'ongoing' | 'completed';
   totalEpisodes: number | null;
   showInFeatured: boolean;
