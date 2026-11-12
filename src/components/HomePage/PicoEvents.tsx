@@ -12,6 +12,7 @@ import {
 } from '../../lib/eventSchedule';
 import { useIsMobileView } from '../../hooks/useIsMobileView';
 import { withBase } from '../../utils/paths';
+import { coverImageSize, type ResponsiveImage } from '../../lib/responsiveImages';
 
 interface EventCpt {
   summary?: string | null;
@@ -20,9 +21,7 @@ interface EventCpt {
   picoDisplayOrder?: number | null;
   singleSlots?: EventSlot[] | null;
   mainImage?: {
-    node?: {
-      sourceUrl?: string | null;
-    } | null;
+    node?: ResponsiveImage | null;
   } | null;
   venueRef?: {
     nodes?: Array<{
@@ -64,6 +63,7 @@ interface PicoEventCard {
   scheduleLabel: string;
   summary: string;
   image: string;
+  responsiveImage?: ResponsiveImage | null;
   reservationOpen: boolean;
   tags: EventTag[];
 }
@@ -108,6 +108,8 @@ const GET_PICO_EVENTS = gql`
             mainImage {
               node {
                 sourceUrl
+                srcSet
+                mediaDetails { width height }
               }
             }
             venueRef {
@@ -260,6 +262,7 @@ const PicoEvents: React.FC = () => {
               scheduleLabel: formatPicoSchedule(node),
               summary: stripHtml(eventCpt.summary),
               image: eventCpt.mainImage?.node?.sourceUrl ?? '/default.jpg',
+              responsiveImage: eventCpt.mainImage?.node,
               reservationOpen,
               tags: [
                 { id: 'category', label: category.label, className: category.className },
@@ -334,6 +337,10 @@ const PicoEvents: React.FC = () => {
                 <img
                   src={event.image}
                   alt={event.title}
+                  srcSet={event.responsiveImage?.srcSet ?? undefined}
+                  sizes={`(min-width: 1536px) ${coverImageSize(event.responsiveImage, 480, 256)}, (min-width: 1280px) ${coverImageSize(event.responsiveImage, 395, 256)}, (min-width: 1024px) ${coverImageSize(event.responsiveImage, 310, 256)}, (min-width: 768px) ${coverImageSize(event.responsiveImage, 352, 256)}, (min-width: 640px) ${coverImageSize(event.responsiveImage, 288, 256)}, (min-width: 600px) ${coverImageSize(event.responsiveImage, 'calc(50vw - 32px)', 256)}, ${coverImageSize(event.responsiveImage, 'calc(100vw - 32px)', 256)}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-64 object-cover object-top"
                 />
                 <div className="relative z-20 p-6">

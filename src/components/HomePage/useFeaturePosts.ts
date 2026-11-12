@@ -2,6 +2,7 @@ import { ApolloClient, HttpLink, InMemoryCache, gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import React from 'react';
 import { fetchStaticPostCache } from '../../lib/postCache';
+import type { ResponsiveImage } from '../../lib/responsiveImages';
 
 export const featureClient = new ApolloClient({
   link: new HttpLink({ uri: 'https://cms.oyakonojikanlabo.jp/graphql' }),
@@ -26,6 +27,11 @@ export const GET_FEATURES = gql`
                   featuredImage {
                     node {
                       sourceUrl
+                      srcSet
+                      mediaDetails {
+                        width
+                        height
+                      }
                     }
                   }
                 }
@@ -54,9 +60,7 @@ export type RelatedPost = {
   content?: string | null;
   excerpt?: string | null;
   featuredImage?: {
-    node?: {
-      sourceUrl?: string | null;
-    } | null;
+    node?: ResponsiveImage | null;
   } | null;
 };
 

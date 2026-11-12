@@ -14,6 +14,7 @@ import { useFeaturedContent } from '../components/HomePage/useFeaturedContent';
 import { getFeatureFlag } from '../config/featureFlags';
 import Seo from '../components/seo/Seo';
 import { withBase } from '../utils/paths';
+import { coverImageSize } from '../lib/responsiveImages';
 
 const stripHtml = (html?: string | null) =>
   html
@@ -166,6 +167,10 @@ const HomePageContent: React.FC = () => {
                           withBase('images/readdy/921de84646a0d38dfa688f1d826685e6.jpeg')
                         }
                         alt={item.post.title}
+                        srcSet={item.post.featuredImage?.node?.srcSet ?? undefined}
+                        sizes={`(min-width: 1280px) ${coverImageSize(item.post.featuredImage?.node, 576, 576)}, (min-width: 1024px) ${coverImageSize(item.post.featuredImage?.node, 'calc(50vw - 16px)', 'calc(50vw - 16px)')}, (min-width: 640px) ${coverImageSize(item.post.featuredImage?.node, 576, 576)}, ${coverImageSize(item.post.featuredImage?.node, 'calc(100vw - 32px)', 'calc(100vw - 32px)')}`}
+                        {...{ fetchpriority: idx === currentIndex ? 'high' : 'low' }}
+                        decoding="async"
                         className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${
                           idx === currentIndex ? 'opacity-100' : 'opacity-0'
                         }`}
@@ -236,6 +241,9 @@ const HomePageContent: React.FC = () => {
                         withBase('images/readdy/921de84646a0d38dfa688f1d826685e6.jpeg')
                       }
                       alt={item.post.title}
+                      srcSet={item.post.featuredImage?.node?.srcSet ?? undefined}
+                      sizes={coverImageSize(item.post.featuredImage?.node, 56, 56)}
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                   </button>

@@ -38,7 +38,13 @@ const series = {
   title: 'とよたかずひこさんインタビュー',
   date: '2026-10-27',
   excerpt: '<p>絵本づくりと「絵本のくつした」誕生の物語</p>',
-  featuredImage: { node: { sourceUrl: '/series-image.jpg' } },
+  featuredImage: {
+    node: {
+      sourceUrl: '/series-image.jpg',
+      srcSet: '/series-small.jpg 300w, /series-image.jpg 1200w',
+      mediaDetails: { width: 1200, height: 675 },
+    },
+  },
   showInFeatured: true,
 };
 const renderHome = () => {
@@ -126,6 +132,19 @@ it('掲載連載を両枠の先頭に表示し、画像・紹介文・全リン�
   ]);
   expect(hero.getByRole('link', { name: '連載を読む' })).toBeInTheDocument();
   expect(hero.getAllByAltText(series.title)[0]).toHaveAttribute('src', '/series-image.jpg');
+  expect(hero.getAllByAltText(series.title)[0]).toHaveAttribute(
+    'srcset',
+    series.featuredImage.node.srcSet,
+  );
+  expect(hero.getAllByAltText(series.title)[0]).toHaveAttribute('fetchpriority', 'high');
+  expect(hero.getAllByAltText(series.title)[0]).toHaveAttribute(
+    'sizes',
+    expect.stringContaining('1.7777777777777777'),
+  );
+  expect(hero.getAllByAltText(series.title)[1]).toHaveAttribute(
+    'sizes',
+    'max(56px, calc(56px * 1.7777777777777777))',
+  );
   expect(hero.getAllByRole('button', { name: /^特集サムネイル/ })).toHaveLength(5);
   expect(features.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
     '/series/toyotakazuhiko',
@@ -138,6 +157,7 @@ it('掲載連載を両枠の先頭に表示し、画像・紹介文・全リン�
 
   fireEvent.click(hero.getByRole('button', { name: '次へ' }));
   expect(hero.getByRole('heading', { name: '過去の連載' })).toBeInTheDocument();
+  expect(hero.getAllByAltText(series.title)[0]).toHaveAttribute('fetchpriority', 'low');
   fireEvent.click(hero.getByRole('button', { name: '前へ' }));
   expect(hero.getByRole('heading', { name: series.title })).toBeInTheDocument();
   fireEvent.click(hero.getByRole('button', { name: '特集サムネイル 5' }));

@@ -108,6 +108,8 @@ const ShoppingSection: React.FC = () => {
                 <img
                   src={product.image}
                   alt={product.title}
+                  loading="lazy"
+                  decoding="async"
                   className="aspect-square w-full object-cover object-center sm:aspect-auto sm:h-64"
                 />
               </ExternalLink>

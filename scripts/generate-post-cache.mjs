@@ -90,7 +90,7 @@ const SERIES_QUERY = `
       pageInfo { hasNextPage endCursor }
       nodes {
         databaseId slug title date modified content excerpt
-        featuredImage { node { sourceUrl } }
+        featuredImage { node { sourceUrl srcSet mediaDetails { width height } } }
         seriesStatus totalEpisodes showInFeatured publishedCount
         episodes { databaseId episodeNumber title path publishedAt imageUrl }
         upcomingEpisodes { episodeNumber scheduledAt }

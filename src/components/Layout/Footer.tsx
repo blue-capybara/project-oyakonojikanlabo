@@ -17,6 +17,8 @@ const Footer: React.FC = () => {
               <img
                 src="https://public.readdy.ai/ai/img_res/35857e6b-21d5-41ce-9f29-aa2ddfa06fc3.png"
                 alt="親子の時間研究所"
+                loading="lazy"
+                decoding="async"
                 className="h-12 w-auto"
               />
             </h3>

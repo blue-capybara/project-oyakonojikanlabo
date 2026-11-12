@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { request, gql } from 'graphql-request';
 import { useIsMobileView } from '../../hooks/useIsMobileView';
+import { coverImageSize, type ResponsiveImage } from '../../lib/responsiveImages';
 
 interface Article {
   id: string;
@@ -9,6 +10,7 @@ interface Article {
   title: string;
   excerpt: string;
   image: string;
+  responsiveImage?: ResponsiveImage | null;
   date: string;
   tags: string[];
 }
@@ -20,9 +22,7 @@ interface ArticleNode {
   excerpt: string;
   date: string;
   featuredImage?: {
-    node?: {
-      sourceUrl?: string | null;
-    } | null;
+    node?: ResponsiveImage | null;
   } | null;
   tags: {
     nodes: Array<{ name: string }>;
@@ -57,6 +57,11 @@ const GET_ARTICLES = gql`
         featuredImage {
           node {
             sourceUrl
+            srcSet
+            mediaDetails {
+              width
+              height
+            }
           }
         }
         tags {
@@ -97,6 +102,7 @@ const ArticlesSection: React.FC = () => {
               day: 'numeric',
             }),
             image: post.featuredImage?.node?.sourceUrl ?? '/default.jpg',
+            responsiveImage: post.featuredImage?.node,
             tags: post.tags.nodes.map((tag) => tag.name),
           };
         });
@@ -127,6 +133,10 @@ const ArticlesSection: React.FC = () => {
                 <img
                   src={article.image}
                   alt={article.title}
+                  srcSet={article.responsiveImage?.srcSet ?? undefined}
+                  sizes={`(min-width: 1536px) ${coverImageSize(article.responsiveImage, 480, 192)}, (min-width: 1280px) ${coverImageSize(article.responsiveImage, 395, 192)}, (min-width: 1024px) ${coverImageSize(article.responsiveImage, 310, 192)}, (min-width: 768px) ${coverImageSize(article.responsiveImage, 352, 192)}, (min-width: 640px) ${coverImageSize(article.responsiveImage, 288, 192)}, (min-width: 600px) ${coverImageSize(article.responsiveImage, 'calc(50vw - 32px)', 192)}, ${coverImageSize(article.responsiveImage, 'calc(100vw - 32px)', 192)}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-48 object-cover object-top"
                 />
                 <div className="flex flex-col justify-between flex-1 p-6">

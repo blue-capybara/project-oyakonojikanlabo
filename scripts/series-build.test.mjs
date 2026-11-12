@@ -26,6 +26,13 @@ const series = (episodes) => ({
   content: '<p>紹介文</p>',
   date: '2026-01-01T00:00:00',
   seriesStatus: 'ongoing',
+  featuredImage: {
+    node: {
+      sourceUrl: '/original.jpg',
+      srcSet: '/small.jpg 300w, /original.jpg 1200w',
+      mediaDetails: { width: 1200, height: 675 },
+    },
+  },
   totalEpisodes: 3,
   publishedCount: episodes.length,
   showInFeatured: true,
@@ -62,6 +69,8 @@ test('公開記事を回番号順にそろえ、予告から正式タイトル�
     [1, 3],
   );
   assert.equal(result[0].publishedCount, 2);
+  assert.equal(result[0].featuredImage.node.srcSet, '/small.jpg 300w, /original.jpg 1200w');
+  assert.deepEqual(result[0].featuredImage.node.mediaDetails, { width: 1200, height: 675 });
   assert(!JSON.stringify(result).includes('/secret'));
   assert(!JSON.stringify(result).includes('漏れてはいけない'));
   const navigation = attachSeriesNavigation([post(1, 1), post(3, 3)], result);
