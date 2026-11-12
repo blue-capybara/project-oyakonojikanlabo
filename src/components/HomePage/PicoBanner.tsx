@@ -18,6 +18,8 @@ const PicoBanner: React.FC = () => {
               <img
                 src={withBase('images/readdy/4d75a49af6fc29ff5c1b0b5c783a3be8.jpeg')}
                 alt="豊中PICO"
+                width={960}
+                height={1280}
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-cover object-top"
@@ -28,6 +30,8 @@ const PicoBanner: React.FC = () => {
                 <img
                   src={withBase('images/readdy/39e5fc488b56e7ee83d85b9a01bb3b4c.png')}
                   alt="PICO豊中"
+                  width={600}
+                  height={300}
                   loading="lazy"
                   decoding="async"
                   className="h-16 w-auto"
