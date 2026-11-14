@@ -6,8 +6,9 @@ SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowRestApi
 
 RewriteEngine On
 
-# /lp/ は別管理のため、URLライフサイクル・記事・SPAの全リライト対象から除外する。
+# /lp/ と /oyako-brands/ は別管理のため、URLライフサイクル・記事・SPAの全リライト対象から除外する。
 RewriteRule ^lp(?:/|$) - [L]
+RewriteRule ^oyako-brands(?:/|$) - [L]
 
 # Viteが内容ハッシュ付きで生成する静的アセットだけを長期キャッシュ
 # HTMLやpublic/配下の固定名ファイルは対象外とし、差し替え時の古い表示を防ぐ

@@ -9,7 +9,7 @@ const historyFallbackConfig = {
   index: '/index.html',
   rewrites: [
     {
-      from: /^\/lp\/.*$/,
+      from: /^\/(?:lp|oyako-brands)\/.*$/,
       to: ({ parsedUrl }: { parsedUrl: URL }) => {
         const pathname = parsedUrl.pathname;
         return pathname.endsWith('/') ? pathname : `${pathname}`;
@@ -18,13 +18,13 @@ const historyFallbackConfig = {
   ],
 };
 
-const lpStaticMiddleware = (root: string) => {
+const independentStaticMiddleware = (root: string) => {
   return async (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => {
     const method = req.method || 'GET';
     if (method !== 'GET' && method !== 'HEAD') return next();
 
     const rawUrl = req.url?.split('?')[0] ?? '';
-    if (!rawUrl.startsWith('/lp/')) return next();
+    if (!rawUrl.startsWith('/lp/') && !rawUrl.startsWith('/oyako-brands/')) return next();
 
     if (!rawUrl.endsWith('/')) return next();
 
@@ -110,12 +110,12 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       {
-        name: 'lp-static-middleware',
+        name: 'independent-static-middleware',
         configureServer(server) {
-          server.middlewares.use(lpStaticMiddleware(server.config.root));
+          server.middlewares.use(independentStaticMiddleware(server.config.root));
         },
         configurePreviewServer(server) {
-          server.middlewares.use(lpStaticMiddleware(server.config.root));
+          server.middlewares.use(independentStaticMiddleware(server.config.root));
         },
       },
       react(),

@@ -1,0 +1,13 @@
+{
+  "purpose": "反映準備のみ。本番変更・デプロイは未実施です。",
+  "destination": "~/oyakonojikanlabo.jp/public_html/oyako-brands/index.html",
+  "source": "本番のoyako-brand/index.htmlを読み取り取得したもの。内容は変更していません。",
+  "required_server_files": ["oyako-brands/index.html"],
+  "optional_server_change": "root-exclusion.optional.patch（今回の404解消には不要）",
+  "observed_root_htaccess_sha256": "267b657dc5b462fc6b02602807e74bf313747acb336ef26f93a62d66d8d05387",
+  "files": {
+    "index.html": "e05a6458a4143742bd21422eeaf1625a4b110965d88c6a2687e990b65753f978",
+    "root-exclusion.optional.patch": "d8b21949742f72c442d644e4481cea4d6187356146a2af446c1d233883f87d49",
+    "source-protection.patch": "142a0c0dc32b96146057ffbe4b56eb9aa44e06257f4c88737c3c4924a4fd44e2"
+  }
+}

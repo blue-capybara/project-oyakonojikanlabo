@@ -10,7 +10,7 @@ mainへのマージ ── push ───────────────┼
 GitHubから再実行 ─ workflow_dispatch ─┘
 ```
 
-`/lp/`と、同じ`public_html`配下にある別管理のサブドメイン・WordPressディレクトリは、どの入口から実行しても更新・削除しません。
+`/lp/`、`/oyako-brands/`と、同じ`public_html`配下にある別管理のサブドメイン・WordPressディレクトリは、どの入口から実行しても更新・削除しません。
 
 ## 自動デプロイの処理
 
@@ -30,15 +30,17 @@ GitHubから再実行 ─ workflow_dispatch ─┘
 
 `public_html`全体に対する削除同期は行いません。次の方式で、このプロジェクトの生成物と別管理データを分離します。
 
-- `.htaccess`の先頭で`/lp/`をURLライフサイクル・記事・SPAリライトから除外
+- `.htaccess`の先頭で`/lp/`と`/oyako-brands/`をURLライフサイクル・記事・SPAリライトから除外
 - XServerのREST API国外アクセス制限は、`AllowRestApi`を対象パスに限定し、トークン保護された`/wp-json/ojl/v1/htaccess-rules`だけを`.htaccess`で例外化
 - `.htaccess`全体は上書きせず、`# BEGIN OJL FRONTEND`から`# END OJL FRONTEND`までだけを更新してXServerのセキュリティ設定を保持
-- `deploy/rsync-excludes.txt`で`/lp/`を同期・削除から除外
+- `deploy/rsync-excludes.txt`で`/lp/`と`/oyako-brands/`を同期・削除から除外し、保護ルールが欠けていれば同期前に停止
 - ルート直下はファイルだけを更新し、ディレクトリは削除しない
 - 削除同期は`assets/`、`fonts/`、`icons/`、`images/`、`post-cache/`、`post-pages/`の内部だけで行う
 - 生成物に未登録のディレクトリが追加された場合は、安全のためデプロイを停止する
 
-これにより、不要になった記事HTML、JSON、ハッシュ付きアセットは削除しながら、`/lp/`や別サブドメインのWordPressデータなど、管理対象外のディレクトリには触れません。`--delete-excluded`は使用しません。
+これにより、不要になった記事HTML、JSON、ハッシュ付きアセットは削除しながら、`/lp/`、`/oyako-brands/`や別サブドメインのWordPressデータなど、管理対象外のディレクトリには触れません。`--delete-excluded`は使用しません。
+
+独立HTMLはドキュメントルート配下へ別途配置します。ビルドで再生成される`dist/`へ原本を置かないでください。`public/oyako-brands/`はローカル確認に使えますが、自動デプロイで本番へ転送する対象にはなりません。SSHでの事前・事後確認は従来どおり本番マーカーと`/lp/`の存在を必須とし、`/oyako-brands/`の未設置を理由にReactのデプロイは停止しません。
 
 XServer向け例外を初めて本番へ反映する際は、ビルド前のAPI取得を通すため、上記の`SetEnvIf`行を本番`.htaccess`へ先に手動追加するか、XServerのクラウドアクセス制限を一時解除してください。反映後は自動生成される`.htaccess`へ同じ例外が残ります。初回移行では、既存`.htaccess`にXServerが追加した`SetEnvIf`行を取り込んだうえでOJL管理マーカーを設置し、2回目以降はマーカー外をそのまま保持します。
 
