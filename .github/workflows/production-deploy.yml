@@ -28,6 +28,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  shopify-articles:
+    name: 公開結果に応じて関連記事を同期
+    needs: build-and-deploy
+    if: ${{ !cancelled() && vars.SHOPIFY_ARTICLES_ENABLED == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run) && (needs.build-and-deploy.result == 'success' || needs.build-and-deploy.result == 'failure') }}
+    uses: ./.github/workflows/shopify-articles.yml
+    with:
+      mode: ${{ needs.build-and-deploy.result == 'success' && 'sync' || 'deactivate' }}
+    secrets: inherit
+
   build-and-deploy:
     name: 本番成果物を生成して同期
     if: ${{ vars.PRODUCTION_DEPLOY_ENABLED == 'true' || (github.event_name == 'workflow_dispatch' && inputs.dry_run) }}

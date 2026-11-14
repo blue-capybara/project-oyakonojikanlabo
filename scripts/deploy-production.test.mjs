@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 
 import {
@@ -75,8 +76,16 @@ describe('本番デプロイ設定', () => {
   });
 
   it('別管理ディレクトリを管理対象に含めず、未知の生成先は停止する', () => {
-    assert(!MANAGED_DIRECTORIES.includes('lp'));
-    assert.doesNotThrow(() => validateSourceDirectories([...MANAGED_DIRECTORIES, 'lp']));
+    for (const directory of ['lp', 'oyako-brands']) {
+      assert(!MANAGED_DIRECTORIES.includes(directory));
+      assert.throws(
+        () => buildManagedDirectoryRsyncArgs(readDeployConfig(validEnv), directory),
+        /管理対象外のディレクトリ/,
+      );
+    }
+    assert.doesNotThrow(() =>
+      validateSourceDirectories([...MANAGED_DIRECTORIES, 'lp', 'oyako-brands']),
+    );
     assert.throws(
       () => validateSourceDirectories([...MANAGED_DIRECTORIES, 'subdomain.example.jp']),
       /未登録のディレクトリ/,
@@ -92,9 +101,38 @@ describe('本番デプロイ設定', () => {
     assert(command.includes("test -d '/home/deploy/public_html/lp'"));
   });
 
-  it('除外設定からLP保護を削除できない', () => {
-    assert.doesNotThrow(() => validateExcludeRules('/lp\n/lp/***\n/.ojl-deploy-root\n'));
-    assert.throws(() => validateExcludeRules('/.ojl-deploy-root\n'), /rsync除外設定に \/lp\//);
+  it('実際の除外設定を検査し、別管理ディレクトリとマーカーの保護を削除できない', () => {
+    const content = readFileSync(new URL('../deploy/rsync-excludes.txt', import.meta.url), 'utf8');
+    assert.doesNotThrow(() => validateExcludeRules(content));
+    for (const rule of [
+      '/lp',
+      '/lp/***',
+      '/oyako-brands',
+      '/oyako-brands/***',
+      '/.ojl-deploy-root',
+    ]) {
+      const withoutRule = content
+        .split('\n')
+        .filter((line) => line !== rule)
+        .join('\n');
+      assert.throws(() => validateExcludeRules(withoutRule), /rsync除外設定に/);
+    }
+  });
+
+  it('別管理ディレクトリだけをURLライフサイクル・記事・SPA判定より先に除外する', () => {
+    const content = readFileSync(new URL('../.htaccess', import.meta.url), 'utf8');
+    for (const directory of ['lp', 'oyako-brands']) {
+      const rule = `RewriteRule ^${directory}(?:/|$) - [L]`;
+      const position = content.indexOf(rule);
+      assert(position >= 0);
+      assert(position < content.indexOf('# BEGIN OJL URL LIFECYCLE'));
+      assert(position < content.indexOf('RewriteCond %{DOCUMENT_ROOT}/post-pages/'));
+      const pattern = new RegExp(rule.split(' ')[1]);
+      for (const url of [directory, `${directory}/`, `${directory}/css/style.css`]) {
+        assert(pattern.test(url));
+      }
+      assert(!pattern.test(`${directory}-other/`));
+    }
   });
 });
 

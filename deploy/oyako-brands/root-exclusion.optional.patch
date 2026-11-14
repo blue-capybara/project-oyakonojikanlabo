@@ -1,0 +1,8 @@
+--- a/.htaccess
++++ b/.htaccess
+@@ -9,4 +9,5 @@
+ # /lp/ は別管理のため、URLライフサイクル・記事・SPAの全リライト対象から除外する。
+ RewriteRule ^lp(?:/|$) - [L]
++RewriteRule ^oyako-brands(?:/|$) - [L]
+ 
+ # Viteが内容ハッシュ付きで生成する静的アセットだけを長期キャッシュ

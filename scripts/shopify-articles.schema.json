@@ -1,0 +1,63 @@
+{
+  "metaobject": {
+    "name": "コラム記事",
+    "type": "ojl_article",
+    "displayNameKey": "title",
+    "access": { "admin": "MERCHANT_READ_WRITE", "storefront": "PUBLIC_READ" },
+    "capabilities": { "publishable": { "enabled": true } },
+    "fieldDefinitions": [
+      {
+        "key": "content_id",
+        "name": "固定記事ID（自動同期）",
+        "type": "single_line_text_field",
+        "required": true
+      },
+      {
+        "key": "title",
+        "name": "記事タイトル（自動同期）",
+        "type": "single_line_text_field",
+        "required": true
+      },
+      {
+        "key": "excerpt",
+        "name": "抜粋（自動同期）",
+        "type": "multi_line_text_field",
+        "required": false
+      },
+      {
+        "key": "canonical_url",
+        "name": "公開記事URL（自動同期）",
+        "type": "url",
+        "required": true
+      },
+      { "key": "image_url", "name": "画像URL（自動同期）", "type": "url", "required": false },
+      {
+        "key": "image_alt",
+        "name": "画像の説明（自動同期）",
+        "type": "single_line_text_field",
+        "required": false
+      },
+      {
+        "key": "source_updated_at",
+        "name": "記事更新日時（自動同期）",
+        "type": "date_time",
+        "required": true
+      },
+      {
+        "key": "synced_at",
+        "name": "最終同期日時（自動同期）",
+        "type": "date_time",
+        "required": true
+      }
+    ]
+  },
+  "product": {
+    "name": "関連するコラム記事",
+    "description": "WordPressから同期されたコラム記事を1件選択してください。記事の新規作成・編集はWordPressで行います。",
+    "namespace": "custom",
+    "key": "related_article",
+    "type": "metaobject_reference",
+    "ownerType": "PRODUCT",
+    "access": { "storefront": "PUBLIC_READ" }
+  }
+}

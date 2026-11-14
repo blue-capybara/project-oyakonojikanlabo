@@ -19,7 +19,7 @@ export const MANAGED_DIRECTORIES = Object.freeze([
   'series-cache',
   'series-pages',
 ]);
-const PROTECTED_SOURCE_DIRECTORIES = new Set(['lp']);
+const PROTECTED_SOURCE_DIRECTORIES = new Set(['lp', 'oyako-brands']);
 
 const required = (env, name) => {
   const value = String(env[name] ?? '').trim();
@@ -164,8 +164,13 @@ export const validateExcludeRules = (content) => {
       .filter((line) => line && !line.startsWith('#')),
   );
 
-  if (!rules.has('/lp') || !rules.has('/lp/***') || !rules.has('/.ojl-deploy-root')) {
-    throw new Error('rsync除外設定に /lp/ またはデプロイ先マーカーの保護がありません');
+  for (const directory of PROTECTED_SOURCE_DIRECTORIES) {
+    if (!rules.has(`/${directory}`) || !rules.has(`/${directory}/***`)) {
+      throw new Error(`rsync除外設定に /${directory}/ の保護がありません`);
+    }
+  }
+  if (!rules.has('/.ojl-deploy-root')) {
+    throw new Error('rsync除外設定にデプロイ先マーカーの保護がありません');
   }
 };
 

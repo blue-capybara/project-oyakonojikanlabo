@@ -1,13 +1,13 @@
 // ----------------------------------------
 // 簡易パスワードロック
-// ロックを外すときは PASSWORD_LOCK_ENABLED を false にするだけでOK
+// 各HTMLのscriptタグに data-password-lock="true" を付けたページだけ有効です。
 // ----------------------------------------
 (() => {
-  const PASSWORD_LOCK_ENABLED = false;
+  const PASSWORD_LOCK_ENABLED = document.currentScript?.dataset.passwordLock === 'true';
   if (!PASSWORD_LOCK_ENABLED) return;
 
   const PASSWORD = 'sunsun2025'; // 必要に応じて変更
-  const STORAGE_KEY = 'sunsunkidsvillage:unlocked';
+  const STORAGE_KEY = 'sunsunkidsvillage:unlocked:' + location.pathname;
   const root = document.documentElement;
 
   // 先に非表示にしてチラ見えを防ぐ

@@ -1,0 +1,34 @@
+{
+  "repository": "blue-capybara/project-oyakonojikanlabo",
+  "ref": "main",
+  "files": [
+    {
+      "path": ".htaccess",
+      "sha": "a82119cdd0f4c5de57364005ac690d756625949a"
+    },
+    {
+      "path": "deploy/rsync-excludes.txt",
+      "sha": "80d42f87bbdecd5a7aebce68e69bd4f1cfa571aa"
+    },
+    {
+      "path": ".github/workflows/production-deploy.yml",
+      "sha": "2f2c83c3488f7df1eed14dd61efdc2fbf5c7c494"
+    },
+    {
+      "path": "scripts/deploy-production.test.mjs",
+      "sha": "771af17ad40057dbfdf59cbfa78be15b2548519c"
+    },
+    {
+      "path": "scripts/validate-production-build.mjs",
+      "sha": "0c58e6b6ee39f1860516826144511ca180bccaed"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha": "b5930df9c674910e79a7d6cd51c03fb61e0ccc13"
+    },
+    {
+      "path": "scripts/deploy-production.mjs",
+      "sha": "2f5eb2c59425122a773e2f2590fd4f761808a3e4"
+    }
+  ]
+}

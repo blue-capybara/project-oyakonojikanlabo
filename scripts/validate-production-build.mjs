@@ -30,6 +30,11 @@ const validateRootFiles = async () => {
   );
   assert(!htaccess.includes('# (no lifecycle rules)'), '.htaccessの301/410ルールが空です');
   assert(htaccess.includes('RewriteRule ^lp(?:/|$) - [L]'), '.htaccessに/lp/除外がありません');
+  const brandsExclusion = htaccess.indexOf('RewriteRule ^oyako-brands(?:/|$) - [L]');
+  assert(
+    brandsExclusion >= 0 && brandsExclusion < htaccess.indexOf('# BEGIN OJL URL LIFECYCLE'),
+    '.htaccessのURLライフサイクルより前に/oyako-brands/除外がありません',
+  );
   assert(
     htaccess.includes('SetEnvIf Request_URI "^/wp-json/ojl/v1/htaccess-rules/?$" AllowRestApi'),
     '.htaccessにXServer向けURLライフサイクルAPI例外がありません',
