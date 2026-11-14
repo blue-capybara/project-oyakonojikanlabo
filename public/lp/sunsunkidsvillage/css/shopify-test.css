@@ -1,0 +1,211 @@
+@charset "UTF-8";
+
+/* テストページの商品一覧とカートの表示を調整します。 */
+.shopify-test-label {
+	width: fit-content;
+	margin: -16px auto 24px;
+	padding: 6px 16px;
+	border: 2px solid var(--brown);
+	border-radius: 999px;
+	background: var(--yellow);
+	color: var(--brown);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.shopify-lineup-collection {
+	width: 100%;
+}
+
+.shopify-lineup-guide,
+.shopify-lineup-status {
+	margin: 0;
+	color: var(--ink);
+	font-size: 14px;
+	line-height: 1.8;
+}
+
+.shopify-lineup-status {
+	padding: 20px;
+	border-radius: 12px;
+	background: #fffddf;
+}
+
+/* ステータスの非表示を既存のスタイルから独立させます。 */
+.shopify-lineup-status[hidden] {
+	display: none;
+}
+
+/* 枠内に影と商品数バッジの余白を確保し、丸いボタンを右下に固定します。 */
+body .shopify-buy-frame--toggle {
+	--cart-frame-size: 112px;
+	width: var(--cart-frame-size);
+	height: var(--cart-frame-size);
+}
+
+body .shopify-buy-frame--toggle iframe {
+	/* Shopifyが自動計算するインラインの寸法より、このページの寸法を優先します。 */
+	width: var(--cart-frame-size) !important;
+	height: var(--cart-frame-size) !important;
+}
+
+body .shopify-buy-frame--toggle.is-sticky {
+	top: auto;
+	right: calc(10px + env(safe-area-inset-right, 0px));
+	bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+	transform: none;
+	z-index: 1050;
+}
+
+body .shopify-buy-frame--toggle:focus-visible {
+	outline: none;
+}
+
+body .shopify-buy-frame--toggle:focus-visible::after {
+	content: "";
+	position: absolute;
+	inset: 10px;
+	border: 2px solid #168137;
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+/* 開いている画面の操作を優先し、非表示中はキーボードの移動先からも外します。 */
+body:has(.openbtn.active, .modal.is-active, .announcement-dialog[open], .shopify-buy-frame--modal.is-block, .shopify-buy-frame--cart.is-active) .shopify-buy-frame--toggle.is-sticky {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+/* 告知はブラウザー標準のモーダルで開き、背景の操作とスクロールを止めます。 */
+html:has(.announcement-dialog[open]),
+body:has(.announcement-dialog[open]) {
+	overflow: hidden;
+}
+
+.announcement-dialog {
+	width: max-content;
+	max-width: calc(100vw - 32px);
+	max-height: none;
+	margin: auto;
+	padding: 34px 14px 14px;
+	border: none;
+	background: transparent;
+	color: var(--brown);
+	overflow: visible;
+}
+
+.announcement-dialog::backdrop {
+	background: rgba(44, 29, 18, 0.42);
+	animation: announcement-fade-in 0.3s ease-out;
+}
+
+.announcement-card {
+	position: relative;
+}
+
+.announcement-dialog[open] .announcement-card {
+	animation: announcement-appear 0.3s ease-out both, announcement-wobble 0.6s 0.3s ease-in-out;
+}
+
+.announcement-banner {
+	display: block;
+	border: 6px solid #fff;
+	border-radius: 18px;
+	background: #fff;
+	box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+	overflow: hidden;
+}
+
+.announcement-banner img {
+	display: block;
+	width: auto;
+	height: auto;
+	max-width: min(520px, calc(100vw - 72px));
+	max-height: 70vh;
+	max-height: 70dvh;
+	object-fit: contain;
+}
+
+.announcement-close {
+	position: absolute;
+	top: -28px;
+	right: -14px;
+	z-index: 1;
+	display: grid;
+	place-items: center;
+	width: 60px;
+	height: 60px;
+	padding: 0;
+	border: 3px solid #d31420;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
+	cursor: pointer;
+}
+
+.announcement-close span::before,
+.announcement-close span::after {
+	content: "";
+	position: absolute;
+	top: calc(50% - 2px);
+	left: calc(50% - 16px);
+	width: 32px;
+	height: 4px;
+	border-radius: 999px;
+	background: #d31420;
+	transform: rotate(45deg);
+}
+
+.announcement-close span::after {
+	transform: rotate(-45deg);
+}
+
+.announcement-close:hover {
+	background: #fff4dc;
+}
+
+.announcement-close:focus-visible,
+.announcement-banner:focus-visible {
+	outline: 3px solid var(--blue);
+	outline-offset: 4px;
+}
+
+@keyframes announcement-fade-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes announcement-appear {
+	from { opacity: 0; transform: translateY(10px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes announcement-wobble {
+	0%, 100% { transform: rotate(0); }
+	30% { transform: rotate(-1deg); }
+	70% { transform: rotate(1deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.announcement-dialog[open] .announcement-card,
+	.announcement-dialog::backdrop {
+		animation: none;
+	}
+}
+
+@media (max-width: 1500px) {
+	body .shopify-buy-frame--toggle {
+		--cart-frame-size: 104px;
+	}
+
+	body .shopify-buy-frame--toggle.is-sticky {
+		right: calc(2px + env(safe-area-inset-right, 0px));
+		/* 下の余白16px＋メニュー76px＋間隔12pxから、枠内の余白14pxを引きます。 */
+		bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.openbtn {
+		right: calc(16px + env(safe-area-inset-right, 0px));
+		bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+	}
+}
