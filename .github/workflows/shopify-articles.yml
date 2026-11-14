@@ -1,0 +1,62 @@
+name: Shopify関連記事の同期・確認
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 実行内容（移行・復旧はローカル専用）
+        required: true
+        default: check
+        type: choice
+        options: [check, dry-run, sync, deactivate]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shopify-articles
+  cancel-in-progress: false
+
+jobs:
+  articles:
+    if: ${{ vars.SHOPIFY_ARTICLES_ENABLED == 'true' }}
+    runs-on: ubuntu-24.04
+    environment: production
+    timeout-minutes: 60
+    steps:
+      - name: ソースを取得
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Node.jsを準備
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: 依存パッケージをインストール
+        run: npm ci
+      - name: 同期・チェック処理を実行
+        env:
+          ARTICLE_MODE: ${{ inputs.mode }}
+          SHOPIFY_STORE_DOMAIN: ${{ vars.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ARTICLES_ADMIN_TOKEN }}
+          SHOPIFY_ADMIN_API_VERSION: '2026-07'
+          CONTENT_API_BASE_URL: https://cms.oyakonojikanlabo.jp/wp-json/ojl-content/v1
+          PUBLIC_SITE_ORIGIN: https://oyakonojikanlabo.jp
+        run: |
+          case "$ARTICLE_MODE" in
+            check) node scripts/shopify-articles.mjs check ;;
+            dry-run) node scripts/shopify-articles.mjs sync ;;
+            sync) node scripts/shopify-articles.mjs sync --apply ;;
+            deactivate) node scripts/shopify-articles.mjs deactivate --apply ;;
+            *) echo '::error::実行モードが不正です'; exit 2 ;;
+          esac
+      - name: 商品との不整合を確認
+        if: ${{ !cancelled() && (inputs.mode == 'sync' || inputs.mode == 'deactivate') }}
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ vars.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ARTICLES_ADMIN_TOKEN }}
+        run: node scripts/shopify-articles.mjs check
